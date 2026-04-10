@@ -1,0 +1,24 @@
+.root {
+    -fx-font-family: Helvetica, sans-serif;
+    -fx-background-color: rgb(212, 238, 255);
+}
+
+Button {
+    -fx-background-color: rgb(159, 217, 255);
+}
+
+ComboBox {
+    -fx-background-color: rgb(171, 220, 253);
+}
+
+TextField {
+    -fx-background-color: rgb(214, 239, 255);
+}
+
+TitledPane {
+    -fx-background-color: rgb(225, 243, 255);
+}
+
+CheckBox .box {
+    -fx-background-color: rgb(179, 225, 255);
+}

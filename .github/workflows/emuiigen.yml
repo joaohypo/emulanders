@@ -1,0 +1,31 @@
+name: Build emuiigen
+
+on:
+  push:
+    paths:
+      - 'emuiigen/**'
+
+jobs:
+  emuiigen:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Setup maven
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Build
+      run: make emuiigen -j$(nproc)
+
+    - name: Upload
+      uses: actions/upload-artifact@v3
+      with:
+        name: emuiigen
+        path: emuiigen/target/emuiigen.jar

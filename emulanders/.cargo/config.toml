@@ -1,0 +1,6 @@
+[unstable]
+build-std = ["core", "compiler_builtins", "alloc"]
+build-std-features = ["compiler-builtins-mem"]
+
+[target.aarch64-nintendo-switch-freestanding]
+rustflags = ["-Ctarget-feature=+aes,+sha2", "--cfg", "aes_armv8"]

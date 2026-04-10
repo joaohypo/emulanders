@@ -1,0 +1,172 @@
+{
+    "strings": [
+        {
+            "key": "UpngInvalidFile",
+            "value": "Arquivo PNG inválido"
+        },
+        {
+            "key": "UpngUnsupportedRgbPng",
+            "value": "Imagens PNG no formato RGB não são suportadas."
+        },
+        {
+            "key": "UpngUpscaleUnsupported",
+            "value": "O dimensionamento da imagem não é permitido."
+        },
+        {
+            "key": "UpngImageTooLarge",
+            "value": "A imagem é muito grande."
+        },
+        {
+            "key": "UpngImageNotFound",
+            "value": "Imagem não encontrada."
+        },
+        {
+            "key": "UpngNotPngImage",
+            "value": "A imagem não é PNG."
+        },
+        {
+            "key": "UpngMalformedPng",
+            "value": "O arquivo não é um PNG válido."
+        },
+        {
+            "key": "UpngUnsupportedPng",
+            "value": "Esta imagem PNG não é suportada."
+        },
+        {
+            "key": "UpngUnsupportedInterlacing",
+            "value": "Imagens entrelaçadas não são suportadas."
+        },
+        {
+            "key": "UpngUnsupportedColorFormat",
+            "value": "O formato de cor desta imagem não é suportado."
+        },
+        {
+            "key": "UpngInvalidParameter",
+            "value": "Parâmetro inválido."
+        },
+        {
+            "key": "EmuiiboNotPresent",
+            "value": "emulanders parece não estar presente."
+        },
+        {
+            "key": "EmuiiboServiceError",
+            "value": "An error ocurred accessing emuiibo:"
+        },
+        {
+            "key": "OtherServiceError",
+            "value": "An error ocurred accessing services:"
+        },
+        {
+            "key": "Help",
+            "value": "Ajuda"
+        },
+        {
+            "key": "EnableEmulation",
+            "value": "Ativar Emulação"
+        },
+        {
+            "key": "DisableEmulation",
+            "value": "Desativar Emulação"
+        },
+        {
+            "key": "ToogleConnectVirtualAmiibo",
+            "value": "Conectar/Desconectar boneco virtual"
+        },
+        {
+            "key": "SelectFolderVirtualAmiibo",
+            "value": "Escolher Pasta/boneco virtual"
+        },
+        {
+            "key": "AddFavorite",
+            "value": "Adicionar aos favoritos"
+        },
+        {
+            "key": "RemoveFavorite",
+            "value": "Remover dos favoritos"
+        },
+        {
+            "key": "ResetActiveVirtualAmiibo",
+            "value": "Redefinir boneco virtual ativo"
+        },
+        {
+            "key": "EmulationStatus",
+            "value": "Emulação"
+        },
+        {
+            "key": "On",
+            "value": "Ativada"
+        },
+        {
+            "key": "Off",
+            "value": "Desativada"
+        },
+        {
+            "key": "CurrentGameIntercepted",
+            "value": "Jogo atual"
+        },
+        {
+            "key": "AvailableVirtualAmiibos",
+            "value": "Bonecos disponíveis em"
+        },
+        {
+            "key": "Intercepted",
+            "value": "interceptado"
+        },
+        {
+            "key": "NotIntercepted",
+            "value": "não interceptado"
+        },
+        {
+            "key": "NoActiveVirtualAmiibo",
+            "value": "Não há figura conectada"
+        },
+        {
+            "key": "Connected",
+            "value": "conectado"
+        },
+        {
+            "key": "Disconnected",
+            "value": "desconectado"
+        },
+        {
+            "key": "ViewVirtualAmiibos",
+            "value": "Visualizar amiibos virtuais"
+        },
+        {
+            "key": "ViewSkylanders",
+            "value": "Visualizar Skylanders (Imaginators)"
+        },
+        {
+            "key": "ViewFavorites",
+            "value": "Visualizar favoritos"
+        },
+        {
+            "key": "SelectedArea",
+            "value": "Área Escolhida"
+        },
+        {
+            "key": "NoVirtualAmiiboAreas",
+            "value": "Este amiibo virtual não tem áreas."
+        },
+        {
+            "key": "EnableRandomUuid",
+            "value": "Ativar UUID aleatório"
+        },
+        {
+            "key": "DisableRandomUuid",
+            "value": "Desativar UUID aleatório"
+        },
+        {
+            "key": "RandomUuid",
+            "value": "UUID aleatório"
+        },
+        {
+            "key": "ViewSkylanders",
+            "value": "Ver Skylanders"
+        },
+        {
+            "key": "ActivityMonitor",
+            "value": "Monitor de Atividade"
+        }
+    ]
+}
