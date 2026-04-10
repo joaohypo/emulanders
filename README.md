@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="emulanders" src="res/logo.png">
+  <img alt="emulanders" src="res/logo1.png" width="400">
 </p>
 
 <p align="center">
@@ -25,6 +25,11 @@ Emulanders works by performing a Man-in-the-Middle (MitM) attack on the `nfc:mf:
 ### Heritage & Credits
 *Emulanders was originally born from the incredible work of XorTroll and the Emuiibo project.*
 While Emulanders has been completely refactored to intercept the `nfc:mf:u` service for Skylanders (Mifare) instead of `nfp` (Amiibos), this project would not have been possible without the foundation laid by Emuiibo.
+
+Special thanks to the open-source libraries and documentation that made this possible:
+- [**Switchbrew**](https://switchbrew.org/): For extensive documentation on Switch IPC services (`nfc:mf:u`).
+- [**nx (aarch64-switch-rs)**](https://github.com/aarch64-switch-rs/nx): The Rust bindings used to build the safe, native sysmodule.
+- [**libtesla / nx-ovlloader**](https://github.com/WerWolv/libtesla): The C++ UI framework used to power the overlay.
 
 ---
 
@@ -60,7 +65,7 @@ To use Emulanders in-game:
 
 ## 🛠️ Compiling
 
-In order to compile Emulanders you need to setup Rust for Nintendo Switch development. You'll also need devkitPro (devkitA64 specifically) to compile the C++ Tesla overlay.
+In order to compile Emulanders you need to setup [Rust for Nintendo Switch development](https://github.com/aarch64-switch-rs/setup-guide). You'll also need devkitPro (devkitA64 specifically) to compile the C++ Tesla overlay.
 
 With these requirements satisfied, simply clone this repo and hit `make` or `make dist-dev`.
 
