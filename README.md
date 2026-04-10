@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="emulanders" src="res/logo1.png" width="400">
+  <img alt="emulanders" src="res/banner_cut.png" width="777">
 </p>
 
 <p align="center">
