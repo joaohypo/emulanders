@@ -2,7 +2,6 @@ use alloc::string::ToString;
 use nx::result::*;
 use nx::fs;
 use alloc::string::String;
-use crate::{amiibo, miiext};
 
 #[inline]
 pub fn exists_file(path: impl AsRef<str>) -> bool {
@@ -66,41 +65,10 @@ pub fn recreate_directory(path: impl AsRef<str>) -> Result<()> {
     Ok(())
 }
 
-// Note: using macros instead of fns to avoid having to deal with serde_json's lifetime stuff
-
-macro_rules! read_deserialize_json {
-    ($path:expr => $t:ty) => {{
-        let json_data = {
-            let mut file = nx::fs::open_file($path, nx::fs::FileOpenOption::Read())?;
-            let mut data: alloc::vec::Vec<u8> = vec![0; file.get_size()?];
-            file.read_array(&mut data)?;
-            data
-        };
-    
-        serde_json::from_slice::<$t>(&json_data).map_err(|_| $crate::rc::ResultInvalidJsonDeserialization::make())
-    }};
-}
-
-macro_rules! write_serialize_json {
-    ($path:expr, $t:expr) => {{
-        if let Ok(json_data) = serde_json::to_vec_pretty($t) {
-            let _ = nx::fs::remove_file($path);
-            let mut file = nx::fs::open_file($path, nx::fs::FileOpenOption::Create() | nx::fs::FileOpenOption::Write() | nx::fs::FileOpenOption::Append())?;
-            file.write_array::<_, true>(&json_data)?;
-            Ok(())
-        }
-        else {
-            Err($crate::rc::ResultInvalidJsonSerialization::make())
-        }
-    }};
-}
-
 pub fn ensure_directories() -> Result<()> {
     let _ = fs::create_directory(BASE_DIR);
-    let _ = fs::create_directory(amiibo::VIRTUAL_AMIIBO_DIR);
     let _ = fs::create_directory(SKYLANDER_DIR);
     let _ = fs::create_directory(FLAGS_DIR);
-    recreate_directory(miiext::EXPORTED_MIIS_DIR)?;
 
     Ok(())
 }

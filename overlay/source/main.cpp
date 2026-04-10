@@ -1,4 +1,3 @@
-
 #define TESLA_INIT_IMPL
 #include <tesla.hpp>
 #include <ui/ui_TeslaExtras.hpp>
@@ -9,6 +8,7 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <algorithm>
 
 namespace {
 
@@ -18,10 +18,8 @@ namespace {
     constexpr auto ActionKeyActivateItem = HidNpadButton_A;
     constexpr auto ActionKeyAddToFavorite = HidNpadButton_Y;
     constexpr auto ActionKeyRemoveFromFavorite = HidNpadButton_X;
-    constexpr auto ActionKeyToogleConnectVirtualAmiibo = HidNpadButton_StickR;
-    constexpr auto ActionKeyResetActiveVirtualAmiibo = HidNpadButton_Minus;
-    constexpr auto ActionKeyEnableRandomUuid = HidNpadButton_ZR;
-    constexpr auto ActionKeyDisableRandomUuid = HidNpadButton_ZL;
+    constexpr auto ActionKeyToogleConnectVirtualSkylander = HidNpadButton_StickR;
+    constexpr auto ActionKeyResetActiveVirtualSkylander = HidNpadButton_Minus;
     
     inline std::string GetActionKeyGlyph(const u64 action_key) {
         for(const auto &info : tsl::impl::KEYS_INFO) {
@@ -29,7 +27,6 @@ namespace {
                 return info.glyph;
             }
         }
-
         return "?";
     }
 
@@ -40,9 +37,9 @@ namespace {
     enum class InitializationStatus {
         Ok,
         TranslationsNotLoaded,
-        EmuiiboNotPresent,
+        EmulandersNotPresent,
         OkVersionMismatch,
-        EmuiiboServiceError,
+        EmulandersServiceError,
         OtherServiceError
     };
 
@@ -66,19 +63,6 @@ namespace {
 
 namespace {
 
-    constexpr u32 IconMargin = 5;
-
-    inline u32 GetIconMaxWidth() {
-        return (tsl::cfg::LayerWidth / 2) - 2 * IconMargin;
-    }
-
-    constexpr u32 IconMaxHeight = 100 - 2 * IconMargin;
-
-}
-
-namespace {
-
-    // Defined in Makefile
     constexpr emu::Version ExpectedVersion = { VER_MAJOR, VER_MINOR, VER_MICRO, {} };
 
     constexpr auto FavoritesFile = "sdmc:/emulanders/overlay/favorites.txt";
@@ -90,25 +74,13 @@ namespace {
         return (g_InitializationStatus == InitializationStatus::Ok) || (g_InitializationStatus == InitializationStatus::OkVersionMismatch);
     }
 
-    std::string g_VirtualAmiiboDirectory;
     std::string g_SkylanderDirectory = "sdmc:/emulanders/skylanders";
     emu::Version g_Version;
-    std::string g_ActiveVirtualAmiiboPath;
     std::string g_ActiveSkylanderPath;
-    emu::VirtualAmiiboData g_ActiveVirtualAmiiboData;
-    ui::PngImage g_VirtualAmiiboImage;
     std::vector<std::string> g_Favorites;
 
-    constexpr size_t MaxVirtualAmiiboAreaCount = 15;
-    u32 g_VirtualAmiiboAreaCount = 0;
-    u32 g_VirtualAmiiboCurrentAreaIndex = 0;
-    emu::VirtualAmiiboAreaEntry g_VirtualAmiiboAreaEntries[MaxVirtualAmiiboAreaCount];
-    std::string g_VirtualAmiiboAreaTitles[MaxVirtualAmiiboAreaCount];
-
-    NsApplicationControlData g_TempControlData;
-
-    inline bool IsActiveVirtualAmiiboValid() {
-        return !g_ActiveVirtualAmiiboPath.empty();
+    inline bool IsActiveSkylanderValid() {
+        return !g_ActiveSkylanderPath.empty();
     }
 
     inline std::string MakeVersionString() {
@@ -116,12 +88,12 @@ namespace {
             if(g_InitializationStatus == InitializationStatus::TranslationsNotLoaded) {
                 return "Unable to load translations!";
             }
-            else if(g_InitializationStatus == InitializationStatus::EmuiiboNotPresent) {
-                return "EmuiiboNotPresent"_tr;
+            else if(g_InitializationStatus == InitializationStatus::EmulandersNotPresent) {
+                return "Emulanders Sysmodule Not Present!";
             }
-            else if(g_InitializationStatus == InitializationStatus::EmuiiboServiceError) {
+            else if(g_InitializationStatus == InitializationStatus::EmulandersServiceError) {
                 std::stringstream strm;
-                strm << "EmuiiboServiceError"_tr;
+                strm << "Emulanders Service Error";
                 strm << " (0x" << std::hex << std::uppercase << g_InitializationResult << ")";
                 return strm.str();
             }
@@ -141,16 +113,15 @@ namespace {
             }
             return strm.str();
         }
-
-        return std::string("Unknown statius (...)");
+        return std::string("Unknown status (...)");
     }
 
-    inline emu::VirtualAmiiboStatus GetActiveVirtualAmiiboStatus() {
-        if(IsActiveVirtualAmiiboValid()) {
-            return emu::GetActiveVirtualAmiiboStatus();
+    inline emu::VirtualSkylanderStatus GetActiveVirtualSkylanderStatus() {
+        if(IsActiveSkylanderValid()) {
+            return emu::GetActiveVirtualSkylanderStatus();
         }
         else {
-            return emu::VirtualAmiiboStatus::Invalid;
+            return emu::VirtualSkylanderStatus::Invalid;
         }
     }
 
@@ -167,14 +138,14 @@ namespace {
         }
     }
 
-    void ToggleActiveVirtualAmiiboStatus() {
-        switch(emu::GetActiveVirtualAmiiboStatus()) {
-            case emu::VirtualAmiiboStatus::Connected: {
-                emu::SetActiveVirtualAmiiboStatus(emu::VirtualAmiiboStatus::Disconnected);
+    void ToggleActiveVirtualSkylanderStatus() {
+        switch(emu::GetActiveVirtualSkylanderStatus()) {
+            case emu::VirtualSkylanderStatus::Connected: {
+                emu::SetActiveVirtualSkylanderStatus(emu::VirtualSkylanderStatus::Disconnected);
                 break;
             }
-            case emu::VirtualAmiiboStatus::Disconnected: {
-                emu::SetActiveVirtualAmiiboStatus(emu::VirtualAmiiboStatus::Connected);
+            case emu::VirtualSkylanderStatus::Disconnected: {
+                emu::SetActiveVirtualSkylanderStatus(emu::VirtualSkylanderStatus::Connected);
                 break;
             }
             default: {
@@ -183,55 +154,20 @@ namespace {
         }
     }
 
-    void LoadActiveVirtualAmiibo() {
-        char active_virtual_amiibo_path_str[FS_MAX_PATH] = {};
-        emu::GetActiveVirtualAmiibo(&g_ActiveVirtualAmiiboData, active_virtual_amiibo_path_str, sizeof(active_virtual_amiibo_path_str));
-        g_ActiveVirtualAmiiboPath.assign(active_virtual_amiibo_path_str);
-
-        g_VirtualAmiiboImage.Reset();
-        if(IsActiveVirtualAmiiboValid()) {
-            emu::GetActiveVirtualAmiiboAreas(g_VirtualAmiiboAreaEntries, sizeof(g_VirtualAmiiboAreaEntries), &g_VirtualAmiiboAreaCount);
-
-            for(u32 i = 0; i < g_VirtualAmiiboAreaCount; i++) {
-                const auto program_id = g_VirtualAmiiboAreaEntries[i].program_id;
-                const auto access_id = g_VirtualAmiiboAreaEntries[i].access_id;
-                std::stringstream strm;
-                strm << std::hex << std::uppercase << std::setfill('0') << "0x" << std::setw(0x8) << access_id << " (" << std::setw(0x10) << program_id << ")";
-                g_VirtualAmiiboAreaTitles[i] = strm.str();
-
-                if(R_SUCCEEDED(nsGetApplicationControlData(NsApplicationControlSource_Storage, program_id, &g_TempControlData, sizeof(g_TempControlData), nullptr))) {
-                    tsl::hlp::doWithSmSession([&]() {
-                        NacpLanguageEntry *entry = nullptr;
-                        nacpGetLanguageEntry(&g_TempControlData.nacp, &entry);
-                        if(entry != nullptr) {
-                            g_VirtualAmiiboAreaTitles[i] = entry->name;
-                        }
-                    });
-                }
-            }
-
-            u32 cur_access_id;
-            if(R_SUCCEEDED(emu::GetActiveVirtualAmiiboCurrentArea(&cur_access_id))) {
-                for(u32 i = 0; i < g_VirtualAmiiboAreaCount; i++) {
-                    if(g_VirtualAmiiboAreaEntries[i].access_id == cur_access_id) {
-                        g_VirtualAmiiboCurrentAreaIndex = i;
-                        break;
-                    }
-                }
-            }
-
-            g_VirtualAmiiboImage.Load(g_ActiveVirtualAmiiboPath + "/amiibo.png", GetIconMaxWidth(), IconMaxHeight);
-        }
+    void LoadActiveSkylander() {
+        char active_skylander_path_str[FS_MAX_PATH] = {};
+        emu::GetActiveVirtualSkylander(active_skylander_path_str, sizeof(active_skylander_path_str));
+        g_ActiveSkylanderPath.assign(active_skylander_path_str);
     }
 
-    inline void SetActiveVirtualAmiibo(const std::string &path) {
-        emu::SetActiveVirtualAmiibo(path.c_str(), path.size());
-        LoadActiveVirtualAmiibo();
+    inline void SetActiveVirtualSkylander(const std::string &path) {
+        emu::SetActiveVirtualSkylander(path.c_str(), path.size());
+        LoadActiveSkylander();
     }
 
-    inline void ResetActiveVirtualAmiibo() {
-        emu::ResetActiveVirtualAmiibo();
-        LoadActiveVirtualAmiibo();
+    inline void ResetActiveVirtualSkylander() {
+        emu::ResetActiveVirtualSkylander();
+        LoadActiveSkylander();
     }
 
     inline void AddFavorite(const std::string &path) {
@@ -352,12 +288,11 @@ class GuiListElement: public ui::elm::SmallListItem {
             return false;
         }
 
-        inline bool ContainsVirtualAmiiboPath() const {
-            if(!IsActiveVirtualAmiiboValid()) {
+        inline bool ContainsActiveSkylanderPath() const {
+            if(!IsActiveSkylanderValid()) {
                 return false;
             }
-
-            return g_ActiveVirtualAmiiboPath.find(this->path) == 0;
+            return g_ActiveSkylanderPath.find(this->path) == 0;
         }
 
         virtual void Update() {}
@@ -382,23 +317,6 @@ class FolderListElement: public GuiListElement {
     
     public:
         FolderListElement(const std::string &path) : GuiListElement(path, GetPathFileName(path)) {
-            this->Update();
-        }
-};
-
-class AmiiboListElement: public GuiListElement {
-    private:
-        bool CanBeFavorite() const override {
-            return true;
-        }
-
-        void Update() override {
-            const auto value = GetActionKeyGlyph(ActionKeyActivateItem);
-            this->setValue(this->IsFavorite() ? GetIconGlyph(Icon::Favorite) + " " + value : value);
-        }
-    
-    public:
-        AmiiboListElement(const std::string &path, const emu::VirtualAmiiboData &data) : GuiListElement(path, data.name) {
             this->Update();
         }
 };
@@ -452,50 +370,7 @@ class CustomList: public tsl::elm::List {
 
 };
 
-class AmiiboIcons: public tsl::elm::Element {
-    private:
-        ui::PngImage cur_virtual_amiibo_image;
-
-    public:
-        static constexpr float ErrorTextFontSize = 15;
-
-        void SetCurrentAmiiboPath(const std::string &path) {
-            if(path.empty()) {
-                this->cur_virtual_amiibo_image.Reset();
-                return;
-            }
-            if(this->cur_virtual_amiibo_image.GetPath() != path) {
-                this->cur_virtual_amiibo_image.Load(path + "/amiibo.png", GetIconMaxWidth(), IconMaxHeight);
-            }
-        }
-
-    private:
-        void DrawIcon(tsl::gfx::Renderer* renderer, const s32 x, const s32 y, const s32 w, const s32 h, const ui::PngImage &image) {
-            const auto img_buf = image.GetRGBABuffer();
-            if(img_buf != nullptr) {
-                renderer->drawBitmap(x + IconMargin / 2 + w / 2 - image.GetWidth() / 2, y + IconMargin, image.GetWidth(), image.GetHeight(), img_buf);
-            }
-            else {
-                renderer->drawString(image.GetErrorText().c_str(), false, x + IconMargin, y + h / 2, ErrorTextFontSize, renderer->a(tsl::style::color::ColorText));
-            }
-        }
-
-        void DrawCustom(tsl::gfx::Renderer* renderer, const s32 x, const s32 y, const s32 w, const s32 h) {
-            renderer->drawRect(x + w / 2 - 1, y, 1, h - IconMargin, this->a(tsl::style::color::ColorText));
-            this->DrawIcon(renderer, x, y, w / 2, h, g_VirtualAmiiboImage);
-            this->DrawIcon(renderer, x + w / 2, y, w / 2, h, this->cur_virtual_amiibo_image);
-        }
-
-        virtual void draw(gfx::Renderer* renderer) override {
-            renderer->enableScissoring(ELEMENT_BOUNDS(this));
-            this->DrawCustom(renderer, ELEMENT_BOUNDS(this));
-            renderer->disableScissoring();
-        }
-
-        virtual void layout(u16 parentX, u16 parentY, u16 parentWidth, u16 parentHeight) override {}
-};
-
-class AmiiboGuiLog : public tsl::Gui {
+class SkylanderGuiLog : public tsl::Gui {
     public:
         virtual tsl::elm::Element* createUI() override {
             auto root_frame = new tsl::elm::OverlayFrame("Debug Log (Dumped to SD)", MakeVersionString());
@@ -507,7 +382,6 @@ class AmiiboGuiLog : public tsl::Gui {
             std::string log_str(log_data);
             delete[] log_data;
 
-            // Dump to SD card every time this screen is opened
             tsl::hlp::doWithSDCardHandle([&]() {
                 std::ofstream log_file("sdmc:/emulanders/debug_log_dump.txt");
                 if (log_file.is_open()) {
@@ -530,29 +404,27 @@ class AmiiboGuiLog : public tsl::Gui {
         }
 };
 
-class AmiiboGuiHelp : public tsl::Gui {
+class SkylanderGuiHelp : public tsl::Gui {
     public:
         virtual tsl::elm::Element* createUI() override {
-            auto root_frame = new ui::elm::DoubleSectionOverlayFrame("Help"_tr, MakeVersionString(), ui::SectionsLayout::big_top, false);
+            auto root_frame = new ui::elm::DoubleSectionOverlayFrame("Help", MakeVersionString(), ui::SectionsLayout::big_top, false);
             auto top_list = new tsl::elm::List();
             root_frame->setTopSection(top_list);
 
-            top_list->addItem(new ui::elm::SmallListItem("Help"_tr, GetActionKeyGlyph(ActionKeyShowHelp)));
-            top_list->addItem(new ui::elm::SmallListItem("EnableEmulation"_tr, GetActionKeyGlyph(ActionKeyEnableEmulation)));
-            top_list->addItem(new ui::elm::SmallListItem("DisableEmulation"_tr, GetActionKeyGlyph(ActionKeyDisableEmulation)));
-            top_list->addItem(new ui::elm::SmallListItem("ToogleConnectVirtualAmiibo"_tr, GetActionKeyGlyph(ActionKeyToogleConnectVirtualAmiibo)));
-            top_list->addItem(new ui::elm::SmallListItem("SelectFolderVirtualAmiibo"_tr, GetActionKeyGlyph(ActionKeyActivateItem)));
-            top_list->addItem(new ui::elm::SmallListItem("AddFavorite"_tr, GetActionKeyGlyph(ActionKeyAddToFavorite)));
-            top_list->addItem(new ui::elm::SmallListItem("RemoveFavorite"_tr, GetActionKeyGlyph(ActionKeyRemoveFromFavorite)));
-            top_list->addItem(new ui::elm::SmallListItem("ResetActiveVirtualAmiibo"_tr, GetActionKeyGlyph(ActionKeyResetActiveVirtualAmiibo)));
-            top_list->addItem(new ui::elm::SmallListItem("EnableRandomUuid"_tr, GetActionKeyGlyph(ActionKeyEnableRandomUuid)));
-            top_list->addItem(new ui::elm::SmallListItem("DisableRandomUuid"_tr, GetActionKeyGlyph(ActionKeyDisableRandomUuid)));
+            top_list->addItem(new ui::elm::SmallListItem("Help", GetActionKeyGlyph(ActionKeyShowHelp)));
+            top_list->addItem(new ui::elm::SmallListItem("Enable Emulation", GetActionKeyGlyph(ActionKeyEnableEmulation)));
+            top_list->addItem(new ui::elm::SmallListItem("Disable Emulation", GetActionKeyGlyph(ActionKeyDisableEmulation)));
+            top_list->addItem(new ui::elm::SmallListItem("Toggle Skylander Connection", GetActionKeyGlyph(ActionKeyToogleConnectVirtualSkylander)));
+            top_list->addItem(new ui::elm::SmallListItem("Select Skylander/Folder", GetActionKeyGlyph(ActionKeyActivateItem)));
+            top_list->addItem(new ui::elm::SmallListItem("Add to Favorites", GetActionKeyGlyph(ActionKeyAddToFavorite)));
+            top_list->addItem(new ui::elm::SmallListItem("Remove from Favorites", GetActionKeyGlyph(ActionKeyRemoveFromFavorite)));
+            top_list->addItem(new ui::elm::SmallListItem("Clear Active Skylander", GetActionKeyGlyph(ActionKeyResetActiveVirtualSkylander)));
 
             return root_frame;
         }
 };
 
-class AmiiboGui : public tsl::Gui {
+class SkylanderGui : public tsl::Gui {
     public:
         enum class Kind {
             Root,
@@ -566,21 +438,17 @@ class AmiiboGui : public tsl::Gui {
         ui::elm::DoubleSectionOverlayFrame *root_frame;
         ui::elm::SmallToggleListItem *emulation_toggle_item;
         ui::elm::SmallListItem *game_header;
-        ui::elm::SmallListItem *amiibo_header;
-        ui::elm::SmallListItem *area_header;
-        ui::elm::SmallToggleListItem *random_uuid_toggle_item;
-        AmiiboIcons* amiibo_icons;
+        ui::elm::SmallListItem *skylander_header;
+        ui::elm::SmallListItem *status_header;
         tsl::elm::List *top_list;
         CustomList *bottom_list;
 
     public:
-        AmiiboGui(const Kind kind, const std::string &path) : kind(kind), base_path(path) {}
+        SkylanderGui(const Kind kind, const std::string &path) : kind(kind), base_path(path) {}
 
         virtual tsl::elm::Element *createUI() override {
-            // View frame with 2 sections
             this->root_frame = new ui::elm::DoubleSectionOverlayFrame("emulanders", MakeVersionString(), ui::SectionsLayout::same, true);
 
-            // Top and bottom containers
             this->top_list = new tsl::elm::List();
             this->root_frame->setTopSection(this->top_list);
             this->bottom_list = new CustomList();
@@ -591,7 +459,6 @@ class AmiiboGui : public tsl::Gui {
             }
 
             if(this->kind == Kind::Root) {
-                this->bottom_list->addItem(createRootElement());
                 this->bottom_list->addItem(createSkylandersElement());
                 this->bottom_list->addItem(createFavoritesElement());
                 this->bottom_list->addItem(createDebugLogElement());
@@ -599,10 +466,9 @@ class AmiiboGui : public tsl::Gui {
                 this->bottom_list->addItem(createHelpElement());
             }
             else {
-                // Iterate base folder
-                u32 virtual_amiibo_count = 0;
-
+                u32 skylander_count = 0;
                 std::vector<std::string> dir_paths;
+
                 if(this->kind == Kind::Favorites) {
                     dir_paths = g_Favorites;
                 }
@@ -635,83 +501,49 @@ class AmiiboGui : public tsl::Gui {
 
                 std::sort(dir_paths.begin(), dir_paths.end());
                 for(const auto &dir_path: dir_paths) {
-                    GuiListElement *new_item = this->createAmiiboElement(dir_path);
+                    GuiListElement *new_item = this->createSkylanderElement(dir_path);
                     if(new_item) {
-                        virtual_amiibo_count++;
+                        skylander_count++;
                     }
                     else {
-                        new_item = this->createSkylanderElement(dir_path);
-                        if(new_item) {
-                            virtual_amiibo_count++;
-                        }
-                        else {
-                            new_item = this->createFolderElement(dir_path);
-                        }
+                        new_item = this->createFolderElement(dir_path);
                     }
     
                     this->bottom_list->addItem(new_item);
-                    if(new_item->ContainsVirtualAmiiboPath()) {
+                    if(new_item->ContainsActiveSkylanderPath()) {
                         this->bottom_list->setCustomInitialFocus(new_item);
                     }
                 }
 
-                // Information about current folder
-                this->bottom_list->addItem(new ui::elm::CustomCategoryHeader("AvailableVirtualAmiibos"_tr + " '" + GetPathFileName(this->base_path) + "': " + std::to_string(virtual_amiibo_count), true, true), 0, 0);
+                this->bottom_list->addItem(new ui::elm::CustomCategoryHeader("Available Skylanders in '" + GetPathFileName(this->base_path) + "': " + std::to_string(skylander_count), true, true), 0, 0);
             }
 
-            // Emulation status
             this->emulation_toggle_item = new ui::elm::SmallToggleListItem("EmulationStatus"_tr + " " + GetActionKeyGlyph(ActionKeyDisableEmulation) + " " + GetActionKeyGlyph(ActionKeyEnableEmulation), false, "On"_tr, "Off"_tr);
             this->emulation_toggle_item->setClickListener([&](u64 keys) {
                 if(keys & ActionKeyActivateItem) {
                     ToggleEmulationStatus();
                     return true;
                 }
-                else {
-                    return false;
-                }
+                return false;
             });
             this->top_list->addItem(this->emulation_toggle_item);
 
-            // Current game status
             this->game_header = new ui::elm::SmallListItem("CurrentGameIntercepted"_tr);
             this->top_list->addItem(this->game_header);
 
-            // Current amiibo
-            this->amiibo_header = new ui::elm::SmallListItem("");
-            this->top_list->addItem(this->amiibo_header);
+            this->skylander_header = new ui::elm::SmallListItem("");
+            this->top_list->addItem(this->skylander_header);
 
-            // Current amiibo random UUID status
-            this->random_uuid_toggle_item = new ui::elm::SmallToggleListItem("RandomUuid"_tr + " " + GetActionKeyGlyph(ActionKeyDisableRandomUuid) + " " + GetActionKeyGlyph(ActionKeyEnableRandomUuid), false, "On"_tr, "Off"_tr);
-            this->random_uuid_toggle_item->setClickListener([&](u64 keys) {
-                if(keys & ActionKeyActivateItem) {
-                    ToggleEmulationStatus();
-                    return true;
-                }
-                else {
-                    return false;
-                }
-            });
-            this->top_list->addItem(this->random_uuid_toggle_item);
+            this->status_header = new ui::elm::SmallListItem("");
+            this->top_list->addItem(this->status_header);
 
-            // Current amiibo area
-            this->area_header = new ui::elm::SmallListItem("");
-            this->top_list->addItem(this->area_header);
-
-            // Current amiibo icon
-            this->amiibo_icons = new AmiiboIcons();
-            this->top_list->addItem(this->amiibo_icons, IconMaxHeight + 2 * IconMargin);
-
-            const auto action_key_prev_area = HidNpadButton_ZL;
-            const auto action_key_next_area = HidNpadButton_ZR;
-
-            // Main key bindings
             this->root_frame->setClickListener([&](u64 keys) {
                 if(keys & ActionKeyShowHelp) {
-                    tsl::changeTo<AmiiboGuiHelp>();
+                    tsl::changeTo<SkylanderGuiHelp>();
                     return true;
                 }
-                if(keys & ActionKeyToogleConnectVirtualAmiibo) {
-                    ToggleActiveVirtualAmiiboStatus();
+                if(keys & ActionKeyToogleConnectVirtualSkylander) {
+                    ToggleActiveVirtualSkylanderStatus();
                     return true;
                 }
                 if(keys & ActionKeyEnableEmulation) {
@@ -722,34 +554,8 @@ class AmiiboGui : public tsl::Gui {
                     emu::SetEmulationStatus(emu::EmulationStatus::Off);
                     return true;
                 }
-                if(keys & ActionKeyEnableRandomUuid) {
-                    g_ActiveVirtualAmiiboData.uuid_info.use_random_uuid = true;
-                    emu::SetActiveVirtualAmiiboUuidInfo(g_ActiveVirtualAmiiboData.uuid_info);
-                    return true;
-                }
-                if(keys & ActionKeyDisableRandomUuid) {
-                    g_ActiveVirtualAmiiboData.uuid_info.use_random_uuid = false;
-                    emu::SetActiveVirtualAmiiboUuidInfo(g_ActiveVirtualAmiiboData.uuid_info);
-                    return true;
-                }
-                if(keys & action_key_prev_area) {
-                    if(g_VirtualAmiiboCurrentAreaIndex > 0) {
-                        const auto new_access_id = g_VirtualAmiiboAreaEntries[g_VirtualAmiiboCurrentAreaIndex - 1].access_id;
-                        if(R_SUCCEEDED(emu::SetActiveVirtualAmiiboCurrentArea(new_access_id))) {
-                            g_VirtualAmiiboCurrentAreaIndex--;
-                        }
-                    }
-                }
-                if(keys & action_key_next_area) {
-                    if(g_VirtualAmiiboCurrentAreaIndex < (g_VirtualAmiiboAreaCount - 1)) {
-                        const auto new_access_id = g_VirtualAmiiboAreaEntries[g_VirtualAmiiboCurrentAreaIndex + 1].access_id;
-                        if(R_SUCCEEDED(emu::SetActiveVirtualAmiiboCurrentArea(new_access_id))) {
-                            g_VirtualAmiiboCurrentAreaIndex++;
-                        }
-                    }
-                }
-                if(keys & ActionKeyResetActiveVirtualAmiibo) {
-                    ResetActiveVirtualAmiibo();
+                if(keys & ActionKeyResetActiveVirtualSkylander) {
+                    ResetActiveVirtualSkylander();
                     return true;
                 }
                 if(auto gui_item = dynamic_cast<GuiListElement*>(getFocusedElement())) {
@@ -789,76 +595,29 @@ class AmiiboGui : public tsl::Gui {
             this->game_header->setColoredValue((is_intercepted ? "Intercepted"_tr : "NotIntercepted"_tr) + mitm_info, is_intercepted ? tsl::style::color::ColorHighlight : ui::style::color::ColorWarning);
 
             const auto has_active_skylander = !g_ActiveSkylanderPath.empty();
-            const auto has_active_virtual_amiibo = IsActiveVirtualAmiiboValid();
 
             if(has_active_skylander) {
-                this->amiibo_header->setText("Skylander: " + GetPathFileName(g_ActiveSkylanderPath));
-            }
-            else if(has_active_virtual_amiibo) {
-                this->amiibo_header->setText(std::string(g_ActiveVirtualAmiiboData.name) + " " + GetActionKeyGlyph(ActionKeyToogleConnectVirtualAmiibo));
+                this->skylander_header->setText("Skylander: " + GetPathFileName(g_ActiveSkylanderPath));
+                this->status_header->setText("Skylander loaded (1024 bytes)");
             }
             else {
-                this->amiibo_header->setText("No active figure");
+                this->skylander_header->setText("No active figure");
+                this->status_header->setText("");
             }
 
-            const auto is_connected = GetActiveVirtualAmiiboStatus() == emu::VirtualAmiiboStatus::Connected;
-            this->amiibo_header->setColoredValue(is_connected ? "Connected"_tr : "Disconnected"_tr, is_connected ? tsl::style::color::ColorHighlight : ui::style::color::ColorWarning);
-
-            if(auto amiibo_item = dynamic_cast<AmiiboListElement*>(getFocusedElement())) {
-                this->amiibo_icons->SetCurrentAmiiboPath(amiibo_item->GetPath());
-            }
-            else {
-                this->amiibo_icons->SetCurrentAmiiboPath("");
-            }
+            const auto is_connected = GetActiveVirtualSkylanderStatus() == emu::VirtualSkylanderStatus::Connected;
+            this->skylander_header->setColoredValue(is_connected ? "Connected"_tr : "Disconnected"_tr, is_connected ? tsl::style::color::ColorHighlight : ui::style::color::ColorWarning);
 
             this->emulation_toggle_item->setState(emu::GetEmulationStatus() == emu::EmulationStatus::On);
-
-            if(has_active_skylander) {
-                this->area_header->setText("Skylander loaded (" + std::to_string(1024) + " bytes)");
-                this->random_uuid_toggle_item->setState(false);
-            }
-            else if(has_active_virtual_amiibo) {
-                if(g_VirtualAmiiboAreaCount > 0) {
-                    this->area_header->setText("SelectedArea"_tr + " (" + std::to_string(g_VirtualAmiiboCurrentAreaIndex + 1) + " / " + std::to_string(g_VirtualAmiiboAreaCount) + "): " + g_VirtualAmiiboAreaTitles[g_VirtualAmiiboCurrentAreaIndex]);
-                }
-                else {
-                    this->area_header->setText("NoVirtualAmiiboAreas"_tr);
-                }
-
-                this->random_uuid_toggle_item->setState(g_ActiveVirtualAmiiboData.uuid_info.use_random_uuid);
-            }
-            else {
-                this->area_header->setText("No figure selected");
-                this->random_uuid_toggle_item->setState(false);
-            }
 
             tsl::Gui::update();
         }
 
     private:
-        VirtualListElement* createRootElement() {
-            auto item = new VirtualListElement("ViewVirtualAmiibos"_tr);
-            item->SetActionListener([&] (auto&) {
-                tsl::changeTo<AmiiboGui>(Kind::Folder, g_VirtualAmiiboDirectory);
-                // When root gets selected for the first time and we have an active virtual amiibo, we start directly at the active virtual amiibo dir
-                static bool is_first_time = true;
-                if(is_first_time && IsActiveVirtualAmiiboValid()) {
-                    const auto active_virtual_amiibo_rel_dir = GetBaseDirectory(GetRelativePathTo(g_VirtualAmiiboDirectory, g_ActiveVirtualAmiiboPath));
-                    auto incremental_path = g_VirtualAmiiboDirectory;
-                    for(const auto &dir_item: SplitPath(active_virtual_amiibo_rel_dir)) {
-                        incremental_path += "/" + dir_item;
-                        tsl::changeTo<AmiiboGui>(Kind::Folder, incremental_path);
-                    }
-                }
-                is_first_time = false;
-            });
-            return item;
-        }
-
         VirtualListElement* createFavoritesElement() {
             auto item = new VirtualListElement("ViewFavorites"_tr, GetIconGlyph(Icon::Favorite));
             item->SetActionListener([&](auto&) {
-                tsl::changeTo<AmiiboGui>(Kind::Favorites, "<favorites>");
+                tsl::changeTo<SkylanderGui>(Kind::Favorites, "<favorites>");
             });
             return item;
         }
@@ -866,15 +625,15 @@ class AmiiboGui : public tsl::Gui {
         ActionListElement* createDebugLogElement() {
             auto item = new ActionListElement("View Debug Log", GetIconGlyph(Icon::Help));
             item->SetActionListener([&](auto&) {
-                tsl::changeTo<AmiiboGuiLog>();
+                tsl::changeTo<SkylanderGuiLog>();
             });
             return item;
         }
 
         ActionListElement* createResetElement() {
-            auto item = new ActionListElement("ResetActiveVirtualAmiibo"_tr, GetIconGlyph(Icon::Reset));
+            auto item = new ActionListElement("Clear Active Skylander", GetIconGlyph(Icon::Reset));
             item->SetActionListener([&](auto&) {
-                ResetActiveVirtualAmiibo();
+                ResetActiveVirtualSkylander();
                 update();
             });
             return item;
@@ -883,15 +642,25 @@ class AmiiboGui : public tsl::Gui {
         ActionListElement* createHelpElement() {
             auto item = new ActionListElement("Help"_tr, GetIconGlyph(Icon::Help));
             item->SetActionListener([&](auto&) {
-                tsl::changeTo<AmiiboGuiHelp>();
+                tsl::changeTo<SkylanderGuiHelp>();
             });
             return item;
         }
 
         VirtualListElement* createSkylandersElement() {
-            auto item = new VirtualListElement("ViewSkylanders"_tr);
+            auto item = new VirtualListElement("View Skylanders Folder");
             item->SetActionListener([&] (auto&) {
-                tsl::changeTo<AmiiboGui>(Kind::Folder, g_SkylanderDirectory);
+                tsl::changeTo<SkylanderGui>(Kind::Folder, g_SkylanderDirectory);
+                static bool is_first_time = true;
+                if(is_first_time && IsActiveSkylanderValid()) {
+                    const auto active_skylander_rel_dir = GetBaseDirectory(GetRelativePathTo(g_SkylanderDirectory, g_ActiveSkylanderPath));
+                    auto incremental_path = g_SkylanderDirectory;
+                    for(const auto &dir_item: SplitPath(active_skylander_rel_dir)) {
+                        incremental_path += "/" + dir_item;
+                        tsl::changeTo<SkylanderGui>(Kind::Folder, incremental_path);
+                    }
+                }
+                is_first_time = false;
             });
             return item;
         }
@@ -899,28 +668,7 @@ class AmiiboGui : public tsl::Gui {
         FolderListElement* createFolderElement(const std::string &path) {
             auto item = new FolderListElement(path);
             item->SetActionListener([&](auto& caller) {
-                tsl::changeTo<AmiiboGui>(Kind::Folder, caller.GetPath());
-            });
-            return item;
-        }
-
-        AmiiboListElement* createAmiiboElement(const std::string &path) {
-            emu::VirtualAmiiboData data = {};
-
-            if(R_FAILED(emu::TryParseVirtualAmiibo(path.c_str(), path.length(), &data))) {
-                return nullptr;
-            }
-
-            auto item = new AmiiboListElement(path, data);
-            item->SetActionListener([&](auto& caller) {
-                const auto path = caller.GetPath();
-                if(g_ActiveVirtualAmiiboPath != path) {
-                    SetActiveVirtualAmiibo(path);
-                    g_ActiveSkylanderPath = "";
-                }
-                else {
-                    ToggleActiveVirtualAmiiboStatus();
-                }
+                tsl::changeTo<SkylanderGui>(Kind::Folder, caller.GetPath());
             });
             return item;
         }
@@ -934,23 +682,17 @@ class AmiiboGui : public tsl::Gui {
             item->SetActionListener([&](auto& caller) {
                 const auto path = caller.GetPath();
                 if(g_ActiveSkylanderPath == path) {
-                    // Toggle: deselect the currently active skylander
-                    ResetActiveVirtualAmiibo();
-                    g_ActiveSkylanderPath = "";
+                    ResetActiveVirtualSkylander();
                 } else {
-                    // Select this skylander
-                    emu::SetActiveVirtualSkylander(path.c_str(), path.length());
-                    g_ActiveSkylanderPath = path;
-                    g_ActiveVirtualAmiiboPath = "";
+                    SetActiveVirtualSkylander(path);
                 }
-                LoadActiveVirtualAmiibo();
                 update();
             });
             return item;
         }
 };
 
-class EmuiiboOverlay : public tsl::Overlay {
+class EmulandersOverlay : public tsl::Overlay {
     public:
         virtual void initServices() override {
             if(!tr::Load()) {
@@ -958,12 +700,12 @@ class EmuiiboOverlay : public tsl::Overlay {
                 return;
             }
             if(!emu::IsAvailable()) {
-                g_InitializationStatus = InitializationStatus::EmuiiboNotPresent;
+                g_InitializationStatus = InitializationStatus::EmulandersNotPresent;
                 return;
             }
             g_InitializationResult = emu::Initialize();
             if(R_FAILED(g_InitializationResult)) {
-                g_InitializationStatus = InitializationStatus::EmuiiboServiceError;
+                g_InitializationStatus = InitializationStatus::EmulandersServiceError;
                 return;
             }
             g_InitializationResult = pmdmntInitialize();
@@ -983,9 +725,6 @@ class EmuiiboOverlay : public tsl::Overlay {
             }
 
             g_InitializationStatus = InitializationStatus::Ok;
-            char virtual_amiibo_dir_str[FS_MAX_PATH] = {};
-            emu::GetVirtualAmiiboDirectory(virtual_amiibo_dir_str, sizeof(virtual_amiibo_dir_str));
-            g_VirtualAmiiboDirectory.assign(virtual_amiibo_dir_str);
         }
 
         virtual void exitServices() override {
@@ -996,12 +735,12 @@ class EmuiiboOverlay : public tsl::Overlay {
         }
 
         virtual std::unique_ptr<tsl::Gui> loadInitialGui() override {
-            LoadActiveVirtualAmiibo();
+            LoadActiveSkylander();
             LoadFavorites();
-            return initially<AmiiboGui>(AmiiboGui::Kind::Root, "<root>");
+            return initially<SkylanderGui>(SkylanderGui::Kind::Root, "<root>");
         }
 };
 
 int main(int argc, char **argv) {
-    return tsl::loop<EmuiiboOverlay, tsl::impl::LaunchFlags::CloseOnExit>(argc, argv);
+    return tsl::loop<EmulandersOverlay, tsl::impl::LaunchFlags::CloseOnExit>(argc, argv);
 }

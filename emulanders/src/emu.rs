@@ -1,4 +1,3 @@
-use crate::amiibo;
 use crate::skylander;
 use crate::fsext;
 use alloc::vec::Vec;
@@ -37,12 +36,11 @@ pub enum EmulationStatus {
     Off,
 }
 
-
 #[atomic_enum]
 #[derive(nx::ipc::sf::Request, nx::ipc::sf::Response, PartialEq, Eq)]
 #[repr(u32)]
 #[allow(dead_code)]
-pub enum VirtualAmiiboStatus {
+pub enum VirtualSkylanderStatus {
     Invalid,
     Connected,
     Disconnected,
@@ -57,11 +55,9 @@ pub const IS_DEV_BUILD: bool = false;
 pub const CURRENT_VERSION: Version = Version::from(1, 1, 3, IS_DEV_BUILD);
 
 static G_EMULATION_STATUS: AtomicEmulationStatus = AtomicEmulationStatus::new(EmulationStatus::Off);
-static G_ACTIVE_VIRTUAL_AMIIBO_STATUS: AtomicVirtualAmiiboStatus =
-    AtomicVirtualAmiiboStatus::new(VirtualAmiiboStatus::Invalid);
+static G_ACTIVE_VIRTUAL_SKYLANDER_STATUS: AtomicVirtualSkylanderStatus =
+    AtomicVirtualSkylanderStatus::new(VirtualSkylanderStatus::Invalid);
 static G_INTERCEPTED_APPLICATION_IDS: sync::Mutex<Vec<u64>> = sync::Mutex::new(Vec::new());
-static G_ACTIVE_VIRTUAL_AMIIBO: sync::Mutex<Option<amiibo::fmt::VirtualAmiibo>> =
-    sync::Mutex::new(None);
 static G_ACTIVE_VIRTUAL_SKYLANDER: sync::Mutex<Option<skylander::Skylander>> =
     sync::Mutex::new(None);
 static G_LAST_MITM_REQUEST_ID: sync::Mutex<u64> = sync::Mutex::new(0);
@@ -72,7 +68,6 @@ const STATUS_ON_FLAG: &str = "status_on";
 pub fn log_debug(msg: &str) {
     let mut log = G_DEBUG_LOG.lock();
     if log.len() + msg.len() > 16384 {
-        // Cut the first half of the string string
         let new_start = log.len() / 2;
         *log = alloc::string::String::from(&log[new_start..]);
     }
@@ -110,12 +105,12 @@ pub fn set_emulation_status(status: EmulationStatus) {
     fsext::set_flag(STATUS_ON_FLAG, status == EmulationStatus::On);
 }
 
-pub fn get_active_virtual_amiibo_status() -> VirtualAmiiboStatus {
-    G_ACTIVE_VIRTUAL_AMIIBO_STATUS.load(Ordering::SeqCst)
+pub fn get_active_virtual_skylander_status() -> VirtualSkylanderStatus {
+    G_ACTIVE_VIRTUAL_SKYLANDER_STATUS.load(Ordering::SeqCst)
 }
 
-pub fn set_active_virtual_amiibo_status(status: VirtualAmiiboStatus) {
-    G_ACTIVE_VIRTUAL_AMIIBO_STATUS.store(status, Ordering::SeqCst);
+pub fn set_active_virtual_skylander_status(status: VirtualSkylanderStatus) {
+    G_ACTIVE_VIRTUAL_SKYLANDER_STATUS.store(status, Ordering::SeqCst);
 }
 
 pub fn register_intercepted_application_id(application_id: ncm::ProgramId) {
@@ -136,56 +131,26 @@ pub fn is_application_id_intercepted(application_id: ncm::ProgramId) -> bool {
         .contains(&application_id.0)
 }
 
-pub fn get_active_virtual_amiibo<'a>() -> sync::MutexGuard<'a, Option<amiibo::fmt::VirtualAmiibo>> {
-    G_ACTIVE_VIRTUAL_AMIIBO.lock()
-}
-
-pub fn set_active_virtual_amiibo(virtual_amiibo: Option<amiibo::fmt::VirtualAmiibo>) {
-    G_ACTIVE_VIRTUAL_AMIIBO_STATUS.store(
-        if virtual_amiibo.is_some() {
-            VirtualAmiiboStatus::Connected
-        } else {
-            VirtualAmiiboStatus::Invalid
-        },
-        Ordering::SeqCst,
-    );
-    *G_ACTIVE_VIRTUAL_AMIIBO.lock() = virtual_amiibo;
-    
-    // If there was an active skylander, we need to notify removal
-    let had_skylander = G_ACTIVE_VIRTUAL_SKYLANDER.lock().is_some();
-    *G_ACTIVE_VIRTUAL_SKYLANDER.lock() = None;
-
-    if had_skylander {
-        crate::ipc::nfc::notify_skylander_removed();
-        crate::ipc::nfc_user::notify_skylander_removed();
-    }
-}
-
 pub fn get_active_virtual_skylander<'a>() -> sync::MutexGuard<'a, Option<skylander::Skylander>> {
     G_ACTIVE_VIRTUAL_SKYLANDER.lock()
 }
 
 pub fn set_active_virtual_skylander(skylander: Option<skylander::Skylander>) {
     let has_skylander = skylander.is_some();
-    G_ACTIVE_VIRTUAL_AMIIBO_STATUS.store(
+    G_ACTIVE_VIRTUAL_SKYLANDER_STATUS.store(
         if has_skylander {
-            VirtualAmiiboStatus::Connected
+            VirtualSkylanderStatus::Connected
         } else {
-            VirtualAmiiboStatus::Invalid
+            VirtualSkylanderStatus::Invalid
         },
         Ordering::SeqCst,
     );
     *G_ACTIVE_VIRTUAL_SKYLANDER.lock() = skylander;
-    *G_ACTIVE_VIRTUAL_AMIIBO.lock() = None;
 
-    // Notify BOTH NFC state machines so the game detects tag changes
-    // nfc.rs handles nfc:mf:u, nfc_user.rs handles nfc:user (which has ReadMifare/WriteMifare)
     if has_skylander {
         crate::ipc::nfc::notify_skylander_selected();
-        crate::ipc::nfc_user::notify_skylander_selected();
     } else {
         crate::ipc::nfc::notify_skylander_removed();
-        crate::ipc::nfc_user::notify_skylander_removed();
     }
 }
 

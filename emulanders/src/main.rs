@@ -15,8 +15,6 @@ use nx::rc;
 use nx::result::*;
 use nx::thread;
 use nx::util;
-use nx::ipc::sf;
-use nx::ipc::sf::sm;
 
 use emulanders::*;
 
@@ -50,20 +48,7 @@ pub fn main() -> Result<()> {
         log!("Error initializing rand provider: {:?}\n", e);
     }
 
-    if let Err(e) = miiext::initialize() {
-        log!("Error initializing mii module provider: {:?}\n", e);
-    }
-
-    if let Err(e) = miiext::export_miis() {
-        log!("Error exporting mii module provider: {:?}\n", e);
-    }
-
-    amiibo::compat::convert_deprecated_virtual_amiibos();
     emu::load_emulation_status();
-
-    if let Err(e) = ipc::nfp::initialize() {
-        abort::abort(abort::AbortLevel::SvcBreak(), e);
-    }
 
     const POINTER_BUF_SIZE: usize = 0x1000;
     type Manager = server::ServerManager<POINTER_BUF_SIZE>;
@@ -71,10 +56,7 @@ pub fn main() -> Result<()> {
     log!("Servicing IPC...\n");
 
     let mut manager = Manager::new()?;
-    manager.register_mitm_service_server::<ipc::nfp::user::UserManager>()?;
-    manager.register_mitm_service_server::<ipc::nfp::sys::SystemManager>()?;
     manager.register_mitm_service_server::<ipc::nfc::UserManager>()?;
-    manager.register_mitm_service_server::<ipc::nfc_user::GenericUserManager>()?;
     
     manager.register_service_server::<ipc::emu::EmulationServer>()?;
 
@@ -86,7 +68,7 @@ pub fn main() -> Result<()> {
 }
 
 #[panic_handler]
-fn panic_handler(info: &panic::PanicInfo) -> ! {
+fn panic_handler(_info: &panic::PanicInfo) -> ! {
     log!("Panic! at emulanders thread '{}'\n", thread::get_current_thread_name());
     abort::abort(abort::AbortLevel::SvcBreak(), rc::ResultPanicked::make())
 }
