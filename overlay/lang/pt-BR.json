@@ -17,8 +17,8 @@
             "value": "Desligado"
         },
         {
-            "key": "CurrentGameIntercepted",
-            "value": "Jogo atual está"
+            "key": "InterceptingGame",
+            "value": "Interceptando Skylanders"
         },
         {
             "key": "Intercepted",
@@ -77,14 +77,6 @@
             "value": "Selecionar Skylander/Pasta"
         },
         {
-            "key": "AddFavorite",
-            "value": "Adicionar aos favoritos"
-        },
-        {
-            "key": "RemoveFavorite",
-            "value": "Remover dos favoritos"
-        },
-        {
             "key": "ClearActiveSkylander",
             "value": "Remover Skylander ativo"
         },
@@ -111,6 +103,18 @@
         {
             "key": "SkylanderLabel",
             "value": "Skylander:"
+        },
+        {
+            "key": "ToggleFavorite",
+            "value": "Favoritar/Desfavoritar (Y)"
+        },
+        {
+            "key": "Yes",
+            "value": "Sim"
+        },
+        {
+            "key": "No",
+            "value": "Nao"
         }
     ]
 }

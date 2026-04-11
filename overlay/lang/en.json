@@ -17,8 +17,8 @@
             "value": "Off"
         },
         {
-            "key": "CurrentGameIntercepted",
-            "value": "Current game is"
+            "key": "InterceptingGame",
+            "value": "Intercepting Skylanders"
         },
         {
             "key": "Intercepted",
@@ -77,14 +77,6 @@
             "value": "Select Skylander/folder"
         },
         {
-            "key": "AddFavorite",
-            "value": "Add to favorites"
-        },
-        {
-            "key": "RemoveFavorite",
-            "value": "Remove from favorites"
-        },
-        {
             "key": "ClearActiveSkylander",
             "value": "Clear active Skylander"
         },
@@ -111,6 +103,18 @@
         {
             "key": "SkylanderLabel",
             "value": "Skylander:"
+        },
+        {
+            "key": "ToggleFavorite",
+            "value": "Toggle Favorite (Y)"
+        },
+        {
+            "key": "Yes",
+            "value": "Yes"
+        },
+        {
+            "key": "No",
+            "value": "No"
         }
     ]
 }

@@ -16,8 +16,7 @@ namespace {
     constexpr auto ActionKeyEnableEmulation = HidNpadButton_R;
     constexpr auto ActionKeyDisableEmulation = HidNpadButton_L;
     constexpr auto ActionKeyActivateItem = HidNpadButton_A;
-    constexpr auto ActionKeyAddToFavorite = HidNpadButton_Y;
-    constexpr auto ActionKeyRemoveFromFavorite = HidNpadButton_X;
+    constexpr auto ActionKeyToggleFavorite = HidNpadButton_Y;
     constexpr auto ActionKeyToogleConnectVirtualSkylander = HidNpadButton_StickR;
     constexpr auto ActionKeyResetActiveVirtualSkylander = HidNpadButton_Minus;
     
@@ -170,16 +169,18 @@ namespace {
         LoadActiveSkylander();
     }
 
+    inline bool IsFavorite(const std::string &path) {
+        return std::find(g_Favorites.begin(), g_Favorites.end(), path) != g_Favorites.end();
+    }
+
     inline void AddFavorite(const std::string &path) {
-        g_Favorites.push_back(path);
+        if(!IsFavorite(path)) {
+            g_Favorites.push_back(path);
+        }
     }
 
     inline void RemoveFavorite(const std::string &path) {
         g_Favorites.erase(std::remove(g_Favorites.begin(), g_Favorites.end(), path), g_Favorites.end()); 
-    }
-
-    inline bool IsFavorite(const std::string &path) {
-        return std::find(g_Favorites.begin(), g_Favorites.end(), path) != g_Favorites.end();
     }
 
     void LoadFavorites() {
@@ -272,16 +273,15 @@ class GuiListElement: public ui::elm::SmallListItem {
             return ::IsFavorite(this->path);
         }
 
-        inline void AddFavorite() {
+        inline void ToggleFavorite() {
             if(this->CanBeFavorite()) {
-                ::AddFavorite(this->path);
+                if(this->IsFavorite()) {
+                    ::RemoveFavorite(this->path);
+                } else {
+                    ::AddFavorite(this->path);
+                }
                 this->Update();
             }
-        }
-
-        inline void RemoveFavorite() {
-            ::RemoveFavorite(this->path);
-            this->Update();
         }
 
         virtual bool CanBeFavorite() const {
@@ -475,10 +475,9 @@ class SkylanderGuiHelp : public tsl::Gui {
             top_list->addItem(new ui::elm::SmallListItem("Enable Emulation", GetActionKeyGlyph(ActionKeyEnableEmulation)));
             top_list->addItem(new ui::elm::SmallListItem("Disable Emulation", GetActionKeyGlyph(ActionKeyDisableEmulation)));
             top_list->addItem(new ui::elm::SmallListItem("Toggle Skylander Connection", GetActionKeyGlyph(ActionKeyToogleConnectVirtualSkylander)));
-            top_list->addItem(new ui::elm::SmallListItem("Select Skylander/Folder", GetActionKeyGlyph(ActionKeyActivateItem)));
-            top_list->addItem(new ui::elm::SmallListItem("Add to Favorites", GetActionKeyGlyph(ActionKeyAddToFavorite)));
-            top_list->addItem(new ui::elm::SmallListItem("Remove from Favorites", GetActionKeyGlyph(ActionKeyRemoveFromFavorite)));
-            top_list->addItem(new ui::elm::SmallListItem("Clear Active Skylander", GetActionKeyGlyph(ActionKeyResetActiveVirtualSkylander)));
+            top_list->addItem(new ui::elm::SmallListItem("SelectSkylanderFolder"_tr, GetActionKeyGlyph(ActionKeyActivateItem)));
+            top_list->addItem(new ui::elm::SmallListItem("ToggleFavorite"_tr, GetActionKeyGlyph(ActionKeyToggleFavorite)));
+            top_list->addItem(new ui::elm::SmallListItem("ClearActiveSkylander"_tr, GetActionKeyGlyph(ActionKeyResetActiveVirtualSkylander)));
 
             return root_frame;
         }
@@ -619,12 +618,8 @@ class SkylanderGui : public tsl::Gui {
                     return true;
                 }
                 if(auto gui_item = dynamic_cast<GuiListElement*>(getFocusedElement())) {
-                    if(keys & ActionKeyAddToFavorite) {
-                        gui_item->AddFavorite();
-                        return true;
-                    }
-                    else if(keys & ActionKeyRemoveFromFavorite) {
-                        gui_item->RemoveFavorite();
+                    if(keys & ActionKeyToggleFavorite) {
+                        gui_item->ToggleFavorite();
                         return true;
                     }
                 }
@@ -642,17 +637,8 @@ class SkylanderGui : public tsl::Gui {
             }
 
             const auto is_intercepted = emu::IsCurrentApplicationIdIntercepted();
-            
-            u64 last_id = 0;
-            emu::GetLastMitmRequestId(&last_id);
-            char mitm_info[64];
-            if (last_id > 0) {
-                sprintf(mitm_info, " (%016lX)", last_id);
-            } else {
-                strcpy(mitm_info, " (None)");
-            }
 
-            this->game_header->setColoredValue((is_intercepted ? "Intercepted"_tr : "NotIntercepted"_tr) + mitm_info, is_intercepted ? tsl::style::color::ColorHighlight : ui::style::color::ColorWarning);
+            this->game_header->setColoredValue(is_intercepted ? "Yes"_tr : "No"_tr, is_intercepted ? tsl::style::color::ColorHighlight : ui::style::color::ColorWarning);
 
             const auto has_active_skylander = !g_ActiveSkylanderPath.empty();
 
