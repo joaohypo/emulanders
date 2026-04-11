@@ -17,6 +17,8 @@ Emulanders does **not** provide copyrighted material, proprietary encryption key
 
 Emulanders is a custom background sysmodule (and Tesla Overlay) for Atmosphère that allows you to load and hot-swap Skylanders figures directly from your SD card into *Skylanders: Imaginators*.
 
+For the current development status and future plans, please see the [Project Roadmap](ROADMAP.md).
+
 ### The Technical Breakthrough
 Unlike standard Nintendo Amiibos that use NTAG formats and communicate via the `nfp` (Nintendo Figurine Platform) service, Skylanders portals and characters utilize NXP Mifare Classic 1K tags. *Imaginators* completely bypasses the standard Amiibo parser stack and communicates directly with the low-level **`nfc:mf:u`** (Mifare User) IPC service.
 
@@ -43,7 +45,7 @@ You will need the following files from a compiled release:
 Emulanders uses the `sdmc:/emulanders/` directory at the root of your SD card.
 
 1. **`sdmc:/emulanders/figures/` (Your Skylanders)**
-   Place your raw Skylander `.dump` or `.bin` files here. Emulanders natively supports reading files from deep subfolders, allowing you to organize your collection (e.g., by Element or Game).
+   Place your raw Skylander `.dump` or `.bin` files here. While you can keep all your files in this root folder, it is highly recommended to organize them into subfolders (e.g., by Element or Game). This not only makes navigation easier but also helps the Tesla overlay manage system memory more efficiently as your collection grows.
    *Example:* `sd:/emulanders/figures/Imaginators/Senseis/King_Pen.dump`
 
 2. **`sdmc:/emulanders/flags/` (State Persistence)**
