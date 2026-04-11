@@ -17,6 +17,7 @@ namespace {
     constexpr auto ActionKeyDisableEmulation = HidNpadButton_L;
     constexpr auto ActionKeyActivateItem = HidNpadButton_A;
     constexpr auto ActionKeyToggleFavorite = HidNpadButton_Y;
+    constexpr auto ActionKeyToogleConnectVirtualSkylander = HidNpadButton_StickR;
     constexpr auto ActionKeyResetActiveVirtualSkylander = HidNpadButton_X;
     
     inline std::string GetActionKeyGlyph(const u64 action_key) {
@@ -350,6 +351,7 @@ class SkylanderIcons: public tsl::elm::Element {
     private:
         ui::PngImage cur_skylander_image;
         std::string current_path;
+        bool is_folder = false;
 
     public:
         static constexpr float ErrorTextFontSize = 15;
@@ -359,6 +361,7 @@ class SkylanderIcons: public tsl::elm::Element {
                 return;
             }
             this->current_path = path;
+            this->is_folder = false;
 
             if(path.empty()) {
                 this->cur_skylander_image.Reset();
@@ -369,24 +372,30 @@ class SkylanderIcons: public tsl::elm::Element {
                 this->cur_skylander_image.Load(GetPathWithoutExtension(path) + ".png", GetIconMaxWidth(), IconMaxHeight);
             } else {
                 this->cur_skylander_image.Reset();
+                this->is_folder = true;
             }
         }
 
     private:
-        void DrawIcon(tsl::gfx::Renderer* renderer, const s32 x, const s32 y, const s32 w, const s32 h, const ui::PngImage &image) {
+        void DrawIcon(tsl::gfx::Renderer* renderer, const s32 x, const s32 y, const s32 w, const s32 h, const ui::PngImage &image, bool folder) {
             const auto img_buf = image.GetRGBABuffer();
             if(img_buf != nullptr) {
                 renderer->drawBitmap(x + IconMargin / 2 + w / 2 - image.GetWidth() / 2, y + IconMargin, image.GetWidth(), image.GetHeight(), img_buf);
             }
             else {
-                renderer->drawString(image.GetErrorText().c_str(), false, x + IconMargin, y + h / 2, ErrorTextFontSize, renderer->a(tsl::style::color::ColorText));
+                std::string msg;
+                if (folder) msg = "FolderSelected"_tr;
+                else if (image.IsError()) msg = image.GetErrorText();
+                else if (image.GetPath().empty()) msg = "NoFigure"_tr;
+                
+                renderer->drawString(msg.c_str(), false, x + IconMargin, y + h / 2, ErrorTextFontSize, renderer->a(tsl::style::color::ColorText));
             }
         }
 
         void DrawCustom(tsl::gfx::Renderer* renderer, const s32 x, const s32 y, const s32 w, const s32 h) {
             renderer->drawRect(x + w / 2 - 1, y, 1, h - IconMargin, this->a(tsl::style::color::ColorText));
-            this->DrawIcon(renderer, x, y, w / 2, h, g_ActiveSkylanderImage);
-            this->DrawIcon(renderer, x + w / 2, y, w / 2, h, this->cur_skylander_image);
+            this->DrawIcon(renderer, x, y, w / 2, h, g_ActiveSkylanderImage, false);
+            this->DrawIcon(renderer, x + w / 2, y, w / 2, h, this->cur_skylander_image, this->is_folder);
         }
 
         virtual void draw(tsl::gfx::Renderer* renderer) override {
@@ -568,7 +577,7 @@ class SkylanderGui : public tsl::Gui {
         std::vector<GuiListElement*> gui_elements;
 
     public:
-        SkylanderGui(const Kind kind, const std::string &path) : kind(kind), base_path(path) {}
+        SkylanderGui(const Kind kind, const std::string &path) : kind(kind), base_path(path), gui_elements(std::vector<GuiListElement*>()) {}
 
         virtual tsl::elm::Element *createUI() override {
             this->root_frame = new ui::elm::DoubleSectionOverlayFrame("emulanders", MakeVersionString(), ui::SectionsLayout::same, true);
@@ -580,6 +589,10 @@ class SkylanderGui : public tsl::Gui {
 
             this->skylander_icons = new SkylanderIcons();
             this->top_list->addItem(this->skylander_icons, IconMaxHeight + 2 * IconMargin);
+
+            auto legend = new ui::elm::SmallListItem("FigureLegend"_tr, "");
+            legend->setTextSize(15);
+            this->top_list->addItem(legend);
 
             if(!IsInitializationOk()) {
                 return this->root_frame;

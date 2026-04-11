@@ -115,6 +115,62 @@
         {
             "key": "No",
             "value": "Nao"
+        },
+        {
+            "key": "FolderSelected",
+            "value": "Pasta selecionada"
+        },
+        {
+            "key": "NoFigure",
+            "value": "Nenhuma figura"
+        },
+        {
+            "key": "FigureLegend",
+            "value": "Esq: Ativo / Dir: Cursor"
+        },
+        {
+            "key": "UpngInvalidFile",
+            "value": "Arquivo invalido"
+        },
+        {
+            "key": "UpngUnsupportedRgbPng",
+            "value": "RGB nao suportado"
+        },
+        {
+            "key": "UpngUpscaleUnsupported",
+            "value": "Upscale nao suportado"
+        },
+        {
+            "key": "UpngImageTooLarge",
+            "value": "Imagem muito grande"
+        },
+        {
+            "key": "UpngImageNotFound",
+            "value": "Imagem nao encontrada"
+        },
+        {
+            "key": "UpngNotPngImage",
+            "value": "Nao e um PNG"
+        },
+        {
+            "key": "UpngMalformedPng",
+            "value": "PNG malformado"
+        },
+        {
+            "key": "UpngUnsupportedPng",
+            "value": "PNG nao suportado"
+        },
+        {
+            "key": "UpngUnsupportedInterlacing",
+            "value": "Entrelacamento nao suportado"
+        },
+        {
+            "key": "UpngUnsupportedColorFormat",
+            "value": "Formato de cor nao suportado"
+        },
+        {
+            "key": "UpngInvalidParameter",
+            "value": "Parametro invalido"
         }
     ]
 }
