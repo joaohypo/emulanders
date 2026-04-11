@@ -74,7 +74,7 @@ namespace {
         return (g_InitializationStatus == InitializationStatus::Ok) || (g_InitializationStatus == InitializationStatus::OkVersionMismatch);
     }
 
-    std::string g_SkylanderDirectory = "sdmc:/emulanders/skylanders";
+    std::string g_SkylanderDirectory = "sdmc:/emulanders/figures";
     emu::Version g_Version;
     std::string g_ActiveSkylanderPath;
     std::vector<std::string> g_Favorites;
@@ -370,10 +370,10 @@ class CustomList: public tsl::elm::List {
 
 };
 
-class SkylanderGuiLog : public tsl::Gui {
+class SkylanderGuiLogView : public tsl::Gui {
     public:
         virtual tsl::elm::Element* createUI() override {
-            auto root_frame = new tsl::elm::OverlayFrame("Debug Log (Dumped to SD)", MakeVersionString());
+            auto root_frame = new tsl::elm::OverlayFrame("Live Debug Log", MakeVersionString());
             auto list = new tsl::elm::List();
             
             char* log_data = new char[16384]();
@@ -381,15 +381,6 @@ class SkylanderGuiLog : public tsl::Gui {
             
             std::string log_str(log_data);
             delete[] log_data;
-
-            tsl::hlp::doWithSDCardHandle([&]() {
-                std::ofstream log_file("sdmc:/emulanders/debug_log_dump.txt");
-                if (log_file.is_open()) {
-                    log_file << log_str;
-                    log_file.flush();
-                    log_file.close();
-                }
-            });
 
             std::stringstream ss(log_str);
             std::string line;
@@ -401,6 +392,75 @@ class SkylanderGuiLog : public tsl::Gui {
             
             root_frame->setContent(list);
             return root_frame;
+        }
+};
+
+class SkylanderGuiLogsMenu : public tsl::Gui {
+    private:
+        ui::elm::DoubleSectionOverlayFrame *root_frame;
+        ui::elm::SmallToggleListItem *logging_toggle_item;
+        tsl::elm::List *top_list;
+        CustomList *bottom_list;
+
+    public:
+        virtual tsl::elm::Element* createUI() override {
+            this->root_frame = new ui::elm::DoubleSectionOverlayFrame("Logs Manager", MakeVersionString(), ui::SectionsLayout::same, true);
+            this->top_list = new tsl::elm::List();
+            this->root_frame->setTopSection(this->top_list);
+            this->bottom_list = new CustomList();
+            this->root_frame->setBottomSection(this->bottom_list);
+
+            this->logging_toggle_item = new ui::elm::SmallToggleListItem("Debug Logging", false, "On", "Off");
+            this->logging_toggle_item->setClickListener([&](u64 keys) {
+                if(keys & ActionKeyActivateItem) {
+                    bool current = emu::GetLoggingStatus();
+                    emu::SetLoggingStatus(!current);
+                    return true;
+                }
+                return false;
+            });
+            this->top_list->addItem(this->logging_toggle_item);
+
+            auto btn_view = new ActionListElement("View RAM Log", GetIconGlyph(Icon::Help));
+            btn_view->SetActionListener([&](auto&) {
+                tsl::changeTo<SkylanderGuiLogView>();
+            });
+            this->bottom_list->addItem(btn_view);
+
+            auto btn_extract = new ActionListElement("Extract to SD", "");
+            btn_extract->SetActionListener([&](auto&) {
+                char* log_data = new char[16384]();
+                emu::GetDebugLog(log_data, 16384);
+                std::string log_str(log_data);
+                delete[] log_data;
+
+                tsl::hlp::doWithSDCardHandle([&]() {
+                    std::ofstream log_file("sdmc:/emulanders/debug_log_dump.txt");
+                    if (log_file.is_open()) {
+                        log_file << log_str;
+                        log_file.flush();
+                        log_file.close();
+                    }
+                });
+                tsl::goBack();
+            });
+            this->bottom_list->addItem(btn_extract);
+
+            auto btn_clear = new ActionListElement("Clear RAM Log", GetIconGlyph(Icon::Reset));
+            btn_clear->SetActionListener([&](auto&) {
+                emu::ClearDebugLog();
+                tsl::goBack();
+            });
+            this->bottom_list->addItem(btn_clear);
+
+            update();
+            return root_frame;
+        }
+
+        virtual void update() override {
+            bool is_logging = emu::GetLoggingStatus();
+            this->logging_toggle_item->setState(is_logging);
+            tsl::Gui::update();
         }
 };
 
@@ -461,7 +521,7 @@ class SkylanderGui : public tsl::Gui {
             if(this->kind == Kind::Root) {
                 this->bottom_list->addItem(createSkylandersElement());
                 this->bottom_list->addItem(createFavoritesElement());
-                this->bottom_list->addItem(createDebugLogElement());
+                this->bottom_list->addItem(createLogsMenuElement());
                 this->bottom_list->addItem(createResetElement());
                 this->bottom_list->addItem(createHelpElement());
             }
@@ -622,10 +682,10 @@ class SkylanderGui : public tsl::Gui {
             return item;
         }
 
-        ActionListElement* createDebugLogElement() {
-            auto item = new ActionListElement("View Debug Log", GetIconGlyph(Icon::Help));
+        ActionListElement* createLogsMenuElement() {
+            auto item = new ActionListElement("Logs Manager", GetIconGlyph(Icon::Help));
             item->SetActionListener([&](auto&) {
-                tsl::changeTo<SkylanderGuiLog>();
+                tsl::changeTo<SkylanderGuiLogsMenu>();
             });
             return item;
         }
@@ -648,7 +708,7 @@ class SkylanderGui : public tsl::Gui {
         }
 
         VirtualListElement* createSkylandersElement() {
-            auto item = new VirtualListElement("View Skylanders Folder");
+            auto item = new VirtualListElement("View Figures Folder");
             item->SetActionListener([&] (auto&) {
                 tsl::changeTo<SkylanderGui>(Kind::Folder, g_SkylanderDirectory);
                 static bool is_first_time = true;

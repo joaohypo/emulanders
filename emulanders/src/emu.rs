@@ -6,7 +6,7 @@ use nx::sync;
 
 use atomic_enum::atomic_enum;
 
-use core::sync::atomic::Ordering;
+use core::sync::atomic::{AtomicBool, Ordering};
 
 #[derive(nx::ipc::sf::Request, nx::ipc::sf::Response, Copy, Clone)]
 #[repr(C)]
@@ -62,10 +62,14 @@ static G_ACTIVE_VIRTUAL_SKYLANDER: sync::Mutex<Option<skylander::Skylander>> =
     sync::Mutex::new(None);
 static G_LAST_MITM_REQUEST_ID: sync::Mutex<u64> = sync::Mutex::new(0);
 static G_DEBUG_LOG: sync::Mutex<alloc::string::String> = sync::Mutex::new(alloc::string::String::new());
+static G_IS_LOGGING_ENABLED: AtomicBool = AtomicBool::new(false);
 
 const STATUS_ON_FLAG: &str = "status_on";
 
 pub fn log_debug(msg: &str) {
+    if !G_IS_LOGGING_ENABLED.load(Ordering::SeqCst) {
+        return;
+    }
     let mut log = G_DEBUG_LOG.lock();
     if log.len() + msg.len() > 16384 {
         let new_start = log.len() / 2;
@@ -76,6 +80,18 @@ pub fn log_debug(msg: &str) {
 
 pub fn get_debug_log() -> alloc::string::String {
     G_DEBUG_LOG.lock().clone()
+}
+
+pub fn clear_debug_log() {
+    G_DEBUG_LOG.lock().clear();
+}
+
+pub fn get_logging_status() -> bool {
+    G_IS_LOGGING_ENABLED.load(Ordering::SeqCst)
+}
+
+pub fn set_logging_status(status: bool) {
+    G_IS_LOGGING_ENABLED.store(status, Ordering::SeqCst);
 }
 
 pub fn get_last_mitm_request_id() -> u64 {

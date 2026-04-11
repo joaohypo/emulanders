@@ -22,6 +22,9 @@ ipc_sf_define_interface_trait! {
         is_application_id_intercepted [8, version::VersionInterval::all()]: (application_id: ncm::ProgramId) => (is_intercepted: bool) (is_intercepted: bool);
         get_last_mitm_request_id [9, version::VersionInterval::all()]: () => (id: u64) (id: u64);
         get_debug_log [10, version::VersionInterval::all()]: (out_log: sf::OutMapAliasBuffer<u8>) => () ();
+        get_logging_status [11, version::VersionInterval::all()]: () => (status: bool) (status: bool);
+        set_logging_status [12, version::VersionInterval::all()]: (status: bool) => () ();
+        clear_debug_log [13, version::VersionInterval::all()]: () => () ();
     }
 }
 
@@ -89,6 +92,20 @@ impl IEmulationServiceServer for EmulationServer {
 
     fn get_debug_log(&mut self, mut out_log: sf::OutMapAliasBuffer<u8>) -> Result<()> {
         out_log.set_string(emu::get_debug_log());
+        Ok(())
+    }
+
+    fn get_logging_status(&mut self) -> Result<bool> {
+        Ok(emu::get_logging_status())
+    }
+
+    fn set_logging_status(&mut self, status: bool) -> Result<()> {
+        emu::set_logging_status(status);
+        Ok(())
+    }
+
+    fn clear_debug_log(&mut self) -> Result<()> {
+        emu::clear_debug_log();
         Ok(())
     }
 }

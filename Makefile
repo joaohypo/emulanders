@@ -32,6 +32,7 @@ dist: sysmodule overlay
 	@mkdir -p $(CURDIR)/SdOut/switch/.overlays
 	@cp $(CURDIR)/overlay/emulanders.ovl $(CURDIR)/SdOut/switch/.overlays/emulanders.ovl
 	@mkdir -p $(CURDIR)/SdOut/emulanders/overlay
+	@mkdir -p $(CURDIR)/SdOut/emulanders/figures
 	@cp -r $(CURDIR)/overlay/lang $(CURDIR)/SdOut/emulanders/overlay/
 	# @zip -r $(CURDIR)/emulanders.zip SdOut 
 	@echo "Output created at $(CURDIR)/SdOut"
@@ -45,6 +46,7 @@ dist-dev: sysmodule-dev overlay
 	@mkdir -p $(CURDIR)/SdOut/switch/.overlays
 	@cp $(CURDIR)/overlay/emulanders.ovl $(CURDIR)/SdOut/switch/.overlays/emulanders.ovl
 	@mkdir -p $(CURDIR)/SdOut/emulanders/overlay
+	@mkdir -p $(CURDIR)/SdOut/emulanders/figures
 	@cp -r $(CURDIR)/overlay/lang $(CURDIR)/SdOut/emulanders/overlay/
 	@echo "Output (dev) created at $(CURDIR)/SdOut"
 

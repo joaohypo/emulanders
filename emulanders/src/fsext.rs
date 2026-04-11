@@ -14,11 +14,11 @@ pub fn exists_file(path: impl AsRef<str>) -> bool {
 pub const BASE_DIR: &'static str = "sdmc:/emulanders";
 
 pub const FLAGS_DIR: &'static str = "sdmc:/emulanders/flags";
-pub const SKYLANDER_DIR: &'static str = "sdmc:/emulanders/skylanders";
+pub const SKYLANDER_DIR: &'static str = "sdmc:/emulanders/figures";
 
 #[inline(always)]
 pub fn make_flag_path(name: &str) -> String {
-    format!("{}/{}.flag", FLAGS_DIR, name)
+    alloc::format!("{}/{}.flag", FLAGS_DIR, name)
 }
 
 pub fn has_flag(name: &str) -> bool {

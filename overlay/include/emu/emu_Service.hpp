@@ -59,5 +59,9 @@ namespace emu {
 
     Result GetLastMitmRequestId(u64 *out_id);
     Result GetDebugLog(char *out_log, size_t log_size);
+    
+    bool GetLoggingStatus();
+    void SetLoggingStatus(bool status);
+    void ClearDebugLog();
 
 }

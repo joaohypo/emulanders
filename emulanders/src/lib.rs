@@ -5,7 +5,6 @@ extern crate nx;
 
 extern crate static_assertions;
 
-#[macro_use]
 extern crate alloc;
 extern crate paste;
 

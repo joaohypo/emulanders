@@ -42,9 +42,9 @@ You will need the following files from a compiled release:
 ### The SD Card Layout
 Emulanders uses the `sdmc:/emulanders/` directory at the root of your SD card.
 
-1. **`sdmc:/emulanders/skylanders/` (Your Figures)**
-   Place your raw Skylander `.dump` or `.bin` files here. You can organize them into subfolders (e.g., by Element or Game).
-   *Example:* `sd:/emulanders/skylanders/Magic/Spyro.dump`
+1. **`sdmc:/emulanders/figures/` (Your Skylanders)**
+   Place your raw Skylander `.dump` or `.bin` files here. Emulanders natively supports reading files from deep subfolders, allowing you to organize your collection (e.g., by Element or Game).
+   *Example:* `sd:/emulanders/figures/Imaginators/Senseis/King_Pen.dump`
 
 2. **`sdmc:/emulanders/flags/` (State Persistence)**
    This folder is automatically managed by the sysmodule. It contains files like `status_on.flag`. If you enable emulation in the Tesla menu, this flag is created so that Emulanders remembers to stay ON even after you reboot your Switch.
@@ -57,9 +57,21 @@ To use Emulanders in-game:
 1. Open the Tesla menu (usually **L + D-Pad Down + Right Stick Click**).
 2. Select **emulanders**.
 3. **Turn Emulation ON** (if it isn't already).
-4. Navigate to your `skylanders` folder and select a figure.
+4. Navigate to your `View Figures Folder` and select a figure.
 5. The overlay will show `>> ACTIVE` next to the chosen figure. The sysmodule will automatically fire the `TagMounted` NFC state machine event, and the game will spawn your character!
 6. To switch characters, simply open the menu and select a different one. The sysmodule handles the `Deactivate` and `Activate` events seamlessly.
+
+---
+
+## 🐛 Troubleshooting & Debug Logging
+If a specific `.dump` file fails to read or the game acts unexpectedly, you can capture a live debug log to help with troubleshooting:
+
+1. Open the Emulanders Tesla Overlay and go to **Logs Manager**.
+2. Toggle **Debug Logging** to `On`. *(Note: This is off by default to save RAM and CPU).*
+3. Perform the actions in-game that cause the bug (e.g., load the broken figure).
+4. Go back to the **Logs Manager** and select **Extract to SD**.
+5. The sysmodule will write the memory buffer to your SD card at `sdmc:/emulanders/debug_log_dump.txt`.
+6. Please attach this `.txt` file when opening an Issue on GitHub!
 
 ---
 

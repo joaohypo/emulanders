@@ -97,4 +97,18 @@ namespace emu {
         );
     }
 
+    bool GetLoggingStatus() {
+        bool status = false;
+        serviceDispatchOut(&g_EmulandersService, 11, status);
+        return status;
+    }
+
+    void SetLoggingStatus(bool status) {
+        serviceDispatchIn(&g_EmulandersService, 12, status);
+    }
+
+    void ClearDebugLog() {
+        serviceDispatch(&g_EmulandersService, 13);
+    }
+
 }
