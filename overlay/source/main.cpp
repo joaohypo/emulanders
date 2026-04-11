@@ -17,7 +17,6 @@ namespace {
     constexpr auto ActionKeyDisableEmulation = HidNpadButton_L;
     constexpr auto ActionKeyActivateItem = HidNpadButton_A;
     constexpr auto ActionKeyToggleFavorite = HidNpadButton_Y;
-    constexpr auto ActionKeyToogleConnectVirtualSkylander = HidNpadButton_StickR;
     constexpr auto ActionKeyResetActiveVirtualSkylander = HidNpadButton_X;
     
     inline std::string GetActionKeyGlyph(const u64 action_key) {
@@ -76,10 +75,27 @@ namespace {
     std::string g_SkylanderDirectory = "sdmc:/emulanders/figures";
     emu::Version g_Version;
     std::string g_ActiveSkylanderPath;
+    ui::PngImage g_ActiveSkylanderImage;
     std::vector<std::string> g_Favorites;
+
+    constexpr u32 IconMargin = 5;
+
+    inline u32 GetIconMaxWidth() {
+        return (tsl::cfg::LayerWidth / 2) - 2 * IconMargin;
+    }
+
+    constexpr u32 IconMaxHeight = 100 - 2 * IconMargin;
 
     inline bool IsActiveSkylanderValid() {
         return !g_ActiveSkylanderPath.empty();
+    }
+
+    inline std::string GetPathWithoutExtension(const std::string &path) {
+        auto idx = path.find_last_of('.');
+        if(idx != std::string::npos) {
+            return path.substr(0, idx);
+        }
+        return path;
     }
 
     inline std::string MakeVersionString() {
@@ -141,6 +157,11 @@ namespace {
         char active_skylander_path_str[FS_MAX_PATH] = {};
         emu::GetActiveVirtualSkylander(active_skylander_path_str, sizeof(active_skylander_path_str));
         g_ActiveSkylanderPath.assign(active_skylander_path_str);
+        if(!g_ActiveSkylanderPath.empty()) {
+            g_ActiveSkylanderImage.Load(GetPathWithoutExtension(g_ActiveSkylanderPath) + ".png", GetIconMaxWidth(), IconMaxHeight);
+        } else {
+            g_ActiveSkylanderImage.Reset();
+        }
     }
 
     inline void SetActiveVirtualSkylander(const std::string &path) {
@@ -325,6 +346,58 @@ class SkylanderListElement: public GuiListElement {
         }
 };
 
+class SkylanderIcons: public tsl::elm::Element {
+    private:
+        ui::PngImage cur_skylander_image;
+        std::string current_path;
+
+    public:
+        static constexpr float ErrorTextFontSize = 15;
+
+        void SetCurrentSkylanderPath(const std::string &path) {
+            if(this->current_path == path) {
+                return;
+            }
+            this->current_path = path;
+
+            if(path.empty()) {
+                this->cur_skylander_image.Reset();
+                return;
+            }
+            
+            if(path.ends_with(".bin") || path.ends_with(".dump")) {
+                this->cur_skylander_image.Load(GetPathWithoutExtension(path) + ".png", GetIconMaxWidth(), IconMaxHeight);
+            } else {
+                this->cur_skylander_image.Reset();
+            }
+        }
+
+    private:
+        void DrawIcon(tsl::gfx::Renderer* renderer, const s32 x, const s32 y, const s32 w, const s32 h, const ui::PngImage &image) {
+            const auto img_buf = image.GetRGBABuffer();
+            if(img_buf != nullptr) {
+                renderer->drawBitmap(x + IconMargin / 2 + w / 2 - image.GetWidth() / 2, y + IconMargin, image.GetWidth(), image.GetHeight(), img_buf);
+            }
+            else {
+                renderer->drawString(image.GetErrorText().c_str(), false, x + IconMargin, y + h / 2, ErrorTextFontSize, renderer->a(tsl::style::color::ColorText));
+            }
+        }
+
+        void DrawCustom(tsl::gfx::Renderer* renderer, const s32 x, const s32 y, const s32 w, const s32 h) {
+            renderer->drawRect(x + w / 2 - 1, y, 1, h - IconMargin, this->a(tsl::style::color::ColorText));
+            this->DrawIcon(renderer, x, y, w / 2, h, g_ActiveSkylanderImage);
+            this->DrawIcon(renderer, x + w / 2, y, w / 2, h, this->cur_skylander_image);
+        }
+
+        virtual void draw(tsl::gfx::Renderer* renderer) override {
+            renderer->enableScissoring(ELEMENT_BOUNDS(this));
+            this->DrawCustom(renderer, ELEMENT_BOUNDS(this));
+            renderer->disableScissoring();
+        }
+
+        virtual void layout(u16 parentX, u16 parentY, u16 parentWidth, u16 parentHeight) override {}
+};
+
 class CustomList: public tsl::elm::List {
     private:
         tsl::elm::Element* custom_initial_focus{nullptr};
@@ -490,6 +563,7 @@ class SkylanderGui : public tsl::Gui {
         ui::elm::SmallListItem *skylander_header;
         ui::elm::SmallListItem *status_header;
         tsl::elm::List *top_list;
+        SkylanderIcons *skylander_icons;
         CustomList *bottom_list;
         std::vector<GuiListElement*> gui_elements;
 
@@ -503,6 +577,9 @@ class SkylanderGui : public tsl::Gui {
             this->root_frame->setTopSection(this->top_list);
             this->bottom_list = new CustomList();
             this->root_frame->setBottomSection(this->bottom_list);
+
+            this->skylander_icons = new SkylanderIcons();
+            this->top_list->addItem(this->skylander_icons, IconMaxHeight + 2 * IconMargin);
 
             if(!IsInitializationOk()) {
                 return this->root_frame;
@@ -631,6 +708,12 @@ class SkylanderGui : public tsl::Gui {
             const auto is_intercepted = emu::IsCurrentApplicationIdIntercepted();
 
             this->game_header->setColoredValue(is_intercepted ? "Yes"_tr : "No"_tr, is_intercepted ? tsl::style::color::ColorHighlight : ui::style::color::ColorWarning);
+
+            if(auto skylander_item = dynamic_cast<GuiListElement*>(getFocusedElement())) {
+                this->skylander_icons->SetCurrentSkylanderPath(skylander_item->GetPath());
+            } else {
+                this->skylander_icons->SetCurrentSkylanderPath("");
+            }
 
             const auto has_active_skylander = !g_ActiveSkylanderPath.empty();
 
