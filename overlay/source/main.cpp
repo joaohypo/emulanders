@@ -137,22 +137,6 @@ namespace {
         }
     }
 
-    void ToggleActiveVirtualSkylanderStatus() {
-        switch(emu::GetActiveVirtualSkylanderStatus()) {
-            case emu::VirtualSkylanderStatus::Connected: {
-                emu::SetActiveVirtualSkylanderStatus(emu::VirtualSkylanderStatus::Disconnected);
-                break;
-            }
-            case emu::VirtualSkylanderStatus::Disconnected: {
-                emu::SetActiveVirtualSkylanderStatus(emu::VirtualSkylanderStatus::Connected);
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-    }
-
     void LoadActiveSkylander() {
         char active_skylander_path_str[FS_MAX_PATH] = {};
         emu::GetActiveVirtualSkylander(active_skylander_path_str, sizeof(active_skylander_path_str));
@@ -395,39 +379,48 @@ class SkylanderGuiLogView : public tsl::Gui {
         }
 };
 
+class LogsToggleElement: public ActionListElement {
+    public:
+        LogsToggleElement() : ActionListElement("DebugLogging"_tr, "") {
+            this->SetActionListener([&] (auto&) {
+                bool current = emu::GetLoggingStatus();
+                emu::SetLoggingStatus(!current);
+                this->Update();
+            });
+            this->Update();
+        }
+
+        void Update() override {
+            bool is_logging = emu::GetLoggingStatus();
+            this->setColoredValue(is_logging ? "On"_tr : "Off"_tr, is_logging ? tsl::style::color::ColorHighlight : ui::style::color::ColorWarning);
+        }
+};
+
 class SkylanderGuiLogsMenu : public tsl::Gui {
     private:
         ui::elm::DoubleSectionOverlayFrame *root_frame;
-        ui::elm::SmallToggleListItem *logging_toggle_item;
+        LogsToggleElement *logging_toggle_item;
         tsl::elm::List *top_list;
         CustomList *bottom_list;
 
     public:
         virtual tsl::elm::Element* createUI() override {
-            this->root_frame = new ui::elm::DoubleSectionOverlayFrame("Logs Manager", MakeVersionString(), ui::SectionsLayout::same, true);
+            this->root_frame = new ui::elm::DoubleSectionOverlayFrame("LogsManager"_tr, MakeVersionString(), ui::SectionsLayout::same, true);
             this->top_list = new tsl::elm::List();
             this->root_frame->setTopSection(this->top_list);
             this->bottom_list = new CustomList();
             this->root_frame->setBottomSection(this->bottom_list);
 
-            this->logging_toggle_item = new ui::elm::SmallToggleListItem("Debug Logging", false, "On", "Off");
-            this->logging_toggle_item->setClickListener([&](u64 keys) {
-                if(keys & ActionKeyActivateItem) {
-                    bool current = emu::GetLoggingStatus();
-                    emu::SetLoggingStatus(!current);
-                    return true;
-                }
-                return false;
-            });
-            this->top_list->addItem(this->logging_toggle_item);
+            this->logging_toggle_item = new LogsToggleElement();
+            this->bottom_list->addItem(this->logging_toggle_item);
 
-            auto btn_view = new ActionListElement("View RAM Log", GetIconGlyph(Icon::Help));
+            auto btn_view = new ActionListElement("ViewRAMLog"_tr, "");
             btn_view->SetActionListener([&](auto&) {
                 tsl::changeTo<SkylanderGuiLogView>();
             });
             this->bottom_list->addItem(btn_view);
 
-            auto btn_extract = new ActionListElement("Extract to SD", "");
+            auto btn_extract = new ActionListElement("ExtractToSD"_tr, "");
             btn_extract->SetActionListener([&](auto&) {
                 char* log_data = new char[16384]();
                 emu::GetDebugLog(log_data, 16384);
@@ -446,7 +439,7 @@ class SkylanderGuiLogsMenu : public tsl::Gui {
             });
             this->bottom_list->addItem(btn_extract);
 
-            auto btn_clear = new ActionListElement("Clear RAM Log", GetIconGlyph(Icon::Reset));
+            auto btn_clear = new ActionListElement("ClearRAMLog"_tr, "");
             btn_clear->SetActionListener([&](auto&) {
                 emu::ClearDebugLog();
                 tsl::goBack();
@@ -458,8 +451,7 @@ class SkylanderGuiLogsMenu : public tsl::Gui {
         }
 
         virtual void update() override {
-            bool is_logging = emu::GetLoggingStatus();
-            this->logging_toggle_item->setState(is_logging);
+            this->logging_toggle_item->Update();
             tsl::Gui::update();
         }
 };
@@ -467,14 +459,12 @@ class SkylanderGuiLogsMenu : public tsl::Gui {
 class SkylanderGuiHelp : public tsl::Gui {
     public:
         virtual tsl::elm::Element* createUI() override {
-            auto root_frame = new ui::elm::DoubleSectionOverlayFrame("Help", MakeVersionString(), ui::SectionsLayout::big_top, false);
+            auto root_frame = new ui::elm::DoubleSectionOverlayFrame("Help"_tr, MakeVersionString(), ui::SectionsLayout::big_top, false);
             auto top_list = new tsl::elm::List();
             root_frame->setTopSection(top_list);
 
-            top_list->addItem(new ui::elm::SmallListItem("Help", GetActionKeyGlyph(ActionKeyShowHelp)));
-            top_list->addItem(new ui::elm::SmallListItem("Enable Emulation", GetActionKeyGlyph(ActionKeyEnableEmulation)));
-            top_list->addItem(new ui::elm::SmallListItem("Disable Emulation", GetActionKeyGlyph(ActionKeyDisableEmulation)));
-            top_list->addItem(new ui::elm::SmallListItem("Toggle Skylander Connection", GetActionKeyGlyph(ActionKeyToogleConnectVirtualSkylander)));
+            top_list->addItem(new ui::elm::SmallListItem("EnableEmulation"_tr, GetActionKeyGlyph(ActionKeyEnableEmulation)));
+            top_list->addItem(new ui::elm::SmallListItem("DisableEmulation"_tr, GetActionKeyGlyph(ActionKeyDisableEmulation)));
             top_list->addItem(new ui::elm::SmallListItem("SelectSkylanderFolder"_tr, GetActionKeyGlyph(ActionKeyActivateItem)));
             top_list->addItem(new ui::elm::SmallListItem("ToggleFavorite"_tr, GetActionKeyGlyph(ActionKeyToggleFavorite)));
             top_list->addItem(new ui::elm::SmallListItem("ClearActiveSkylander"_tr, GetActionKeyGlyph(ActionKeyResetActiveVirtualSkylander)));
@@ -587,7 +577,7 @@ class SkylanderGui : public tsl::Gui {
             });
             this->top_list->addItem(this->emulation_toggle_item);
 
-            this->game_header = new ui::elm::SmallListItem("CurrentGameIntercepted"_tr);
+            this->game_header = new ui::elm::SmallListItem("InterceptingGame"_tr);
             this->top_list->addItem(this->game_header);
 
             this->skylander_header = new ui::elm::SmallListItem("");
