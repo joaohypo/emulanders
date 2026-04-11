@@ -27,12 +27,15 @@ jobs:
         sudo -n apt-get upgrade -y git build-essential zip
 
     - name: Prepare Rust
-      uses: dtolnay/rust-toolchain@nightly
-      with:
-        components: rust-src
+      run: |
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain nightly
+        export PATH="$HOME/.cargo/bin:$PATH"
+        rustup component add rust-src --toolchain nightly
 
     - name: Prepare cargo-nx
-      run: cargo install cargo-nx --git https://github.com/aarch64-switch-rs/cargo-nx
+      run: |
+        export PATH="$HOME/.cargo/bin:$PATH"
+        cargo install cargo-nx --git https://github.com/aarch64-switch-rs/cargo-nx
 
     - name: Checkout latest libnx commit
       run: |
@@ -44,7 +47,9 @@ jobs:
         make install -j$(nproc)
 
     - name: Build Project
-      run: make dist -j$(nproc)
+      run: |
+        export PATH="$HOME/.cargo/bin:$PATH"
+        make dist -j$(nproc)
 
     - name: Package Output
       run: |
