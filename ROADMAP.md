@@ -21,5 +21,6 @@ Manage multiple progression paths for the same figure without external tools:
 ---
 
 ### 💡 Future Ideas
+- **Auto-Dismount Timer (PoC):** Implement a dedicated background thread in the Rust sysmodule to automatically unmount the active Skylander after a set duration (e.g., 60 seconds). Since the game constantly polls the virtual portal with IPC read requests while a figure is active, an auto-dismount feature would significantly reduce CPU overhead and keep the IPC debug logs clean.
 - **Web Dashboard:** A local web interface to manage the figures folder over the network.
 - **Automatic ID Identification:** Identify the Skylander's identity from raw dump bytes to display their real name in the UI.
