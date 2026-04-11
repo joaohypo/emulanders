@@ -1,160 +1,116 @@
 {
     "strings": [
         {
-            "key": "UpngInvalidFile",
-            "value": "잘못된 파일"
-        },
-        {
-            "key": "UpngUnsupportedRgbPng",
-            "value": "RGB 형식 PNG는 지원되지 않습니다."
-        },
-        {
-            "key": "UpngUpscaleUnsupported",
-            "value": "업스케일링이 허용되지 않습니다."
-        },
-        {
-            "key": "UpngImageTooLarge",
-            "value": "이미지가 너무 큽니다."
-        },
-        {
-            "key": "UpngImageNotFound",
-            "value": "이미지를 찾을 수 없습니다."
-        },
-        {
-            "key": "UpngNotPngImage",
-            "value": "이미지가 PNG가 아닙니다."
-        },
-        {
-            "key": "UpngMalformedPng",
-            "value": "PNG 형식이 잘못되었습니다."
-        },
-        {
-            "key": "UpngUnsupportedPng",
-            "value": "이 PNG는 지원되지 않습니다."
-        },
-        {
-            "key": "UpngUnsupportedInterlacing",
-            "value": "이미지 인터레이스가 지원되지 않습니다."
-        },
-        {
-            "key": "UpngUnsupportedColorFormat",
-            "value": "이미지 색상 형식은 지원되지 않습니다."
-        },
-        {
-            "key": "UpngInvalidParameter",
-            "value": "잘못된 매개변수입니다."
-        },
-        {
-            "key": "EmuiiboNotPresent",
-            "value": "emuiibo가 없는 것 같습니다..."
-        },
-        {
-            "key": "EmuiiboServiceError",
-            "value": "An error ocurred accessing emuiibo:"
-        },
-        {
             "key": "OtherServiceError",
-            "value": "An error ocurred accessing services:"
-        },
-        {
-            "key": "Help",
-            "value": "도움말"
-        },
-        {
-            "key": "EnableEmulation",
-            "value": "에뮬레이션 활성화"
-        },
-        {
-            "key": "DisableEmulation",
-            "value": "에뮬레이션 비활성화"
-        },
-        {
-            "key": "ToogleConnectVirtualAmiibo",
-            "value": "가상 amiibo 연결/연결 해제"
-        },
-        {
-            "key": "SelectFolderVirtualAmiibo",
-            "value": "폴더/가상 amiibo 선택"
-        },
-        {
-            "key": "AddFavorite",
-            "value": "즐겨찾기에 추가"
-        },
-        {
-            "key": "RemoveFavorite",
-            "value": "즐겨찾기에서 제거"
-        },
-        {
-            "key": "ResetActiveVirtualAmiibo",
-            "value": "활성 가상 amiibo 재설정"
+            "value": "An error occurred accessing services:"
         },
         {
             "key": "EmulationStatus",
-            "value": "에뮬레이션 상태"
+            "value": "Emulation status"
         },
         {
             "key": "On",
-            "value": "켬"
+            "value": "On"
         },
         {
             "key": "Off",
-            "value": "끔"
+            "value": "Off"
         },
         {
             "key": "CurrentGameIntercepted",
-            "value": "현재 게임은"
-        },
-        {
-            "key": "AvailableVirtualAmiibos",
-            "value": "사용 가능한 amibo"
+            "value": "Current game is"
         },
         {
             "key": "Intercepted",
-            "value": "차단됨"
+            "value": "intercepted"
         },
         {
             "key": "NotIntercepted",
-            "value": "차단되지 않음"
-        },
-        {
-            "key": "NoActiveVirtualAmiibo",
-            "value": "활성화된 가상 amiibo가 없음"
+            "value": "not intercepted"
         },
         {
             "key": "Connected",
-            "value": "연결됨"
+            "value": "connected"
         },
         {
             "key": "Disconnected",
-            "value": "연결 해제됨"
-        },
-        {
-            "key": "ViewVirtualAmiibos",
-            "value": "가상 amiibo 보기"
+            "value": "disconnected"
         },
         {
             "key": "ViewFavorites",
-            "value": "즐겨찾기 보기"
+            "value": "View favorites"
         },
         {
-            "key": "SelectedArea",
-            "value": "선택한 지역"
+            "key": "Help",
+            "value": "Help"
         },
         {
-            "key": "NoVirtualAmiiboAreas",
-            "value": "이 가상 amiibo에는 지역이 없습니다."
+            "key": "DebugLogging",
+            "value": "Debug Logging"
         },
         {
-            "key": "EnableRandomUuid",
-            "value": "무작위 UUID 활성화"
+            "key": "ViewRAMLog",
+            "value": "View RAM Log"
         },
         {
-            "key": "DisableRandomUuid",
-            "value": "무작위 UUID 활성화"
+            "key": "ExtractToSD",
+            "value": "Extract to SD"
         },
         {
-            "key": "RandomUuid",
-            "value": "무작위 UUID"
+            "key": "ClearRAMLog",
+            "value": "Clear RAM Log"
+        },
+        {
+            "key": "EnableEmulation",
+            "value": "Enable emulation"
+        },
+        {
+            "key": "DisableEmulation",
+            "value": "Disable emulation"
+        },
+        {
+            "key": "ToggleSkylanderConnection",
+            "value": "Toggle Skylander connection"
+        },
+        {
+            "key": "SelectSkylanderFolder",
+            "value": "Select Skylander/folder"
+        },
+        {
+            "key": "AddFavorite",
+            "value": "Add to favorites"
+        },
+        {
+            "key": "RemoveFavorite",
+            "value": "Remove from favorites"
+        },
+        {
+            "key": "ClearActiveSkylander",
+            "value": "Clear active Skylander"
+        },
+        {
+            "key": "LogsManager",
+            "value": "Logs Manager"
+        },
+        {
+            "key": "ViewFiguresFolder",
+            "value": "View Figures Folder"
+        },
+        {
+            "key": "AvailableSkylanders",
+            "value": "Available Skylanders in"
+        },
+        {
+            "key": "NoActiveFigure",
+            "value": "No active figure"
+        },
+        {
+            "key": "SkylanderLoaded",
+            "value": "Skylander loaded (1024 bytes)"
+        },
+        {
+            "key": "SkylanderLabel",
+            "value": "Skylander:"
         }
     ]
 }

@@ -1,160 +1,116 @@
 {
     "strings": [
         {
-            "key": "UpngInvalidFile",
-            "value": "Archivo PNG inválido"
-        },
-        {
-            "key": "UpngUnsupportedRgbPng",
-            "value": "No se soportan imágenes PNG de formato RGB."
-        },
-        {
-            "key": "UpngUpscaleUnsupported",
-            "value": "No se permite escalar la imagen."
-        },
-        {
-            "key": "UpngImageTooLarge",
-            "value": "La imagen es demasiado grande."
-        },
-        {
-            "key": "UpngImageNotFound",
-            "value": "Imagen no encontrada."
-        },
-        {
-            "key": "UpngNotPngImage",
-            "value": "La imagen no es un PNG."
-        },
-        {
-            "key": "UpngMalformedPng",
-            "value": "La imagen PNG es inválida."
-        },
-        {
-            "key": "UpngUnsupportedPng",
-            "value": "No se soporta este archivo PNG."
-        },
-        {
-            "key": "UpngUnsupportedInterlacing",
-            "value": "No se soportan imagénes entrelazadas."
-        },
-        {
-            "key": "UpngUnsupportedColorFormat",
-            "value": "No se soporta el formato de color de esta imagen."
-        },
-        {
-            "key": "UpngInvalidParameter",
-            "value": "Parámetro incorrecto."
-        },
-        {
-            "key": "EmuiiboNotPresent",
-            "value": "emuiibo no parece estar presente."
-        },
-        {
-            "key": "EmuiiboServiceError",
-            "value": "An error ocurred accessing emuiibo:"
-        },
-        {
             "key": "OtherServiceError",
-            "value": "An error ocurred accessing services:"
-        },
-        {
-            "key": "Help",
-            "value": "Ayuda"
-        },
-        {
-            "key": "EnableEmulation",
-            "value": "Activar emulación"
-        },
-        {
-            "key": "DisableEmulation",
-            "value": "Desactivar emulación"
-        },
-        {
-            "key": "ToogleConnectVirtualAmiibo",
-            "value": "Conectar/Desconectar amiibo virtual"
-        },
-        {
-            "key": "SelectFolderVirtualAmiibo",
-            "value": "Selecionar carpeta/amiibo virtual"
-        },
-        {
-            "key": "AddFavorite",
-            "value": "Añadir a favoritos"
-        },
-        {
-            "key": "RemoveFavorite",
-            "value": "Quitar de favoritos"
-        },
-        {
-            "key": "ResetActiveVirtualAmiibo",
-            "value": "Restablecer amiibo virtual activo"
+            "value": "An error occurred accessing services:"
         },
         {
             "key": "EmulationStatus",
-            "value": "Estado de la emulación"
+            "value": "Emulation status"
         },
         {
             "key": "On",
-            "value": "activa"
+            "value": "On"
         },
         {
             "key": "Off",
-            "value": "inactiva"
+            "value": "Off"
         },
         {
             "key": "CurrentGameIntercepted",
-            "value": "El juego actual"
-        },
-        {
-            "key": "AvailableVirtualAmiibos",
-            "value": "Amiibos disponibles en"
+            "value": "Current game is"
         },
         {
             "key": "Intercepted",
-            "value": "está siendo interceptado"
+            "value": "intercepted"
         },
         {
             "key": "NotIntercepted",
-            "value": "no está siendo interceptado"
-        },
-        {
-            "key": "NoActiveVirtualAmiibo",
-            "value": "No hay ningún amiibo virtual activo"
+            "value": "not intercepted"
         },
         {
             "key": "Connected",
-            "value": "conectado"
+            "value": "connected"
         },
         {
             "key": "Disconnected",
-            "value": "desconectado"
-        },
-        {
-            "key": "ViewVirtualAmiibos",
-            "value": "Ver amiibos virtuales"
+            "value": "disconnected"
         },
         {
             "key": "ViewFavorites",
-            "value": "Ver favoritos"
+            "value": "View favorites"
         },
         {
-            "key": "SelectedArea",
-            "value": "Area seleccionada"
+            "key": "Help",
+            "value": "Help"
         },
         {
-            "key": "NoVirtualAmiiboAreas",
-            "value": "Este amiibo virtual no tiene áreas."
+            "key": "DebugLogging",
+            "value": "Debug Logging"
         },
         {
-            "key": "EnableRandomUuid",
-            "value": "Activar UUID aleatoria"
+            "key": "ViewRAMLog",
+            "value": "View RAM Log"
         },
         {
-            "key": "DisableRandomUuid",
-            "value": "Desactivar UUID aleatoria"
+            "key": "ExtractToSD",
+            "value": "Extract to SD"
         },
         {
-            "key": "RandomUuid",
-            "value": "UUID aleatoria"
+            "key": "ClearRAMLog",
+            "value": "Clear RAM Log"
+        },
+        {
+            "key": "EnableEmulation",
+            "value": "Enable emulation"
+        },
+        {
+            "key": "DisableEmulation",
+            "value": "Disable emulation"
+        },
+        {
+            "key": "ToggleSkylanderConnection",
+            "value": "Toggle Skylander connection"
+        },
+        {
+            "key": "SelectSkylanderFolder",
+            "value": "Select Skylander/folder"
+        },
+        {
+            "key": "AddFavorite",
+            "value": "Add to favorites"
+        },
+        {
+            "key": "RemoveFavorite",
+            "value": "Remove from favorites"
+        },
+        {
+            "key": "ClearActiveSkylander",
+            "value": "Clear active Skylander"
+        },
+        {
+            "key": "LogsManager",
+            "value": "Logs Manager"
+        },
+        {
+            "key": "ViewFiguresFolder",
+            "value": "View Figures Folder"
+        },
+        {
+            "key": "AvailableSkylanders",
+            "value": "Available Skylanders in"
+        },
+        {
+            "key": "NoActiveFigure",
+            "value": "No active figure"
+        },
+        {
+            "key": "SkylanderLoaded",
+            "value": "Skylander loaded (1024 bytes)"
+        },
+        {
+            "key": "SkylanderLabel",
+            "value": "Skylander:"
         }
     ]
 }

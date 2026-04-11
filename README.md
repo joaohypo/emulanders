@@ -83,6 +83,28 @@ With these requirements satisfied, simply clone this repo and hit `make` or `mak
 
 ---
 
+## ❤️ Credits & Acknowledgments
+
+**Emulanders was originally born from the incredible work of XorTroll and the Emuiibo project.**
+While Emulanders has been completely refactored to intercept the `nfc:mf:u` service for Skylanders (Mifare) instead of `nfp` (Amiibos), this project would not have been possible without the foundational sysmodule hooking and UI logic laid by Emuiibo.
+
+Special thanks to the original **Emuiibo** contributors and the **nfp-mitm** project:
+- *XorTroll, Subv, ogniK, averne, spx01, SciresM*
+- *AD2076* and *AmonRaNet* for their work on the original Tesla overlay.
+
+Special thanks to the open-source libraries and knowledge bases that made this possible:
+- [**Switchbrew**](https://switchbrew.org/): For extensive documentation on Switch IPC services (`nfc:mf:u`).
+- [**nx (aarch64-switch-rs)**](https://github.com/aarch64-switch-rs/nx): The Rust bindings used to build the safe, native sysmodule.
+- [**libtesla / nx-ovlloader**](https://github.com/WerWolv/libtesla): The C++ UI framework used to power the overlay.
+- [**SkylandersNFC GitHub**](https://github.com/skylandersNFC): For providing an invaluable knowledge base, tools, and documentation regarding Skylanders NFC formats and structure.
+
+And a massive thank you to the entire **Skylanders community** for their continuous effort in building tools, creating video tutorials, and keeping the magic of the game alive!
+
+---
+
 ## 📜 License
 
 Emulanders is licensed under the same terms as the original Emuiibo project (GPLv2/GPLv3) where applicable. See the `LICENSE` file for more details.
+
+### License Exemption (Inherited from Emuiibo)
+- The Ryujinx project/team is exempt from GPLv2 licensing, and may make use of this code licensing it under their current license.

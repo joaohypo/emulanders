@@ -1,92 +1,8 @@
 {
     "strings": [
         {
-            "key": "UpngInvalidFile",
-            "value": "Bad file"
-        },
-        {
-            "key": "UpngUnsupportedRgbPng",
-            "value": "RGB format PNGs are not supported."
-        },
-        {
-            "key": "UpngUpscaleUnsupported",
-            "value": "Upscaling not allowed."
-        },
-        {
-            "key": "UpngImageTooLarge",
-            "value": "Image is too large."
-        },
-        {
-            "key": "UpngImageNotFound",
-            "value": "Image not found."
-        },
-        {
-            "key": "UpngNotPngImage",
-            "value": "Image is not a PNG."
-        },
-        {
-            "key": "UpngMalformedPng",
-            "value": "PNG malformed."
-        },
-        {
-            "key": "UpngUnsupportedPng",
-            "value": "This PNG not supported."
-        },
-        {
-            "key": "UpngUnsupportedInterlacing",
-            "value": "Image interlacing is not supported."
-        },
-        {
-            "key": "UpngUnsupportedColorFormat",
-            "value": "Image color format is not supported."
-        },
-        {
-            "key": "UpngInvalidParameter",
-            "value": "Invalid parameter."
-        },
-        {
-            "key": "EmuiiboNotPresent",
-            "value": "emulanders doesn't seem to be present."
-        },
-        {
-            "key": "EmuiiboServiceError",
-            "value": "An error ocurred accessing emuiibo:"
-        },
-        {
             "key": "OtherServiceError",
-            "value": "An error ocurred accessing services:"
-        },
-        {
-            "key": "Help",
-            "value": "Help"
-        },
-        {
-            "key": "EnableEmulation",
-            "value": "Enable emulation"
-        },
-        {
-            "key": "DisableEmulation",
-            "value": "Disable emulation"
-        },
-        {
-            "key": "ToogleConnectVirtualAmiibo",
-            "value": "Connect/Disconnect virtual tag"
-        },
-        {
-            "key": "SelectFolderVirtualAmiibo",
-            "value": "Select folder/virtual tag"
-        },
-        {
-            "key": "AddFavorite",
-            "value": "Add to favorites"
-        },
-        {
-            "key": "RemoveFavorite",
-            "value": "Remove from favorites"
-        },
-        {
-            "key": "ResetActiveVirtualAmiibo",
-            "value": "Reset active virtual tag"
+            "value": "An error occurred accessing services:"
         },
         {
             "key": "EmulationStatus",
@@ -94,19 +10,15 @@
         },
         {
             "key": "On",
-            "value": "on"
+            "value": "On"
         },
         {
             "key": "Off",
-            "value": "off"
+            "value": "Off"
         },
         {
             "key": "CurrentGameIntercepted",
             "value": "Current game is"
-        },
-        {
-            "key": "AvailableVirtualAmiibos",
-            "value": "Figures available in"
         },
         {
             "key": "Intercepted",
@@ -117,10 +29,6 @@
             "value": "not intercepted"
         },
         {
-            "key": "NoActiveVirtualAmiibo",
-            "value": "No active figure"
-        },
-        {
             "key": "Connected",
             "value": "connected"
         },
@@ -129,40 +37,80 @@
             "value": "disconnected"
         },
         {
-            "key": "ViewVirtualAmiibos",
-            "value": "View virtual amiibos"
-        },
-        {
-            "key": "ViewSkylanders",
-            "value": "View Skylanders (Imaginators)"
-        },
-        {
             "key": "ViewFavorites",
             "value": "View favorites"
         },
         {
-            "key": "SelectedArea",
-            "value": "Selected area"
+            "key": "Help",
+            "value": "Help"
         },
         {
-            "key": "NoVirtualAmiiboAreas",
-            "value": "This virtual amiibo has no areas."
+            "key": "DebugLogging",
+            "value": "Debug Logging"
         },
         {
-            "key": "EnableRandomUuid",
-            "value": "Enable random UUID"
+            "key": "ViewRAMLog",
+            "value": "View RAM Log"
         },
         {
-            "key": "DisableRandomUuid",
-            "value": "Disable random UUID"
+            "key": "ExtractToSD",
+            "value": "Extract to SD"
         },
         {
-            "key": "RandomUuid",
-            "value": "Random UUID"
+            "key": "ClearRAMLog",
+            "value": "Clear RAM Log"
         },
         {
-            "key": "ActivityMonitor",
-            "value": "Activity Monitor"
+            "key": "EnableEmulation",
+            "value": "Enable emulation"
+        },
+        {
+            "key": "DisableEmulation",
+            "value": "Disable emulation"
+        },
+        {
+            "key": "ToggleSkylanderConnection",
+            "value": "Toggle Skylander connection"
+        },
+        {
+            "key": "SelectSkylanderFolder",
+            "value": "Select Skylander/folder"
+        },
+        {
+            "key": "AddFavorite",
+            "value": "Add to favorites"
+        },
+        {
+            "key": "RemoveFavorite",
+            "value": "Remove from favorites"
+        },
+        {
+            "key": "ClearActiveSkylander",
+            "value": "Clear active Skylander"
+        },
+        {
+            "key": "LogsManager",
+            "value": "Logs Manager"
+        },
+        {
+            "key": "ViewFiguresFolder",
+            "value": "View Figures Folder"
+        },
+        {
+            "key": "AvailableSkylanders",
+            "value": "Available Skylanders in"
+        },
+        {
+            "key": "NoActiveFigure",
+            "value": "No active figure"
+        },
+        {
+            "key": "SkylanderLoaded",
+            "value": "Skylander loaded (1024 bytes)"
+        },
+        {
+            "key": "SkylanderLabel",
+            "value": "Skylander:"
         }
     ]
 }

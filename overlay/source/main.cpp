@@ -575,7 +575,7 @@ class SkylanderGui : public tsl::Gui {
                     }
                 }
 
-                this->bottom_list->addItem(new ui::elm::CustomCategoryHeader("Available Skylanders in '" + GetPathFileName(this->base_path) + "': " + std::to_string(skylander_count), true, true), 0, 0);
+                this->bottom_list->addItem(new ui::elm::CustomCategoryHeader("AvailableSkylanders"_tr + " '" + GetPathFileName(this->base_path) + "': " + std::to_string(skylander_count), true, true), 0, 0);
             }
 
             this->emulation_toggle_item = new ui::elm::SmallToggleListItem("EmulationStatus"_tr + " " + GetActionKeyGlyph(ActionKeyDisableEmulation) + " " + GetActionKeyGlyph(ActionKeyEnableEmulation), false, "On"_tr, "Off"_tr);
@@ -657,11 +657,11 @@ class SkylanderGui : public tsl::Gui {
             const auto has_active_skylander = !g_ActiveSkylanderPath.empty();
 
             if(has_active_skylander) {
-                this->skylander_header->setText("Skylander: " + GetPathFileName(g_ActiveSkylanderPath));
-                this->status_header->setText("Skylander loaded (1024 bytes)");
+                this->skylander_header->setText("SkylanderLabel"_tr + " " + GetPathFileName(g_ActiveSkylanderPath));
+                this->status_header->setText("SkylanderLoaded"_tr);
             }
             else {
-                this->skylander_header->setText("No active figure");
+                this->skylander_header->setText("NoActiveFigure"_tr);
                 this->status_header->setText("");
             }
 
@@ -683,7 +683,7 @@ class SkylanderGui : public tsl::Gui {
         }
 
         ActionListElement* createLogsMenuElement() {
-            auto item = new ActionListElement("Logs Manager", GetIconGlyph(Icon::Help));
+            auto item = new ActionListElement("LogsManager"_tr, GetIconGlyph(Icon::Help));
             item->SetActionListener([&](auto&) {
                 tsl::changeTo<SkylanderGuiLogsMenu>();
             });
@@ -691,7 +691,7 @@ class SkylanderGui : public tsl::Gui {
         }
 
         ActionListElement* createResetElement() {
-            auto item = new ActionListElement("Clear Active Skylander", GetIconGlyph(Icon::Reset));
+            auto item = new ActionListElement("ClearActiveSkylander"_tr, GetIconGlyph(Icon::Reset));
             item->SetActionListener([&](auto&) {
                 ResetActiveVirtualSkylander();
                 update();
@@ -708,7 +708,7 @@ class SkylanderGui : public tsl::Gui {
         }
 
         VirtualListElement* createSkylandersElement() {
-            auto item = new VirtualListElement("View Figures Folder");
+            auto item = new VirtualListElement("ViewFiguresFolder"_tr);
             item->SetActionListener([&] (auto&) {
                 tsl::changeTo<SkylanderGui>(Kind::Folder, g_SkylanderDirectory);
                 static bool is_first_time = true;
