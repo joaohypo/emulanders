@@ -1,14 +1,14 @@
 
-name: Build emuiibo
+name: Build emulanders
 
 on:
   push:
     paths:
-      - 'emuiibo/**'
+      - 'emulanders/**'
       - 'overlay/**'
 
 jobs:
-  emuiibo:
+  emulanders:
     runs-on: ubuntu-latest
     container: devkitpro/devkita64:latest
 
@@ -46,7 +46,7 @@ jobs:
         make install -j$(nproc)
 
     - name: Build
-      run: make emuiibo -j$(nproc)
+      run: make dist -j$(nproc)
 
     - name: Upload
       uses: actions/upload-artifact@v3

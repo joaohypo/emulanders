@@ -18,7 +18,7 @@
         },
         {
             "key": "InterceptingGame",
-            "value": "Interceptando Jogo"
+            "value": "Intercepting Game"
         },
         {
             "key": "Intercepted",
@@ -62,11 +62,11 @@
         },
         {
             "key": "EnableEmulation",
-            "value": "Ativar Emulacao"
+            "value": "Enable Emulation"
         },
         {
             "key": "DisableEmulation",
-            "value": "Desativar Emulacao"
+            "value": "Disable Emulation"
         },
         {
             "key": "SelectSkylanderFolder",
@@ -102,15 +102,15 @@
         },
         {
             "key": "ToggleFavorite",
-            "value": "Favoritar/Desfavoritar"
+            "value": "Toggle Favorite"
         },
         {
             "key": "Yes",
-            "value": "Sim"
+            "value": "Yes"
         },
         {
             "key": "No",
-            "value": "Nao"
+            "value": "No"
         }
     ]
 }

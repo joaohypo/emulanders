@@ -39,8 +39,8 @@ include $(DEVKITPRO)/libnx/switch_rules
 #---------------------------------------------------------------------------------
 APP_TITLE	:= 	emulanders
 VER_MAJOR	:=	1
-VER_MINOR	:=	1
-VER_MICRO	:=	3
+VER_MINOR	:=	0
+VER_MICRO	:=	0
 APP_VERSION :=	$(VER_MAJOR).$(VER_MINOR).$(VER_MICRO)
 TARGET		:=	$(APP_TITLE)
 BUILD		:=	build
