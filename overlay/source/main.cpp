@@ -590,9 +590,7 @@ class SkylanderGui : public tsl::Gui {
             this->skylander_icons = new SkylanderIcons();
             this->top_list->addItem(this->skylander_icons, IconMaxHeight + 2 * IconMargin);
 
-            auto legend = new ui::elm::SmallListItem("FigureLegend"_tr, "");
-            legend->setTextSize(15);
-            this->top_list->addItem(legend);
+            this->top_list->addItem(new ui::elm::CustomCategoryHeader("FigureLegend"_tr, false, true));
 
             if(!IsInitializationOk()) {
                 return this->root_frame;
