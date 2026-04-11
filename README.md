@@ -57,13 +57,14 @@ To use Emulanders in-game:
 1. Open the Tesla menu (usually **L + D-Pad Down + Right Stick Click**).
 2. Select **emulanders**.
 3. **Turn Emulation ON** (if it isn't already).
-4. Navigate to your `View Figures Folder` and select a figure.
-5. The overlay will show `>> ACTIVE` next to the chosen figure. The sysmodule will automatically fire the `TagMounted` NFC state machine event, and the game will spawn your character!
-6. To switch characters, simply open the menu and select a different one. The sysmodule handles the `Deactivate` and `Activate` events seamlessly.
+4. Navigate to **View Figures Folder** and select a Skylander figure (`.dump` or `.bin`).
+5. The overlay will show `>> ACTIVE` next to the figure. The sysmodule will fire the NFC `TagFound` event, and the game will spawn your character!
+6. To switch characters, simply select a different figure. Emulanders handles the hot-swap state machine automatically.
+7. **Pro Tip:** Once the game has finished reading your figure (and the character is fully loaded), it is recommended to use the **Clear Active Skylander** option. While keeping a figure "mounted" is harmless, removing it prevents unnecessary background IPC processing and keeps your **Debug Log** clean if you happen to have logging enabled.
 
 ---
 
-## 🐛 Troubleshooting & Debug Logging
+## 📂 Directory Structure & Persistence
 If a specific `.dump` file fails to read or the game acts unexpectedly, you can capture a live debug log to help with troubleshooting:
 
 1. Open the Emulanders Tesla Overlay and go to **Logs Manager**.
