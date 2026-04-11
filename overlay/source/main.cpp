@@ -601,10 +601,6 @@ class SkylanderGui : public tsl::Gui {
                     tsl::changeTo<SkylanderGuiHelp>();
                     return true;
                 }
-                if(keys & ActionKeyToogleConnectVirtualSkylander) {
-                    ToggleActiveVirtualSkylanderStatus();
-                    return true;
-                }
                 if(keys & ActionKeyEnableEmulation) {
                     emu::SetEmulationStatus(emu::EmulationStatus::On);
                     return true;
