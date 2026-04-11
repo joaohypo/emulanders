@@ -407,6 +407,30 @@ class SkylanderIcons: public tsl::elm::Element {
         virtual void layout(u16 parentX, u16 parentY, u16 parentWidth, u16 parentHeight) override {}
 };
 
+class SkylanderLegend: public tsl::elm::Element {
+    public:
+        virtual void draw(tsl::gfx::Renderer* renderer) override {
+            const auto x = this->getX();
+            const auto y = this->getY();
+            const auto w = this->getWidth();
+
+            const u32 fontSize = 15;
+            
+            std::string leftText = "LegendLeft"_tr;
+            std::string rightText = "LegendRight"_tr;
+
+            auto [lw, lh] = renderer->drawString(leftText.c_str(), false, 0, 0, fontSize, tsl::style::color::ColorTransparent);
+            auto [rw, rh] = renderer->drawString(rightText.c_str(), false, 0, 0, fontSize, tsl::style::color::ColorTransparent);
+
+            renderer->drawString(leftText.c_str(), false, x + (w / 4) - (lw / 2), y + 20, fontSize, renderer->a(tsl::style::color::ColorText));
+            renderer->drawString(rightText.c_str(), false, x + (3 * w / 4) - (rw / 2), y + 20, fontSize, renderer->a(tsl::style::color::ColorText));
+        }
+
+        virtual void layout(u16 parentX, u16 parentY, u16 parentWidth, u16 parentHeight) override {
+            this->setBoundaries(this->getX(), this->getY(), this->getWidth(), 30);
+        }
+};
+
 class CustomList: public tsl::elm::List {
     private:
         tsl::elm::Element* custom_initial_focus{nullptr};
@@ -590,7 +614,7 @@ class SkylanderGui : public tsl::Gui {
             this->skylander_icons = new SkylanderIcons();
             this->top_list->addItem(this->skylander_icons, IconMaxHeight + 2 * IconMargin);
 
-            this->top_list->addItem(new ui::elm::CustomCategoryHeader("FigureLegend"_tr, false, true));
+            this->top_list->addItem(new SkylanderLegend());
 
             if(!IsInitializationOk()) {
                 return this->root_frame;

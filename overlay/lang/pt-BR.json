@@ -125,10 +125,6 @@
             "value": "Nenhuma figura"
         },
         {
-            "key": "FigureLegend",
-            "value": "Esq: Ativo / Dir: Cursor"
-        },
-        {
             "key": "UpngInvalidFile",
             "value": "Arquivo invalido"
         },
@@ -171,6 +167,14 @@
         {
             "key": "UpngInvalidParameter",
             "value": "Parametro invalido"
+        },
+        {
+            "key": "LegendLeft",
+            "value": "Esq: Ativo"
+        },
+        {
+            "key": "LegendRight",
+            "value": "Dir: Cursor"
         }
     ]
 }

@@ -125,10 +125,6 @@
             "value": "No figure"
         },
         {
-            "key": "FigureLegend",
-            "value": "Left: Active / Right: Hovered"
-        },
-        {
             "key": "UpngInvalidFile",
             "value": "Invalid file"
         },
@@ -171,6 +167,14 @@
         {
             "key": "UpngInvalidParameter",
             "value": "Invalid parameter"
+        },
+        {
+            "key": "LegendLeft",
+            "value": "Left: Active"
+        },
+        {
+            "key": "LegendRight",
+            "value": "Right: Cursor"
         }
     ]
 }
