@@ -57,6 +57,5 @@ emulanders-clean:
 	@rm -rf $(CURDIR)/SdOut
 	@cd emulanders && cargo clean
 	@$(MAKE) clean -C overlay/
-
-emulandgen-clean:
+n:
 	@cd emulandgen && mvn clean
