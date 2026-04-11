@@ -22,100 +22,96 @@ For the current development status and future plans, please see the [Project Roa
 ### The Technical Breakthrough
 Unlike standard Nintendo Amiibos that use NTAG formats and communicate via the `nfp` (Nintendo Figurine Platform) service, Skylanders portals and characters utilize NXP Mifare Classic 1K tags. *Imaginators* completely bypasses the standard Amiibo parser stack and communicates directly with the low-level **`nfc:mf:u`** (Mifare User) IPC service.
 
-Emulanders functions as a protocol bridge for the `nfc:mf:u` interface. It provides a virtualized data path that remains fully compliant with the system's official communication standards, allowing the game engine to retrieve character information from local digital backups on the SD card. This ensures a seamless and stable experience while accessing your archival collection.
-
-### Heritage & Credits
-*Emulanders was originally born from the incredible work of XorTroll and the Emuiibo project.*
-While Emulanders has been completely refactored to facilitate the `nfc:mf:u` service for Skylanders (Mifare) instead of `nfp` (Amiibos), this project would not have been possible without the foundation laid by Emuiibo.
-
-Special thanks to the open-source libraries and documentation that made this possible:
-- [**Switchbrew**](https://switchbrew.org/): For extensive documentation on Switch IPC services (`nfc:mf:u`).
-- [**nx (aarch64-switch-rs)**](https://github.com/aarch64-switch-rs/nx): The Rust bindings used to build the safe, native sysmodule.
-- [**libtesla / nx-ovlloader**](https://github.com/WerWolv/libtesla): The C++ UI framework used to power the overlay.
+Emulanders functions as a protocol bridge for the `nfc:mf:u` interface. It provides a virtualized data path that remains fully compliant with the system's official communication standards, allowing the game engine to retrieve character information from local digital backups on the SD card.
 
 ---
 
-### 🤝 Parallel Operation with Amiibo Utilities
-Emulanders is designed to work harmoniously alongside other NFC utilities, including Amiibo emulators like **Emuiibo**. 
-- **Distinct Service Domains:** While Amiibo utilities typically focus on the `nfp` (Amiibo) service stack, Emulanders exclusively provides a dedicated data path for the `nfc:mf:u` (Mifare) stack.
-- **Architectural Harmony:** Because these systems operate on entirely different logical interfaces, they do not compete for system resources or IPC handles.
-This allows for the simultaneous management of a diverse digital figurine collection without the need for manual module swapping.
+## 🚀 Core Features
+
+- **Virtualized Mifare Bridge:** Full emulation of the `nfc:mf:u` protocol used by Skylanders figurines and portals.
+- **Real-time Hot-swapping:** Change characters instantly via the Tesla Overlay without leaving the game.
+- **Visual Identification:** Support for `.png` preview images to easily identify figures in the menu.
+- **State Persistence:** Remembers your emulation status (ON/OFF) and active figure across console reboots.
+- **Harmony with Amiibo:** Designed to run alongside Amiibo emulators (like Emuiibo) without service conflicts.
+- **Optimized Performance:** RAM-based circular log buffer and on-demand image loading to preserve system resources.
 
 ---
 
 ## 📂 Installation & Directory Structure
 
 You will need the following files from a compiled release:
-- **Sysmodule**: `sd:/atmosphere/contents/<TitleID>/exefs.nsp`
+- **Sysmodule**: `sd:/atmosphere/contents/420000000000E311/exefs.nsp`
 - **Tesla Overlay**: `sd:/switch/.overlays/emulanders.ovl`
 
 ### The SD Card Layout
 Emulanders uses the `sdmc:/emulanders/` directory at the root of your SD card.
 
 1. **`sdmc:/emulanders/figures/` (Your Skylanders)**
-   Place your raw Skylander `.dump` or `.bin` files here. Although **Skylanders Imaginators** is the only title in the franchise available on the Nintendo Switch, you can still organize your collection into subfolders by Element or Series for easier navigation.
+   Place your raw Skylander `.dump` or `.bin` files here. Although **Skylanders Imaginators** is the only title in the franchise available on the Nintendo Switch, you can still organize your collection into subfolders (e.g., by Element or Series) for easier navigation.
    *Example:* `sd:/emulanders/figures/Senseis/King_Pen.dump`
 
-2. **`sdmc:/emulanders/flags/` (State Persistence)**
-   This folder is automatically managed by the sysmodule. It contains files like `status_on.flag`. If you enable emulation in the Tesla menu, this flag is created so that Emulanders remembers to stay ON even after you reboot your Switch.
+2. **`sdmc:/emulanders/overlay/lang/` (Localization)**
+   Contains JSON files for all supported languages. The overlay automatically matches your Switch's system language.
+
+3. **`sdmc:/emulanders/flags/` (State Persistence)**
+   Automatically managed folder that preserves your emulation settings across reboots.
 
 ---
 
-## 🎮 Usage (Tesla Overlay)
+## 🎮 Usage & Tips
 
 To use Emulanders in-game:
 1. Open the Tesla menu (usually **L + D-Pad Down + Right Stick Click**).
-2. Select **emulanders**.
-3. **Turn Emulation ON** (if it isn't already).
-4. Navigate to **View Figures Folder** and select a Skylander figure (`.dump` or `.bin`).
-5. The overlay will show `>> ACTIVE` next to the figure. The sysmodule will fire the NFC `TagFound` event, and the game will spawn your character!
-6. To switch characters, simply select a different figure. Emulanders handles the hot-swap state machine automatically.
-7. **Pro Tip:** Once the game has finished reading your figure (and the character is fully loaded), it is recommended to use the **Clear Active Skylander** option. While keeping a figure "mounted" is harmless, removing it prevents unnecessary background IPC processing and keeps your **Debug Log** clean if you happen to have logging enabled.
+2. Select **emulanders** and **Turn Emulation ON**.
+3. Navigate to **View Figures Folder** and select a Skylander figure.
+4. The overlay will show `>> ACTIVE`. The sysmodule will fire the `TagFound` event, and the character will spawn!
+5. **To change characters:** Select a different figure. The system handles the swap automatically.
+6. **To remove a character:** Select the active figure again or use the **Clear active Skylander** option.
+
+### 💡 Pro Tips
+- **Resource Management:** Once a character is fully loaded, it is recommended to **Clear active Skylander**. This stops high-frequency IPC polling and saves CPU/Battery.
+- **Visual Icons:** To see character portraits in the menu, place a `.png` file with the exact same name as your `.dump` file in the same folder. *(Recommended size: ~150x200px).*
+- **Swap Force Compatibility:** Skylanders Imaginators on Switch supports Swap Force figures but does **not** support the "mixing parts" mechanic. To load a Swap Force character, you only need to select a single `.dump` file (either the top or bottom half); the game will load the full character automatically.
 
 ---
 
-## 📂 Directory Structure & Persistence
-If a specific `.dump` file fails to read or the game acts unexpectedly, you can capture a live debug log to help with troubleshooting:
+## 🤝 Parallel Operation
+Emulanders is designed to work harmoniously alongside other NFC utilities, including Amiibo emulators like **Emuiibo**. 
+- **Distinct Domains:** Emuiibo handles `nfp` (Amiibo), while Emulanders handles `nfc:mf:u` (Mifare).
+- **Simultaneous Use:** You can keep both installed. They do not compete for handles, as they operate on entirely different logical interfaces.
 
-1. Open the Emulanders Tesla Overlay and go to **Logs Manager**.
-2. Toggle **Debug Logging** to `On`. *(Note: This is off by default to save RAM and CPU).*
-3. Perform the actions in-game that cause the bug (e.g., load the broken figure).
-4. Go back to the **Logs Manager** and select **Extract to SD**.
-5. The sysmodule will write the memory buffer to your SD card at `sdmc:/emulanders/debug_log_dump.txt`.
-6. Please attach this `.txt` file when opening an Issue on GitHub!
+---
+
+## 🐛 Troubleshooting & Debug Logging
+If a specific `.dump` fails or the game acts unexpectedly:
+1. Open the overlay and go to **Logs Manager**.
+2. Toggle **Debug Logging** to `On`.
+3. Reproduce the bug in-game.
+4. Select **Extract to SD** to save the log to `sdmc:/emulanders/debug_log_dump.txt`.
+5. Attach this file when opening an issue on GitHub.
 
 ---
 
 ## 🛠️ Compiling
-
-In order to compile Emulanders you need to setup [Rust for Nintendo Switch development](https://github.com/aarch64-switch-rs/setup-guide). You'll also need devkitPro (devkitA64 specifically) to compile the C++ Tesla overlay.
-
-With these requirements satisfied, simply clone this repo and hit `make` or `make dist-dev`.
+Requires [Rust for Nintendo Switch](https://github.com/aarch64-switch-rs/setup-guide) and devkitPro (devkitA64).
+Clone the repo and run `make dist` for release or `make dist-dev` for debug.
 
 ---
 
 ## ❤️ Credits & Acknowledgments
 
 **Emulanders was originally born from the incredible work of XorTroll and the Emuiibo project.**
-While Emulanders has been completely refactored to intercept the `nfc:mf:u` service for Skylanders (Mifare) instead of `nfp` (Amiibos), this project would not have been possible without the foundational sysmodule hooking and UI logic laid by Emuiibo.
+While Emulanders has been completely refactored to facilitate the `nfc:mf:u` service for Skylanders (Mifare) instead of `nfp` (Amiibos), this project would not have been possible without the foundation laid by Emuiibo.
 
-Special thanks to the original **Emuiibo** contributors and the **nfp-mitm** project:
-- *XorTroll, Subv, ogniK, averne, spx01, SciresM*
-- *AD2076* and *AmonRaNet* for their work on the original Tesla overlay.
-
-Special thanks to the open-source libraries and knowledge bases that made this possible:
-- [**Switchbrew**](https://switchbrew.org/): For extensive documentation on Switch IPC services (`nfc:mf:u`).
-- [**nx (aarch64-switch-rs)**](https://github.com/aarch64-switch-rs/nx): The Rust bindings used to build the safe, native sysmodule.
-- [**libtesla / nx-ovlloader**](https://github.com/WerWolv/libtesla): The C++ UI framework used to power the overlay.
-- [**SkylandersNFC GitHub**](https://github.com/skylandersNFC): For providing an invaluable knowledge base, tools, and documentation regarding Skylanders NFC formats and structure.
-
-And a massive thank you to the entire **Skylanders community** for their continuous effort in building tools, creating video tutorials, and keeping the magic of the game alive!
+Special thanks to:
+- **Switchbrew**: For extensive documentation on Switch IPC services.
+- **nx (aarch64-switch-rs)**: For the Rust bindings.
+- **libtesla / nx-ovlloader**: For the overlay framework.
+- **SkylandersNFC GitHub**: For invaluable knowledge on Skylanders NFC structures.
+- **The Skylanders Community**: For keeping the magic of the game alive!
 
 ---
 
 ## 📜 License
-
-Emulanders is licensed under the same terms as the original Emuiibo project (GPLv2/GPLv3) where applicable. See the `LICENSE` file for more details.
-
-### License Exemption (Inherited from Emuiibo)
-- The Ryujinx project/team is exempt from GPLv2 licensing, and may make use of this code licensing it under their current license.
+Licensed under GPLv2/GPLv3 where applicable. See the `LICENSE` file for more details.
+*Note: The Ryujinx project/team is exempt from GPLv2 licensing.*
