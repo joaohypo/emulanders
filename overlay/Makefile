@@ -38,8 +38,8 @@ include $(DEVKITPRO)/libnx/switch_rules
 #   NACP building is skipped as well.
 #---------------------------------------------------------------------------------
 APP_TITLE	:= 	emulanders
-VER_MAJOR	:=	1
-VER_MINOR	:=	0
+VER_MAJOR	:=	0
+VER_MINOR	:=	9
 VER_MICRO	:=	0
 APP_VERSION :=	$(VER_MAJOR).$(VER_MINOR).$(VER_MICRO)
 TARGET		:=	$(APP_TITLE)
