@@ -18,7 +18,7 @@
         },
         {
             "key": "InterceptingGame",
-            "value": "Intercepting Skylanders"
+            "value": "Intercepting Game"
         },
         {
             "key": "Intercepted",
@@ -62,15 +62,11 @@
         },
         {
             "key": "EnableEmulation",
-            "value": "Enable emulation"
+            "value": "Enable Emulation"
         },
         {
             "key": "DisableEmulation",
-            "value": "Disable emulation"
-        },
-        {
-            "key": "ToggleSkylanderConnection",
-            "value": "Toggle Skylander connection"
+            "value": "Disable Emulation"
         },
         {
             "key": "SelectSkylanderFolder",
@@ -106,7 +102,7 @@
         },
         {
             "key": "ToggleFavorite",
-            "value": "Toggle Favorite (Y)"
+            "value": "Toggle Favorite"
         },
         {
             "key": "Yes",

@@ -665,7 +665,7 @@ class SkylanderGui : public tsl::Gui {
         }
 
         ActionListElement* createLogsMenuElement() {
-            auto item = new ActionListElement("LogsManager"_tr, GetIconGlyph(Icon::Help));
+            auto item = new ActionListElement("LogsManager"_tr, "");
             item->SetActionListener([&](auto&) {
                 tsl::changeTo<SkylanderGuiLogsMenu>();
             });
