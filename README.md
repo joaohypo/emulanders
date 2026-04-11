@@ -45,8 +45,8 @@ You will need the following files from a compiled release:
 Emulanders uses the `sdmc:/emulanders/` directory at the root of your SD card.
 
 1. **`sdmc:/emulanders/figures/` (Your Skylanders)**
-   Place your raw Skylander `.dump` or `.bin` files here. While you can keep all your files in this root folder, it is highly recommended to organize them into subfolders (e.g., by Element or Game). This not only makes navigation easier but also helps the Tesla overlay manage system memory more efficiently as your collection grows.
-   *Example:* `sd:/emulanders/figures/Imaginators/Senseis/King_Pen.dump`
+   Place your raw Skylander `.dump` or `.bin` files here. Although **Skylanders Imaginators** is the only title in the franchise available on the Nintendo Switch, you can still organize your collection into subfolders by Element or Series for easier navigation.
+   *Example:* `sd:/emulanders/figures/Senseis/King_Pen.dump`
 
 2. **`sdmc:/emulanders/flags/` (State Persistence)**
    This folder is automatically managed by the sysmodule. It contains files like `status_on.flag`. If you enable emulation in the Tesla menu, this flag is created so that Emulanders remembers to stay ON even after you reboot your Switch.
