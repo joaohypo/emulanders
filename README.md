@@ -22,16 +22,24 @@ For the current development status and future plans, please see the [Project Roa
 ### The Technical Breakthrough
 Unlike standard Nintendo Amiibos that use NTAG formats and communicate via the `nfp` (Nintendo Figurine Platform) service, Skylanders portals and characters utilize NXP Mifare Classic 1K tags. *Imaginators* completely bypasses the standard Amiibo parser stack and communicates directly with the low-level **`nfc:mf:u`** (Mifare User) IPC service.
 
-Emulanders works by performing a Man-in-the-Middle (MitM) attack on the `nfc:mf:u` interface. It spoofs the official Switch driver, intercepts the game's low-level block read/write requests, and natively serves raw encrypted blocks from your `.dump` files on the SD card back to the game engine without causing Kernel Panics.
+Emulanders functions as a protocol bridge for the `nfc:mf:u` interface. It provides a virtualized data path that remains fully compliant with the system's official communication standards, allowing the game engine to retrieve character information from local digital backups on the SD card. This ensures a seamless and stable experience while accessing your archival collection.
 
 ### Heritage & Credits
 *Emulanders was originally born from the incredible work of XorTroll and the Emuiibo project.*
-While Emulanders has been completely refactored to intercept the `nfc:mf:u` service for Skylanders (Mifare) instead of `nfp` (Amiibos), this project would not have been possible without the foundation laid by Emuiibo.
+While Emulanders has been completely refactored to facilitate the `nfc:mf:u` service for Skylanders (Mifare) instead of `nfp` (Amiibos), this project would not have been possible without the foundation laid by Emuiibo.
 
 Special thanks to the open-source libraries and documentation that made this possible:
 - [**Switchbrew**](https://switchbrew.org/): For extensive documentation on Switch IPC services (`nfc:mf:u`).
 - [**nx (aarch64-switch-rs)**](https://github.com/aarch64-switch-rs/nx): The Rust bindings used to build the safe, native sysmodule.
 - [**libtesla / nx-ovlloader**](https://github.com/WerWolv/libtesla): The C++ UI framework used to power the overlay.
+
+---
+
+### 🤝 Parallel Operation with Amiibo Utilities
+Emulanders is designed to work harmoniously alongside other NFC utilities, including Amiibo emulators like **Emuiibo**. 
+- **Distinct Service Domains:** While Amiibo utilities typically focus on the `nfp` (Amiibo) service stack, Emulanders exclusively provides a dedicated data path for the `nfc:mf:u` (Mifare) stack.
+- **Architectural Harmony:** Because these systems operate on entirely different logical interfaces, they do not compete for system resources or IPC handles.
+This allows for the simultaneous management of a diverse digital figurine collection without the need for manual module swapping.
 
 ---
 

@@ -214,6 +214,8 @@ namespace ui {
                 this->m_scrollText = "";
                 this->m_ellipsisText = "";
                 this->m_maxWidth = 0;
+                this->m_scrollOffset = 0;
+                this->m_scrollAnimationCounter = 0;
             }
 
             /**

@@ -1,7 +1,7 @@
 [package]
 name = "emulanders"
 version = "1.0.0"
-authors = ["XorTroll", "bruna"]
+authors = ["joaohypo"]
 edition = "2024"
 
 [dependencies]
@@ -33,7 +33,7 @@ disable_device_address_space_merge = false
 is_production = true
 unqualified_approval = false
 memory_region = 2
-program_id = "0x0100000000000366"
+program_id = "0x420000000000E311"
 
 [package.metadata.nx.nsp.npdm.fs_access_control]
 flags = "0xFFFFFFFFFFFFFFFF"

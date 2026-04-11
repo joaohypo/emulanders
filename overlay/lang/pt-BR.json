@@ -94,7 +94,11 @@
         },
         {
             "key": "SkylanderLoaded",
-            "value": "Skylander carregado (1024 bytes)"
+            "value": "Skylander carregado"
+        },
+        {
+            "key": "SystemReady",
+            "value": "Sistema pronto"
         },
         {
             "key": "SkylanderLabel",

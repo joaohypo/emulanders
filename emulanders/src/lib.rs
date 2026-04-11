@@ -22,4 +22,4 @@ pub mod emu;
 
 pub mod skylander;
 
-pub use ipc::emu::{EmulationService, IEmulationServiceClient};
+pub use ipc::emu::{EmulandersService, IEmulandersServiceClient};

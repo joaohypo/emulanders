@@ -58,7 +58,7 @@ pub fn main() -> Result<()> {
     let mut manager = Manager::new()?;
     manager.register_mitm_service_server::<ipc::nfc::UserManager>()?;
     
-    manager.register_service_server::<ipc::emu::EmulationServer>()?;
+    manager.register_service_server::<ipc::emu::EmulandersServer>()?;
 
     if let Err(e) = manager.loop_process() {
         log!("Error occured running server manager loop: {:?}", e);

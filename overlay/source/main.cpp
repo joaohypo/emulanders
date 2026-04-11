@@ -18,7 +18,7 @@ namespace {
     constexpr auto ActionKeyActivateItem = HidNpadButton_A;
     constexpr auto ActionKeyToggleFavorite = HidNpadButton_Y;
     constexpr auto ActionKeyToogleConnectVirtualSkylander = HidNpadButton_StickR;
-    constexpr auto ActionKeyResetActiveVirtualSkylander = HidNpadButton_Minus;
+    constexpr auto ActionKeyResetActiveVirtualSkylander = HidNpadButton_X;
     
     inline std::string GetActionKeyGlyph(const u64 action_key) {
         for(const auto &info : tsl::impl::KEYS_INFO) {
@@ -295,8 +295,9 @@ class ActionListElement: public GuiListElement {
 class FolderListElement: public GuiListElement {
     private:
         void Update() override {
-            const std::string value = "..";
-            this->setValue(this->IsFavorite() ? GetIconGlyph(Icon::Favorite) + " " + value : value);
+            bool is_active_inside = this->ContainsActiveSkylanderPath();
+            const std::string value = is_active_inside ? ">> ACTIVE" : "..";
+            this->setValue(this->IsFavorite() ? GetIconGlyph(Icon::Favorite) + " " + value : value, !is_active_inside);
         }
     
     public:
@@ -312,11 +313,10 @@ class SkylanderListElement: public GuiListElement {
         }
 
         void Update() override {
-            std::string value = "SKYL";
-            if(!g_ActiveSkylanderPath.empty() && g_ActiveSkylanderPath == this->GetPath()) {
-                value = ">> ACTIVE";
-            }
-            this->setValue(this->IsFavorite() ? GetIconGlyph(Icon::Favorite) + " " + value : value);
+            bool is_active = !g_ActiveSkylanderPath.empty() && g_ActiveSkylanderPath == this->GetPath();
+            std::string value = is_active ? ">> ACTIVE" : "SKYL";
+            
+            this->setValue(this->IsFavorite() ? GetIconGlyph(Icon::Favorite) + " " + value : value, !is_active);
         }
 
     public:
@@ -491,6 +491,7 @@ class SkylanderGui : public tsl::Gui {
         ui::elm::SmallListItem *status_header;
         tsl::elm::List *top_list;
         CustomList *bottom_list;
+        std::vector<GuiListElement*> gui_elements;
 
     public:
         SkylanderGui(const Kind kind, const std::string &path) : kind(kind), base_path(path) {}
@@ -559,6 +560,7 @@ class SkylanderGui : public tsl::Gui {
                     }
     
                     this->bottom_list->addItem(new_item);
+                    this->gui_elements.push_back(new_item);
                     if(new_item->ContainsActiveSkylanderPath()) {
                         this->bottom_list->setCustomInitialFocus(new_item);
                     }
@@ -622,6 +624,10 @@ class SkylanderGui : public tsl::Gui {
                 return;
             }
 
+            for(auto item : this->gui_elements) {
+                item->Update();
+            }
+
             const auto is_intercepted = emu::IsCurrentApplicationIdIntercepted();
 
             this->game_header->setColoredValue(is_intercepted ? "Yes"_tr : "No"_tr, is_intercepted ? tsl::style::color::ColorHighlight : ui::style::color::ColorWarning);
@@ -634,7 +640,7 @@ class SkylanderGui : public tsl::Gui {
             }
             else {
                 this->skylander_header->setText("NoActiveFigure"_tr);
-                this->status_header->setText("");
+                this->status_header->setText("SystemReady"_tr);
             }
 
             const auto is_connected = GetActiveVirtualSkylanderStatus() == emu::VirtualSkylanderStatus::Connected;

@@ -1,6 +1,6 @@
 
 TARGET_TRIPLE := aarch64-nintendo-switch-freestanding
-PROGRAM_ID := 0100000000000366
+PROGRAM_ID := 420000000000E311
 
 .PHONY: all dev clean emulanders emulanders-dev sysmodule sysmodule-dev overlay emulandgen dist dist-dev emulanders-clean emulandgen-clean
 

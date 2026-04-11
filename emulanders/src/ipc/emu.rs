@@ -8,9 +8,9 @@ use nx::service;
 use nx::version;
 use crate::emu;
 
-ipc_sf_define_default_client_for_interface!(EmulationService);
+ipc_sf_define_default_client_for_interface!(EmulandersService);
 ipc_sf_define_interface_trait! {
-    trait EmulationService {
+    trait EmulandersService {
         get_version [0, version::VersionInterval::all()]: () => (version: emu::Version) (version: emu::Version);
         get_emulation_status [1, version::VersionInterval::all()]: () => (status: emu::EmulationStatus) (status: emu::EmulationStatus);
         set_emulation_status [2, version::VersionInterval::all()]: (status: emu::EmulationStatus) => () ();
@@ -28,9 +28,9 @@ ipc_sf_define_interface_trait! {
     }
 }
 
-pub struct EmulationServer;
+pub struct EmulandersServer;
 
-impl IEmulationServiceServer for EmulationServer {
+impl IEmulandersServiceServer for EmulandersServer {
     fn get_version(&mut self) -> Result<emu::Version> {
         log!("GetVersion -- (...)\n");
         Ok(emu::CURRENT_VERSION)
@@ -110,19 +110,19 @@ impl IEmulationServiceServer for EmulationServer {
     }
 }
 
-impl server::ISessionObject for EmulationServer {
+impl server::ISessionObject for EmulandersServer {
     fn try_handle_request_by_id(&mut self, req_id: u32, protocol: nx::ipc::CommandProtocol, server_ctx: &mut server::ServerContext) -> Option<Result<()>> {
-        <Self as IEmulationServiceServer>::try_handle_request_by_id(self, req_id, protocol, server_ctx)
+        <Self as IEmulandersServiceServer>::try_handle_request_by_id(self, req_id, protocol, server_ctx)
     }
 }
 
-impl server::IServerObject for EmulationServer {
+impl server::IServerObject for EmulandersServer {
     fn new() -> Self {
         Self
     }
 }
 
-impl server::IService for EmulationServer {
+impl server::IService for EmulandersServer {
     fn get_name() -> sm::ServiceName {
         sm::ServiceName::new("emulande")
     }
@@ -132,7 +132,7 @@ impl server::IService for EmulationServer {
     }
 }
 
-impl service::IService for EmulationService {
+impl service::IService for EmulandersService {
     fn get_name() -> sm::ServiceName {
         sm::ServiceName::new("emulande")
     }
