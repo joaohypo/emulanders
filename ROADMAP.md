@@ -1,26 +1,33 @@
 # Emulanders Project Roadmap 🚀
 
-The following points represent the planned objectives and areas of development for Emulanders.
+The following represents the ongoing and future development goals for Emulanders. These tasks are isolated objectives aimed at improving the functionality, user experience, and community reach of the project.
 
-### 🔨 The "Transparent Proxy"
-Currently, Emulanders decides whether to intercept the `nfc:mf:u` service at the moment the game starts. To allow real-time switching between a physical USB Portal and the emulator:
-- **Always-on Interception:** The sysmodule will always intercept the service call.
-- **Smart Relay:** When emulation is turned **OFF**, the sysmodule will act as a "Transparent Proxy," forwarding all game commands to the physical hardware.
-- **Seamless Handover:** When emulation is turned **ON**, it will stop relaying and serve data from the SD card.
+### 🔨 Transparent Proxy (No-Reboot Toggle)
+Implement an IPC relay mechanism where the sysmodule always intercepts the `nfc:mf:u` service. When emulation is OFF, the sysmodule acts as a "Transparent Cable," forwarding all game commands to the real physical USB Portal. This would allow switching between physical and virtual figures without restarting the game or the console.
 
-### 🔨 In-Game Management & Cloning
-Manage multiple progression paths for the same figure without external tools:
-- **File-Based Cloning:** Add a "Clone Figure" option in the Overlay to duplicate `.dump` files, allowing for separate leveling paths via the in-game "Reset" feature.
-- **Automatic Backups:** Create timestamped backups of `.dump` files before the game performs write operations.
+### 🔨 Persistent Progress (NFC Writing)
+Currently, the Mifare `write` command is a stub. The goal is to implement full write support so that character progress (experience, gold, items) is saved back to the `.dump` files on the SD card in real-time. This also opens the possibility of using the sysmodule to write data to physical tags.
 
-### 🔨 Production & Community
-- **Community Translations:** Crowdsource native translations for all supported languages in the Tesla Overlay.
-- **Panic Handling:** Implement a crash-handler to flush the RAM log to the SD card upon fatal errors.
-- **Homebrew App Store:** Prepare and submit Emulanders to the Homebrew Details and HBMenu stores for easier distribution.
+### 🔨 In-Game Figure Cloning
+Add a "Clone Figure" function directly in the Tesla Overlay. This will allow users to duplicate a `.dump` file on the SD card with a single button press, enabling multiple independent progression paths for the same character.
+
+### 🔨 Figure Discovery & Asset Downloader
+Develop a tool (or integrate logic) to parse raw dump bytes and identify the character's internal ID. By mapping these IDs to a database, the system could automatically identify figures and download/generate the appropriate `.png` visual icons for the entire collection.
+
+### 🔨 Auto-Dismount Timer (Optimization)
+Implement a background worker thread in the Rust sysmodule to automatically unmount virtual figures after a period of inactivity (e.g., 60 seconds). This would significantly reduce CPU overhead and keep debug logs clean by stopping the game's constant polling once the character is loaded.
+
+### 🔨 Production Polish & Panic Handling
+Improve the sysmodule's resilience by implementing a "Panic Hook" that flushes the RAM debug buffer to the SD card (`last_crash_log.txt`) in the event of a fatal error. This ensures that even the most elusive bugs can be diagnosed by the community.
+
+### 🔨 Community Localization
+Gather native speaker contributions to finalize high-quality translations for all supported languages in the Tesla Overlay, ensuring a polished experience for users worldwide.
+
+### 🔨 Homebrew App Store Distribution
+Prepare the project structure and metadata for official submission to the Homebrew Details and HBMenu stores, making Emulanders easily accessible to the wider Switch homebrew community.
 
 ---
 
-### 💡 Future Ideas
-- **Auto-Dismount Timer (PoC):** Implement a dedicated background thread in the Rust sysmodule to automatically unmount the active Skylander after a set duration (e.g., 60 seconds). Since the game constantly polls the virtual portal with IPC read requests while a figure is active, an auto-dismount feature would significantly reduce CPU overhead and keep the IPC debug logs clean.
-- **Web Dashboard:** A local web interface to manage the figures folder over the network.
-- **Automatic ID Identification:** Identify the Skylander's identity from raw dump bytes to display their real name in the UI.
+### 💡 Research & Experimental Ideas
+- **Web-Based Collection Manager:** A local network dashboard to manage, rename, and backup figures via a browser.
+- **Save File Editor Integration:** Basic in-game stat viewing (Level/Gold) directly within the Tesla Overlay.
