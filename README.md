@@ -87,8 +87,13 @@ The project utilizes the `sdmc:/emulanders/` directory.
 
 ## 🎮 Usage
 
-[![Usage Demonstration](https://img.youtube.com/vi/oYJi1xWd5xI/0.jpg)](https://www.youtube.com/watch?v=oYJi1xWd5xI)
-*Check out the [Usage Demonstration Video](https://www.youtube.com/watch?v=oYJi1xWd5xI) to see Emulanders in action.*
+<p align="center">
+  <a href="https://youtu.be/oYJi1xWd5xI">
+    <img src="https://img.youtube.com/vi/oYJi1xWd5xI/0.jpg" alt="Emulanders Usage Guide" width="600">
+    <br>
+    <em>Watch the Usage Demonstration on YouTube</em>
+  </a>
+</p>
 
 1. Open the Tesla menu (**L + D-Pad Down + Right Stick Click**).
 2. Select **emulanders**.
