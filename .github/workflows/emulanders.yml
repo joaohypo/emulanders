@@ -5,7 +5,7 @@ on:
     branches:
       - main
     tags:
-      - 'v*'
+      - '*'
   pull_request:
     branches:
       - main
@@ -55,14 +55,18 @@ jobs:
         make dist -j$(nproc)
 
     - name: Set Release Name
+      shell: bash
       run: |
         if [[ ${{ github.ref }} == refs/tags/* ]]; then
-          echo "RELEASE_NAME=emulanders-${{ github.ref_name }}" >> $GITHUB_ENV
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          echo "RELEASE_NAME=emulanders-${TAG_NAME}" >> $GITHUB_ENV
         else
-          echo "RELEASE_NAME=emulanders-${GITHUB_SHA::7}" >> $GITHUB_ENV
+          SHORT_SHA=$(echo ${GITHUB_SHA} | cut -c1-7)
+          echo "RELEASE_NAME=emulanders-${SHORT_SHA}" >> $GITHUB_ENV
         fi
 
     - name: Package Output
+      shell: bash
       run: |
         cd SdOut
         zip -r ../${{ env.RELEASE_NAME }}.zip *
@@ -74,7 +78,7 @@ jobs:
         path: ${{ env.RELEASE_NAME }}.zip
 
     - name: Create GitHub Release
-      if: startsWith(github.ref, 'refs/tags/v')
+      if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v2
       with:
         files: ${{ env.RELEASE_NAME }}.zip
