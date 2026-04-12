@@ -7,6 +7,9 @@
 </p>
 
 <p align="center">
+  <a title="Release" href="https://github.com/joaohypo/emulanders/releases/latest">
+    <img alt="Latest Release" src="https://img.shields.io/github/v/release/joaohypo/emulanders?label=Latest%20Release&style=for-the-badge&color=blue">
+  </a>
   <a title="Downloads" href="https://github.com/joaohypo/emulanders/releases">
     <img alt="Downloads" src="https://img.shields.io/github/downloads/joaohypo/emulanders/total?longCache=true&style=for-the-badge&label=Downloads&logoColor=fff&logo=GitHub">
   </a>
@@ -35,11 +38,19 @@ Emulanders acts as a protocol bridge for the `nfc:mf:u` interface, providing a v
 
 ---
 
-## 🚀 Features
+## 📥 Download
+
+The latest stable binaries, including the sysmodule (`exefs.nsp`) and the Tesla overlay (`emulanders.ovl`), can be found on the **[Releases Page](https://github.com/joaohypo/emulanders/releases/latest)**. 
+
+Always ensure you are using the version compatible with your current Atmosphère and Firmware setup.
+
+---
+
+## 🚀 Core Features
 
 - **Mifare Protocol Emulation:** Comprehensive implementation of the `nfc:mf:u` service stack.
 - **Hot-swapping:** Change active figures via the Tesla Overlay during gameplay.
-- **Visual Identification:** Support for `.png` preview images within the menu.
+- **Figure Identification:** Support for `.png` preview images within the menu.
 - **State Persistence:** Retains emulation state and selected figures across reboots.
 - **Tool Compatibility:** Operates in parallel with Amiibo emulators (e.g., Emuiibo) without service conflict.
 - **Resource Efficiency:** Low-overhead background processing and on-demand asset loading.
@@ -56,7 +67,11 @@ Emulanders acts as a protocol bridge for the `nfc:mf:u` interface, providing a v
 
 ## 📂 Installation
 
-### Required Files
+### Quick Start (Recommended)
+To install Emulanders, simply **extract the release archive and drag all folders** (`atmosphere`, `switch`, `emulanders`) to the root of your Switch's SD card.
+
+### Manual File Placement
+Alternatively, you can place the files manually:
 - **Sysmodule**: `sd:/atmosphere/contents/420000000000E311/exefs.nsp`
 - **Tesla Overlay**: `sd:/switch/.overlays/emulanders.ovl`
 
@@ -131,6 +146,6 @@ Emulanders is licensed under **GNU GPLv3**.
 
 By adopting **GPLv3**, we ensure that the project remains open and protected against "Tivoization" (blocking users from running modified versions on their hardware) and provides stronger patent protections. This is the State-of-the-Art standard for preserving freedom in modern console homebrew. 
 
-See the `LICENSE` file for full details.
+See the [**LICENSE**](LICENSE) file for full details.
 
 *Ryujinx project exemption: The Ryujinx team is exempt from GPLv3 licensing for this codebase.*
