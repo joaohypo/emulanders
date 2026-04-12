@@ -122,10 +122,10 @@ namespace {
         }
         else {
             std::stringstream strm;
-            strm << "emulanders v" << (int)g_Version.major << "." << (int)g_Version.minor << "." << (int)g_Version.micro;
+            strm << "emulanders " << (int)g_Version.major << "." << (int)g_Version.minor << "." << (int)g_Version.micro;
             strm << " (" << (g_Version.dev_build ? "dev" : "release") << ")";
             if(g_InitializationStatus == InitializationStatus::OkVersionMismatch) {
-                strm << "(outdated, expected v" << (int)ExpectedVersion.major << "." << (int)ExpectedVersion.minor << "." << (int)ExpectedVersion.micro << ")";
+                strm << "(outdated, expected " << (int)ExpectedVersion.major << "." << (int)ExpectedVersion.minor << "." << (int)ExpectedVersion.micro << ")";
             }
             return strm.str();
         }

@@ -54,20 +54,28 @@ jobs:
         export PATH="$HOME/.cargo/bin:$PATH"
         make dist -j$(nproc)
 
+    - name: Set Release Name
+      run: |
+        if [[ ${{ github.ref }} == refs/tags/* ]]; then
+          echo "RELEASE_NAME=emulanders-${{ github.ref_name }}" >> $GITHUB_ENV
+        else
+          echo "RELEASE_NAME=emulanders-${GITHUB_SHA::7}" >> $GITHUB_ENV
+        fi
+
     - name: Package Output
       run: |
         cd SdOut
-        zip -r ../emulanders-release.zip *
+        zip -r ../${{ env.RELEASE_NAME }}.zip *
 
     - name: Upload CI Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: emulanders-build
-        path: emulanders-release.zip
+        name: ${{ env.RELEASE_NAME }}
+        path: ${{ env.RELEASE_NAME }}.zip
 
     - name: Create GitHub Release
       if: startsWith(github.ref, 'refs/tags/v')
       uses: softprops/action-gh-release@v2
       with:
-        files: emulanders-release.zip
+        files: ${{ env.RELEASE_NAME }}.zip
         generate_release_notes: true
