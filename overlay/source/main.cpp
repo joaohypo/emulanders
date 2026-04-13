@@ -85,7 +85,7 @@ namespace {
         return (tsl::cfg::LayerWidth / 2) - 2 * IconMargin;
     }
 
-    constexpr u32 IconMaxHeight = 100 - 2 * IconMargin;
+    constexpr u32 IconMaxHeight = 275 - 2 * IconMargin;
 
     inline bool IsActiveSkylanderValid() {
         return !g_ActiveSkylanderPath.empty();
@@ -154,12 +154,63 @@ namespace {
         }
     }
 
+    std::string ResolveImagePath(const std::string &path) {
+        std::string legacy_path = GetPathWithoutExtension(path) + ".png";
+        std::string resolved_path = legacy_path;
+
+        tsl::hlp::doWithSDCardHandle([&]() {
+            FILE* f = fopen(legacy_path.c_str(), "rb");
+            if (f) {
+                fclose(f);
+                resolved_path = legacy_path;
+                return;
+            }
+            
+            f = fopen(path.c_str(), "rb");
+            if (!f) {
+                return;
+            }
+            
+            u8 buffer[64];
+            size_t read_bytes = fread(buffer, 1, 64, f);
+            fclose(f);
+            
+            if (read_bytes < 32) {
+                return;
+            }
+            
+            u32 char_id = buffer[16] | (buffer[17] << 8) | (buffer[18] << 16);
+            u16 variant_id = buffer[28] | (buffer[29] << 8);
+            
+            char asset_path[FS_MAX_PATH];
+            if (variant_id != 0) {
+                snprintf(asset_path, sizeof(asset_path), "sdmc:/emulanders/assets/%06X_%04X.png", char_id, variant_id);
+                f = fopen(asset_path, "rb");
+                if (f) {
+                    fclose(f);
+                    resolved_path = std::string(asset_path);
+                    return;
+                }
+            }
+            
+            snprintf(asset_path, sizeof(asset_path), "sdmc:/emulanders/assets/%06X.png", char_id);
+            f = fopen(asset_path, "rb");
+            if (f) {
+                fclose(f);
+                resolved_path = std::string(asset_path);
+                return;
+            }
+        });
+
+        return resolved_path;
+    }
+
     void LoadActiveSkylander() {
         char active_skylander_path_str[FS_MAX_PATH] = {};
         emu::GetActiveVirtualSkylander(active_skylander_path_str, sizeof(active_skylander_path_str));
         g_ActiveSkylanderPath.assign(active_skylander_path_str);
         if(!g_ActiveSkylanderPath.empty()) {
-            g_ActiveSkylanderImage.Load(GetPathWithoutExtension(g_ActiveSkylanderPath) + ".png", GetIconMaxWidth(), IconMaxHeight);
+            g_ActiveSkylanderImage.Load(ResolveImagePath(g_ActiveSkylanderPath), GetIconMaxWidth(), IconMaxHeight);
         } else {
             g_ActiveSkylanderImage.Reset();
         }
@@ -369,7 +420,7 @@ class SkylanderIcons: public tsl::elm::Element {
             }
             
             if(path.ends_with(".bin") || path.ends_with(".dump")) {
-                this->cur_skylander_image.Load(GetPathWithoutExtension(path) + ".png", GetIconMaxWidth(), IconMaxHeight);
+                this->cur_skylander_image.Load(ResolveImagePath(path), GetIconMaxWidth(), IconMaxHeight);
             } else {
                 this->cur_skylander_image.Reset();
                 this->is_folder = true;
@@ -408,7 +459,16 @@ class SkylanderIcons: public tsl::elm::Element {
 };
 
 class SkylanderLegend: public tsl::elm::Element {
+    private:
+        std::string current_path;
+
     public:
+        void SetCurrentSkylanderPath(const std::string &path) {
+            if(this->current_path != path) {
+                this->current_path = path;
+            }
+        }
+
         virtual void draw(tsl::gfx::Renderer* renderer) override {
             const auto x = this->getX();
             const auto y = this->getY();
@@ -416,14 +476,24 @@ class SkylanderLegend: public tsl::elm::Element {
 
             const u32 fontSize = 15;
             
-            std::string leftText = "LegendLeft"_tr;
-            std::string rightText = "LegendRight"_tr;
+            std::string leftName = g_ActiveSkylanderPath.empty() ? "NoActiveFigure"_tr : GetPathFileName(GetPathWithoutExtension(g_ActiveSkylanderPath));
+            std::string rightName = this->current_path.empty() ? "NoFigure"_tr : GetPathFileName(GetPathWithoutExtension(this->current_path));
+
+            // Truncate names if they are too long to prevent overlapping
+            if(!g_ActiveSkylanderPath.empty() && leftName.length() > 16) leftName = leftName.substr(0, 14) + "..";
+            if(!this->current_path.empty() && rightName.length() > 16) rightName = rightName.substr(0, 14) + "..";
+
+            std::string leftText = "LegendActive"_tr + ": " + leftName;
+            std::string rightText = "LegendCursor"_tr + ": " + rightName;
+
+            auto leftColor = g_ActiveSkylanderPath.empty() ? ui::style::color::ColorWarning : tsl::style::color::ColorHighlight;
+            auto rightColor = tsl::style::color::ColorText;
 
             auto [lw, lh] = renderer->drawString(leftText.c_str(), false, 0, 0, fontSize, tsl::style::color::ColorTransparent);
             auto [rw, rh] = renderer->drawString(rightText.c_str(), false, 0, 0, fontSize, tsl::style::color::ColorTransparent);
 
-            renderer->drawString(leftText.c_str(), false, x + (w / 4) - (lw / 2), y + 20, fontSize, renderer->a(tsl::style::color::ColorText));
-            renderer->drawString(rightText.c_str(), false, x + (3 * w / 4) - (rw / 2), y + 20, fontSize, renderer->a(tsl::style::color::ColorText));
+            renderer->drawString(leftText.c_str(), false, std::max((int)x, (int)(x + (w / 4) - (lw / 2))), y + 20, fontSize, renderer->a(leftColor));
+            renderer->drawString(rightText.c_str(), false, std::max((int)x + (int)(w / 2), (int)(x + (3 * w / 4) - (rw / 2))), y + 20, fontSize, renderer->a(rightColor));
         }
 
         virtual void layout(u16 parentX, u16 parentY, u16 parentWidth, u16 parentHeight) override {
@@ -511,11 +581,16 @@ class SkylanderGuiLogsMenu : public tsl::Gui {
 
     public:
         virtual tsl::elm::Element* createUI() override {
-            this->root_frame = new ui::elm::DoubleSectionOverlayFrame("LogsManager"_tr, MakeVersionString(), ui::SectionsLayout::same, true);
+            this->root_frame = new ui::elm::DoubleSectionOverlayFrame("LogsManager"_tr, MakeVersionString(), ui::SectionsLayout::big_top, true);
             this->top_list = new tsl::elm::List();
             this->root_frame->setTopSection(this->top_list);
             this->bottom_list = new CustomList();
             this->root_frame->setBottomSection(this->bottom_list);
+
+            this->top_list->addItem(new ui::elm::BigCategoryHeader("LogsWarningTitle"_tr, true));
+            this->top_list->addItem(new ui::elm::SmallListItem("LogsWarningRAM"_tr));
+            this->top_list->addItem(new ui::elm::SmallListItem("LogsWarningTrouble"_tr));
+            this->top_list->addItem(new ui::elm::SmallListItem("LogsWarningDisable"_tr));
 
             this->logging_toggle_item = new LogsToggleElement();
             this->bottom_list->addItem(this->logging_toggle_item);
@@ -593,10 +668,9 @@ class SkylanderGui : public tsl::Gui {
         ui::elm::DoubleSectionOverlayFrame *root_frame;
         ui::elm::SmallToggleListItem *emulation_toggle_item;
         ui::elm::SmallListItem *game_header;
-        ui::elm::SmallListItem *skylander_header;
-        ui::elm::SmallListItem *status_header;
         tsl::elm::List *top_list;
         SkylanderIcons *skylander_icons;
+        SkylanderLegend *skylander_legend;
         CustomList *bottom_list;
         std::vector<GuiListElement*> gui_elements;
 
@@ -604,7 +678,7 @@ class SkylanderGui : public tsl::Gui {
         SkylanderGui(const Kind kind, const std::string &path) : kind(kind), base_path(path), gui_elements(std::vector<GuiListElement*>()) {}
 
         virtual tsl::elm::Element *createUI() override {
-            this->root_frame = new ui::elm::DoubleSectionOverlayFrame("emulanders", MakeVersionString(), ui::SectionsLayout::same, true);
+            this->root_frame = new ui::elm::DoubleSectionOverlayFrame("emulanders", MakeVersionString(), ui::SectionsLayout::big_top, true);
 
             this->top_list = new tsl::elm::List();
             this->root_frame->setTopSection(this->top_list);
@@ -614,7 +688,8 @@ class SkylanderGui : public tsl::Gui {
             this->skylander_icons = new SkylanderIcons();
             this->top_list->addItem(this->skylander_icons, IconMaxHeight + 2 * IconMargin);
 
-            this->top_list->addItem(new SkylanderLegend());
+            this->skylander_legend = new SkylanderLegend();
+            this->top_list->addItem(this->skylander_legend);
 
             if(!IsInitializationOk()) {
                 return this->root_frame;
@@ -623,9 +698,9 @@ class SkylanderGui : public tsl::Gui {
             if(this->kind == Kind::Root) {
                 this->bottom_list->addItem(createSkylandersElement());
                 this->bottom_list->addItem(createFavoritesElement());
-                this->bottom_list->addItem(createLogsMenuElement());
                 this->bottom_list->addItem(createResetElement());
                 this->bottom_list->addItem(createHelpElement());
+                this->bottom_list->addItem(createLogsMenuElement());
             }
             else {
                 u32 skylander_count = 0;
@@ -694,12 +769,6 @@ class SkylanderGui : public tsl::Gui {
             this->game_header = new ui::elm::SmallListItem("InterceptingGame"_tr);
             this->top_list->addItem(this->game_header);
 
-            this->skylander_header = new ui::elm::SmallListItem("");
-            this->top_list->addItem(this->skylander_header);
-
-            this->status_header = new ui::elm::SmallListItem("");
-            this->top_list->addItem(this->status_header);
-
             this->root_frame->setClickListener([&](u64 keys) {
                 if(keys & ActionKeyShowHelp) {
                     tsl::changeTo<SkylanderGuiHelp>();
@@ -746,23 +815,11 @@ class SkylanderGui : public tsl::Gui {
 
             if(auto skylander_item = dynamic_cast<GuiListElement*>(getFocusedElement())) {
                 this->skylander_icons->SetCurrentSkylanderPath(skylander_item->GetPath());
+                this->skylander_legend->SetCurrentSkylanderPath(skylander_item->GetPath());
             } else {
                 this->skylander_icons->SetCurrentSkylanderPath("");
+                this->skylander_legend->SetCurrentSkylanderPath("");
             }
-
-            const auto has_active_skylander = !g_ActiveSkylanderPath.empty();
-
-            if(has_active_skylander) {
-                this->skylander_header->setText("SkylanderLabel"_tr + " " + GetPathFileName(g_ActiveSkylanderPath));
-                this->status_header->setText("SkylanderLoaded"_tr);
-            }
-            else {
-                this->skylander_header->setText("NoActiveFigure"_tr);
-                this->status_header->setText("SystemReady"_tr);
-            }
-
-            const auto is_connected = GetActiveVirtualSkylanderStatus() == emu::VirtualSkylanderStatus::Connected;
-            this->skylander_header->setColoredValue(is_connected ? "Connected"_tr : "Disconnected"_tr, is_connected ? tsl::style::color::ColorHighlight : ui::style::color::ColorWarning);
 
             this->emulation_toggle_item->setState(emu::GetEmulationStatus() == emu::EmulationStatus::On);
 

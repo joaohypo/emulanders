@@ -122,7 +122,7 @@
         },
         {
             "key": "NoFigure",
-            "value": "No figure"
+            "value": "No figure selected"
         },
         {
             "key": "UpngInvalidFile",
@@ -169,12 +169,28 @@
             "value": "Invalid parameter"
         },
         {
-            "key": "LegendLeft",
-            "value": "Left: Active"
+            "key": "LegendActive",
+            "value": "Active"
         },
         {
-            "key": "LegendRight",
-            "value": "Right: Cursor"
+            "key": "LegendCursor",
+            "value": "Cursor"
+        },
+        {
+            "key": "LogsWarningTitle",
+            "value": "IMPORTANT: Debug Logging"
+        },
+        {
+            "key": "LogsWarningRAM",
+            "value": "Enabling debug logs consumes system RAM."
+        },
+        {
+            "key": "LogsWarningTrouble",
+            "value": "Use only for troubleshooting purposes."
+        },
+        {
+            "key": "LogsWarningDisable",
+            "value": "Disable it for normal gameplay."
         }
     ]
 }

@@ -37,10 +37,6 @@ namespace ui {
                     const auto scale1 = (double)max_height / (double)upng_height;
                     const auto scale2 = (double)max_width / (double)upng_width;
                     const auto scale = std::min(scale1, scale2);
-                    if(scale > 1.0) {
-                        this->SetError("UpngUpscaleUnsupported"_tr);
-                        break;
-                    }
 
                     this->path = png_path;
                     this->img_buffer_width = (int)((double)upng_width * scale);

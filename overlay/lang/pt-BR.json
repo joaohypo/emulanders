@@ -122,7 +122,7 @@
         },
         {
             "key": "NoFigure",
-            "value": "Nenhuma figura"
+            "value": "Nenhuma figura selecionada"
         },
         {
             "key": "UpngInvalidFile",
@@ -169,12 +169,28 @@
             "value": "Parametro invalido"
         },
         {
-            "key": "LegendLeft",
-            "value": "Esq: Ativo"
+            "key": "LegendActive",
+            "value": "Ativo"
         },
         {
-            "key": "LegendRight",
-            "value": "Dir: Cursor"
+            "key": "LegendCursor",
+            "value": "Cursor"
+        },
+        {
+            "key": "LogsWarningTitle",
+            "value": "IMPORTANTE: Log de Depuração"
+        },
+        {
+            "key": "LogsWarningRAM",
+            "value": "Ativar logs consome memória RAM do sistema."
+        },
+        {
+            "key": "LogsWarningTrouble",
+            "value": "Use apenas para fins de diagnóstico."
+        },
+        {
+            "key": "LogsWarningDisable",
+            "value": "Desative para o uso normal do sistema."
         }
     ]
 }
