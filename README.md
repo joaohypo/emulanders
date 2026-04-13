@@ -87,14 +87,17 @@ The project utilizes the `sdmc:/emulanders/` directory.
 
 ## 🎮 Usage
 
-<p align="center">
-  <a href="https://youtu.be/oYJi1xWd5xI">
-    <img src="https://img.youtube.com/vi/oYJi1xWd5xI/0.jpg" alt="Emulanders Usage Guide" width="600">
-    <br>
-    <em>Watch the Usage Demonstration on YouTube</em>
-  </a>
-</p>
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/01174328-a540-43f4-b72f-6ff93dc2e801" autoplay="autoplay" loop="loop" muted="muted" playsinline width="480"></video>
+  <br>
+  <em><a href="https://youtu.be/oYJi1xWd5xI">Watch the full Usage Demonstration on YouTube</a></em>
+</div>
 
+### ⚠️ Important Prerequisites
+- **Sysmodule Status:** Ensure the Emulanders sysmodule is running in the background. If you use tools like **Hekate Toolbox** (homebrew app) or the **Sysmodules** overlay (Tesla/Ultrahand) to toggle background modules ON/OFF, **you must restart your console** for the changes to take effect.
+- **Enable Before Launch:** Emulation **must be set to ON** in the Emulanders Tesla menu *before* you start the game. *Skylanders: Imaginators* initializes its NFC services during the loading screen. If emulation is off when the game boots, the sysmodule will miss the initial IPC calls and will not intercept the game.
+
+### Basic Workflow
 1. Open the Tesla menu (**L + D-Pad Down + Right Stick Click**).
 2. Select **emulanders**.
 3. Set **Emulation** to **ON**.
