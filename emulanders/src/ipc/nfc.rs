@@ -115,6 +115,15 @@ pub struct UserEmulator {
     info: sm::mitm::MitmProcessInfo,
 }
 
+impl Drop for UserEmulator {
+    fn drop(&mut self) {
+        log!("[{:#X}] MifareUser::Drop (Connection closed)\n", self.info.program_id.0);
+        emu::unregister_intercepted_application_id(self.info.program_id);
+        G_MIFARE_DETECTION_ACTIVE.store(false, Ordering::SeqCst);
+        G_MIFARE_DEVICE_STATE.store(0, Ordering::SeqCst);
+    }
+}
+
 impl IMifareUserServer for UserEmulator {
     fn initialize(&mut self, _aruid: applet::AppletResourceUserId, _process_id: sf::ProcessId, _mcu_data: sf::InMapAliasBuffer<u8>) -> Result<()> {
         log!("[{:#X}] MifareUser::Initialize\n", self.info.program_id.0);
@@ -158,7 +167,7 @@ impl IMifareUserServer for UserEmulator {
         G_MIFARE_DEVICE_STATE.store(1, Ordering::SeqCst); // SearchingForTag
 
         // If a skylander is already loaded when detection starts, signal immediately
-        if emu::get_active_virtual_skylander().is_some() {
+        if emu::is_emulation_on() && emu::get_active_virtual_skylander().is_some() {
             log!("[{:#X}]   -> Skylander already loaded, signaling TagFound\n", self.info.program_id.0);
             G_MIFARE_DEVICE_STATE.store(2, Ordering::SeqCst); // TagFound (NOT TagMounted!)
             if let Some(event) = G_MIFARE_ACTIVATE_EVENT.lock().as_ref() {
@@ -203,8 +212,12 @@ impl IMifareUserServer for UserEmulator {
             let sector = block_index / 4;
             let block_in_sector = block_index % 4;
 
-            let block_data = if let Some(skylander) = skylander_guard.as_ref() {
-                skylander.get_block(sector, block_in_sector)
+            let block_data = if emu::is_emulation_on() {
+                if let Some(skylander) = skylander_guard.as_ref() {
+                    skylander.get_block(sector, block_in_sector)
+                } else {
+                    [0u8; 16]
+                }
             } else {
                 [0u8; 16]
             };
@@ -237,12 +250,14 @@ impl IMifareUserServer for UserEmulator {
         //   0x28: reserved (0x30 bytes)
         let mut info = [0u8; 0x58];
         // Fill UID from skylander dump (block 0, bytes 0-3 are the UID for Mifare Classic)
-        if let Some(skylander) = emu::get_active_virtual_skylander().as_ref() {
-            let uid = skylander.get_uid();
-            for (i, &b) in uid.iter().enumerate().take(4) {
-                info[i] = b;
+        if emu::is_emulation_on() {
+            if let Some(skylander) = emu::get_active_virtual_skylander().as_ref() {
+                let uid = skylander.get_uid();
+                for (i, &b) in uid.iter().enumerate().take(4) {
+                    info[i] = b;
+                }
+                info[10] = 4; // uuid_length = 4 bytes for Mifare Classic
             }
-            info[10] = 4; // uuid_length = 4 bytes for Mifare Classic
         }
         // Protocol = 2 (Mifare)
         info[0x20] = 0x02;
