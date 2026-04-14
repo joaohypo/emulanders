@@ -52,7 +52,7 @@ pub const IS_DEV_BUILD: bool = true;
 #[cfg(not(debug_assertions))]
 pub const IS_DEV_BUILD: bool = false;
 
-pub const CURRENT_VERSION: Version = Version::from(0, 9, 0, IS_DEV_BUILD);
+pub const CURRENT_VERSION: Version = Version::from(0, 9, 1, IS_DEV_BUILD);
 
 static G_EMULATION_STATUS: AtomicEmulationStatus = AtomicEmulationStatus::new(EmulationStatus::Off);
 static G_ACTIVE_VIRTUAL_SKYLANDER_STATUS: AtomicVirtualSkylanderStatus =

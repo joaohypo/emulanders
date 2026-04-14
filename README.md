@@ -70,6 +70,8 @@ Always ensure you are using the version compatible with your current Atmosphère
 ### Quick Start (Recommended)
 To install Emulanders, simply **extract the release archive and drag all folders** (`atmosphere`, `switch`, `emulanders`) to the root of your Switch's SD card.
 
+For figure portraits in the overlay, also download the **Assets Pack** from the same release page and extract it to the root of your SD card — the zip already contains the correct `emulanders/assets/` structure. This pack provides artwork for **every Skylander and accessory** across all generations.
+
 ### Manual File Placement
 Alternatively, you can place the files manually:
 - **Sysmodule**: `sd:/atmosphere/contents/420000000000E311/exefs.nsp`
@@ -80,15 +82,16 @@ The project utilizes the `sdmc:/emulanders/` directory.
 
 1. **`/figures/`**: Place raw `.dump` or `.bin` backups here. Subfolders are supported and recommended for organization (e.g., by Element or Series).
    *Example:* `sd:/emulanders/figures/Senseis/King_Pen.dump`
-2. **`/overlay/lang/`**: Language definition files (JSON).
-3. **`/flags/`**: System-managed files for state persistence.
+2. **`/assets/`**: *(Optional)* Shared portrait images, resolved automatically by Character ID. See **Image Resolution** below.
+3. **`/overlay/lang/`**: Language definition files (JSON).
+4. **`/flags/`**: System-managed files for state persistence.
 
 ---
 
 ## 🎮 Usage
 
 <div align="center">
-  <video src="https://github.com/user-attachments/assets/01174328-a540-43f4-b72f-6ff93dc2e801" autoplay="autoplay" loop="loop" muted="muted" playsinline width="480"></video>
+  <video src="https://github.com/user-attachments/assets/7e61b20a-e117-4c3a-9585-9310cc56cbc0" autoplay="autoplay" loop="loop" muted="muted" playsinline width="480"></video>
   <br>
   <em><a href="https://youtu.be/oYJi1xWd5xI">Watch the full Usage Demonstration on YouTube</a></em>
 </div>
@@ -101,15 +104,46 @@ The project utilizes the `sdmc:/emulanders/` directory.
 1. Open the Tesla menu (**L + D-Pad Down + Right Stick Click**).
 2. Select **emulanders**.
 3. Set **Emulation** to **ON**.
-4. Navigate to **View Figures Folder** and select a file (`.dump` or `.bin`).
-5. The `>> ACTIVE` indicator confirms the figure is mounted.
-6. **To swap:** Select a different file.
-7. **To unmount:** Select the active file again, use the **Clear active Skylander** menu option, or press the **X** button while the overlay is open.
+4. **Important:** Minimize the overlay and launch the game. It is highly recommended to only re-open the overlay once you are inside the game world, **after all initial loading screens have finished**. The game's loading process is extremely resource-intensive and may cause lag or instability in the overlay interface if used simultaneously.
+5. Navigate to **View Figures Folder** and select a file (`.dump` or `.bin`).
+6. The `>> ACTIVE` indicator confirms the figure is mounted.
+7. **To swap:** Select a different file.
+8. **To unmount:** Select the active file again, use the **Clear active Skylander** menu option, or press the **X** button while the overlay is open.
+
+### Commands
+- **Enable Emulation:** `[ZR]`
+- **Disable Emulation:** `[ZL]`
+- **Select Skylander / Folder:** `[A]`
+- **Toggle Favorite:** `[Y]`
+- **Clear active Skylander:** `[X]`
+- **Show Help:** `[+]` (Plus)
 
 ### Technical Notes
 - **Polling Overhead:** To reduce CPU usage after a character has loaded, it is recommended to unmount the figure. This suspends the high-frequency IPC polling.
-- **Visual Assets:** Portraits are displayed if a `.png` file with the identical filename exists in the same directory as the figure backup. (Target resolution: ~150x200px).
 - **Swap Force:** *Skylanders: Imaginators* on Switch provides full compatibility for Swap Force figures. However, because the game itself does not implement the "part-mixing" mechanic on this platform, you only need to select a single backup file (either the base or the top half) to load the character in its entirety.
+
+### 🖼️ Image Resolution
+
+The overlay displays a portrait for each figure using a **3-tier fallback** system. No manual configuration is required — the overlay reads the Character ID and Variant ID directly from the dump file.
+
+| Priority | Path Pattern | Example |
+|:--|:--|:--|
+| 1. **Same-name PNG** | `<figure_path_without_ext>.png` | `figures/King_Pen.png` (beside `King_Pen.dump`) |
+| 2. **Shared asset (variant)** | `assets/{CharID}_{VariantID}.png` | `assets/000259_5000.png` |
+| 3. **Shared asset (base)** | `assets/{CharID}.png` | `assets/000259.png` |
+
+**How it works:** When no same-name PNG is found, the overlay reads bytes `16-18` (Character ID) and `28-29` (Variant ID) from the `.dump` / `.bin` file, then looks for a matching image in `sd:/emulanders/assets/`.
+
+An **Assets Pack** is available as a separate download on the [Releases Page](https://github.com/joaohypo/emulanders/releases). It includes portraits for **every known Skylander figure, variant, and accessory**. To install, simply extract the zip to the **root of your SD card** — the folder structure is ready to go. Recommended image resolution: **RGBA PNG, ≤200×275px**.
+
+---
+
+## ⚠️ Known Issues
+
+### Docked Mode UI Disappearance
+In **Docked Mode**, if the Nintendo Switch's **"Adjust Screen Size"** setting is set to less than **100%**, the main Emulanders UI window may disappear when selected from the Tesla menu (though the Tesla base menu itself remains functional). This is a known system-level compositing conflict with overscan rescaling.
+
+**Workaround:** Set your Switch's **Adjust Screen Size** to **100%** (**System Settings > TV Settings > Adjust Screen Size**). If the image cuts off on your TV, adjust the "Overscan" or "Aspect Ratio" settings on your **TV itself** (e.g., set to "Just Scan" or "1:1 Pixel Mapping").
 
 ---
 
@@ -155,7 +189,7 @@ Finally, a massive thank you to the **Skylanders community** for their tireless 
 
 Emulanders is licensed under **GNU GPLv3**. 
 
-By adopting **GPLv3**, we ensure that the project remains open and protected against "Tivoization" (blocking users from running modified versions on their hardware) and provides stronger patent protections. This is the State-of-the-Art standard for preserving freedom in modern console homebrew. 
+By adopting **GPLv3**, we ensure that the project remains open and protected against "Tivoization" (blocking users from running modified versions on their hardware) and provides stronger patent protections. This is an established standard for preserving freedom in modern console homebrew. 
 
 See the [**LICENSE**](LICENSE) file for full details.
 

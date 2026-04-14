@@ -17,6 +17,7 @@ aes = { version = "0.8.4", features = ["zeroize"] }
 ctr = { version = "0.9.2", features = ["zeroize"] }
 hmac = "0.12.1"
 sha2 = { version = "0.10.9", default-features = false }
+linked_list_allocator = "=0.10.5"
 
 [package.metadata.nx.nsp.npdm]
 name = "emulanders"

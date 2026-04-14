@@ -13,8 +13,8 @@
 namespace {
 
     constexpr auto ActionKeyShowHelp = HidNpadButton_Plus;
-    constexpr auto ActionKeyEnableEmulation = HidNpadButton_R;
-    constexpr auto ActionKeyDisableEmulation = HidNpadButton_L;
+    constexpr auto ActionKeyEnableEmulation = HidNpadButton_ZR;
+    constexpr auto ActionKeyDisableEmulation = HidNpadButton_ZL;
     constexpr auto ActionKeyActivateItem = HidNpadButton_A;
     constexpr auto ActionKeyToggleFavorite = HidNpadButton_Y;
     constexpr auto ActionKeyToogleConnectVirtualSkylander = HidNpadButton_StickR;

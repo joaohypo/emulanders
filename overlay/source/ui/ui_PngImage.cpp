@@ -36,7 +36,7 @@ namespace ui {
                     const auto img_depth = bpp / bit_depth;
                     const auto scale1 = (double)max_height / (double)upng_height;
                     const auto scale2 = (double)max_width / (double)upng_width;
-                    const auto scale = std::min(scale1, scale2);
+                    const auto scale = std::min({scale1, scale2, 1.0});
 
                     this->path = png_path;
                     this->img_buffer_width = (int)((double)upng_width * scale);
