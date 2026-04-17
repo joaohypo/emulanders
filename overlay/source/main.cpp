@@ -428,25 +428,33 @@ class SkylanderIcons: public tsl::elm::Element {
         }
 
     private:
-        void DrawIcon(tsl::gfx::Renderer* renderer, const s32 x, const s32 y, const s32 w, const s32 h, const ui::PngImage &image, bool folder) {
+        void DrawIcon(tsl::gfx::Renderer* renderer, const s32 x, const s32 y, const s32 w, const s32 h, const ui::PngImage &image, bool folder, const std::string &raw_path) {
             const auto img_buf = image.GetRGBABuffer();
             if(img_buf != nullptr) {
                 renderer->drawBitmap(x + IconMargin / 2 + w / 2 - image.GetWidth() / 2, y + IconMargin, image.GetWidth(), image.GetHeight(), img_buf);
             }
             else {
                 std::string msg;
-                if (folder) msg = "FolderSelected"_tr;
-                else if (image.IsError()) msg = image.GetErrorText();
-                else if (image.GetPath().empty()) msg = "NoFigure"_tr;
+                auto text_color = ui::style::color::ColorWarning;
+
+                if (raw_path.empty()) {
+                    msg = "NoFigure"_tr;
+                } else if (folder) {
+                    msg = "FolderSelected"_tr;
+                } else {
+                    msg = GetPathFileName(GetPathWithoutExtension(raw_path));
+                    text_color = tsl::style::color::ColorHighlight;
+                }
                 
-                renderer->drawString(msg.c_str(), false, x + IconMargin, y + h / 2, ErrorTextFontSize, renderer->a(tsl::style::color::ColorText));
+                auto [tw, th] = renderer->drawString(msg.c_str(), false, 0, 0, ErrorTextFontSize, renderer->a(tsl::style::color::ColorTransparent));
+                renderer->drawString(msg.c_str(), false, x + w / 2 - tw / 2, y + h / 2, ErrorTextFontSize, renderer->a(text_color));
             }
         }
 
         void DrawCustom(tsl::gfx::Renderer* renderer, const s32 x, const s32 y, const s32 w, const s32 h) {
             renderer->drawRect(x + w / 2 - 1, y, 1, h - IconMargin, this->a(tsl::style::color::ColorText));
-            this->DrawIcon(renderer, x, y, w / 2, h, g_ActiveSkylanderImage, false);
-            this->DrawIcon(renderer, x + w / 2, y, w / 2, h, this->cur_skylander_image, this->is_folder);
+            this->DrawIcon(renderer, x, y, w / 2, h, g_ActiveSkylanderImage, false, g_ActiveSkylanderPath);
+            this->DrawIcon(renderer, x + w / 2, y, w / 2, h, this->cur_skylander_image, this->is_folder, this->current_path);
         }
 
         virtual void draw(tsl::gfx::Renderer* renderer) override {
@@ -476,18 +484,13 @@ class SkylanderLegend: public tsl::elm::Element {
 
             const u32 fontSize = 15;
             
-            std::string leftName = g_ActiveSkylanderPath.empty() ? "NoActiveFigure"_tr : GetPathFileName(GetPathWithoutExtension(g_ActiveSkylanderPath));
-            std::string rightName = this->current_path.empty() ? "NoFigure"_tr : GetPathFileName(GetPathWithoutExtension(this->current_path));
-
-            // Truncate names if they are too long to prevent overlapping
-            if(!g_ActiveSkylanderPath.empty() && leftName.length() > 16) leftName = leftName.substr(0, 14) + "..";
-            if(!this->current_path.empty() && rightName.length() > 16) rightName = rightName.substr(0, 14) + "..";
-
-            std::string leftText = "LegendActive"_tr + ": " + leftName;
-            std::string rightText = "LegendCursor"_tr + ": " + rightName;
+            std::string leftText = "LegendActive"_tr;
+            std::string rightText = "LegendCursor"_tr;
 
             auto leftColor = g_ActiveSkylanderPath.empty() ? ui::style::color::ColorWarning : tsl::style::color::ColorHighlight;
-            auto rightColor = tsl::style::color::ColorText;
+            
+            bool rightMenuIsValidDump = this->current_path.ends_with(".bin") || this->current_path.ends_with(".dump");
+            auto rightColor = rightMenuIsValidDump ? tsl::style::color::ColorHighlight : ui::style::color::ColorWarning;
 
             auto [lw, lh] = renderer->drawString(leftText.c_str(), false, 0, 0, fontSize, tsl::style::color::ColorTransparent);
             auto [rw, rh] = renderer->drawString(rightText.c_str(), false, 0, 0, fontSize, tsl::style::color::ColorTransparent);

@@ -7,7 +7,6 @@ use nx::sync;
 use atomic_enum::atomic_enum;
 
 use core::sync::atomic::{AtomicBool, Ordering};
-
 #[derive(nx::ipc::sf::Request, nx::ipc::sf::Response, Copy, Clone)]
 #[repr(C)]
 pub struct Version {
@@ -145,7 +144,6 @@ pub fn is_application_id_intercepted(application_id: ncm::ProgramId) -> bool {
     G_INTERCEPTED_APPLICATION_IDS
         .lock()
         .contains(&application_id.0)
-        && is_emulation_on()
 }
 
 pub fn get_active_virtual_skylander<'a>() -> sync::MutexGuard<'a, Option<skylander::Skylander>> {

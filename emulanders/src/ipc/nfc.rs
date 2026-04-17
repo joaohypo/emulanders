@@ -235,9 +235,61 @@ impl IMifareUserServer for UserEmulator {
         Ok(())
     }
 
-    fn write(&mut self, _handle: DeviceHandle, _in_params: sf::InMapAliasBuffer<u8>) -> Result<()> {
-        log!("[{:#X}] MifareUser::Write\n", self.info.program_id.0);
-        // Accept the write but don't persist (read-only emulation for now)
+    fn write(&mut self, _handle: DeviceHandle, in_params: sf::InMapAliasBuffer<u8>) -> Result<()> {
+        // NfcMifareWriteBlockParameter { data[0x10], block_index(u8), reserved[0x7], sector_key[0x10] } = 40 bytes
+        let param_size = 40usize;
+        let num_blocks = in_params.get_size() / param_size;
+        
+        log!("[{:#X}] MifareUser::Write (num_blocks={}, in_size={})\n",
+             self.info.program_id.0, num_blocks, in_params.get_size());
+
+        let mut skylander_guard = emu::get_active_virtual_skylander();
+        if !emu::is_emulation_on() {
+            return Ok(());
+        }
+
+        let skylander = match skylander_guard.as_mut() {
+            Some(s) => s,
+            None => return Ok(()),
+        };
+
+        for i in 0..num_blocks {
+            let param_offset = i * param_size;
+            
+            unsafe {
+                // Read the block_index from offset 16 (after the 16 byte data array)
+                let block_index = *(in_params.get_address().add(param_offset + 16) as *const u8);
+                
+                // Hex dump the first 24 bytes purely for diagnostics
+                if i == 0 {
+                    let mut hex_dump = alloc::string::String::from("Write Hex: ");
+                    let dump_size = if in_params.get_size() < 24 { in_params.get_size() } else { 24 };
+                    for j in 0..dump_size {
+                        let b = *(in_params.get_address().add(j) as *const u8);
+                        hex_dump.push_str(&alloc::format!("{:02X} ", b));
+                    }
+                    log!("{}\n", hex_dump);
+                }
+
+                log!("  Write[{}]: block={} (sector {}, block_in_sector {})\n", i, block_index, block_index / 4, block_index % 4);
+
+                let sector = block_index / 4;
+                let block_in_sector = block_index % 4;
+                let mut data_to_write = [0u8; 16];
+                
+                // Copy 16 bytes starting from offset 0
+                if in_params.get_size() >= param_offset + 16 {
+                    core::ptr::copy_nonoverlapping(
+                        in_params.get_address().add(param_offset) as *const u8,
+                        data_to_write.as_mut_ptr(),
+                        16
+                    );
+                    skylander.set_block(sector, block_in_sector, &data_to_write);
+                }
+            }
+        }
+        
+        let _ = skylander.save();
         Ok(())
     }
 

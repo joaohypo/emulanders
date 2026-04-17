@@ -90,7 +90,7 @@
         },
         {
             "key": "NoActiveFigure",
-            "value": "No active figure"
+            "value": "None Selected"
         },
         {
             "key": "SkylanderLoaded",
@@ -118,11 +118,11 @@
         },
         {
             "key": "FolderSelected",
-            "value": "Folder selected"
+            "value": "Folder"
         },
         {
             "key": "NoFigure",
-            "value": "No figure selected"
+            "value": "None Selected"
         },
         {
             "key": "UpngInvalidFile",
@@ -170,11 +170,11 @@
         },
         {
             "key": "LegendActive",
-            "value": "Active"
+            "value": "ACTIVE"
         },
         {
             "key": "LegendCursor",
-            "value": "Cursor"
+            "value": "CURSOR"
         },
         {
             "key": "LogsWarningTitle",

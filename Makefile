@@ -2,13 +2,13 @@
 TARGET_TRIPLE := aarch64-nintendo-switch-freestanding
 PROGRAM_ID := 420000000000E311
 
-.PHONY: all dev clean emulanders emulanders-dev sysmodule sysmodule-dev overlay emulandgen dist dist-dev emulanders-clean emulandgen-clean
+.PHONY: all dev clean emulanders emulanders-dev sysmodule sysmodule-dev overlay dist dist-dev emulanders-clean
 
-all: emulanders emulandgen
+all: emulanders
 
-dev: emulanders-dev emulandgen
+dev: emulanders-dev
 
-clean: emulanders-clean emulandgen-clean
+clean: emulanders-clean
 
 emulanders: sysmodule overlay dist
 
@@ -57,5 +57,3 @@ emulanders-clean:
 	@rm -rf $(CURDIR)/SdOut
 	@cd emulanders && cargo clean
 	@$(MAKE) clean -C overlay/
-n:
-	@cd emulandgen && mvn clean

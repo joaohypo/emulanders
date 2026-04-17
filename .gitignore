@@ -14,3 +14,4 @@ obj/
 SdOut/
 target/
 dev/
+build.ps1

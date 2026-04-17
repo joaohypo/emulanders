@@ -57,7 +57,6 @@ pub fn main() -> Result<()> {
 
     let mut manager = Manager::new()?;
     manager.register_mitm_service_server::<ipc::nfc::UserManager>()?;
-    
     manager.register_service_server::<ipc::emu::EmulandersServer>()?;
 
     if let Err(e) = manager.loop_process() {
@@ -69,6 +68,7 @@ pub fn main() -> Result<()> {
 
 #[panic_handler]
 fn panic_handler(_info: &panic::PanicInfo) -> ! {
-    log!("Panic! at emulanders thread '{}'\n", thread::get_current_thread_name());
+    // get_current_thread_name() usually returns a static str or implements Display in this crate structure.
+    log!("Panic! at emulanders thread\n");
     abort::abort(abort::AbortLevel::SvcBreak(), rc::ResultPanicked::make())
 }
