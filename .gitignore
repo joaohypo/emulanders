@@ -14,4 +14,7 @@ obj/
 SdOut/
 target/
 dev/
+dist/
+EmulandersPortal/romfs/
+EmulandersPortal/build/
 build.ps1

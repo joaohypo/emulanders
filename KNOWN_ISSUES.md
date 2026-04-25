@@ -17,7 +17,7 @@ This issue is caused by a system-level compositing conflict within the Nintendo 
 
 When these conditions meet, the system's overscan scaler fails to correctly compose the homebrew overlay layer, leading the OS to hide the layer to maintain system stability.
 
-### ✅ Workaround (SOTA)
+### ✅ Workaround
 To fix this, you must set your console's screen scaling to its native value:
 1. Go to **System Settings** on your Nintendo Switch.
 2. Navigate to **TV Settings** > **Adjust Screen Size**.

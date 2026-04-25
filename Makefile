@@ -10,9 +10,9 @@ dev: emulanders-dev
 
 clean: emulanders-clean
 
-emulanders: sysmodule overlay dist
+emulanders: sysmodule overlay portal dist
 
-emulanders-dev: sysmodule-dev overlay dist-dev
+emulanders-dev: sysmodule-dev overlay portal dist-dev
 
 sysmodule:
 	@cd emulanders && cargo update && cargo nx build --release
@@ -23,7 +23,10 @@ sysmodule-dev:
 overlay:
 	@$(MAKE) -C overlay/
 
-dist: sysmodule overlay
+portal:
+	@$(MAKE) -C EmulandersPortal/
+
+dist: sysmodule overlay portal
 	@rm -rf $(CURDIR)/SdOut
 	@mkdir -p $(CURDIR)/SdOut/atmosphere/contents/$(PROGRAM_ID)/flags
 	@touch $(CURDIR)/SdOut/atmosphere/contents/$(PROGRAM_ID)/flags/boot2.flag
@@ -34,10 +37,25 @@ dist: sysmodule overlay
 	@mkdir -p $(CURDIR)/SdOut/emulanders/overlay
 	@mkdir -p $(CURDIR)/SdOut/emulanders/figures
 	@cp -r $(CURDIR)/overlay/lang $(CURDIR)/SdOut/emulanders/overlay/
-	# @zip -r $(CURDIR)/emulanders.zip SdOut 
-	@echo "Output created at $(CURDIR)/SdOut"
+	@mkdir -p $(CURDIR)/SdOut/emulanders/res
+	@cp $(CURDIR)/res/logo.png $(CURDIR)/SdOut/emulanders/res/
+	@cp $(CURDIR)/res/icon_dumper.png $(CURDIR)/SdOut/emulanders/res/
+	@cp $(CURDIR)/res/icon_manager.png $(CURDIR)/SdOut/emulanders/res/
+	@cp $(CURDIR)/res/icon_editor.png $(CURDIR)/SdOut/emulanders/res/
+	@cp $(CURDIR)/res/icon_dumpdl.png $(CURDIR)/SdOut/emulanders/res/
+	@cp $(CURDIR)/res/icon_asset.png $(CURDIR)/SdOut/emulanders/res/
+	@cp $(CURDIR)/res/icon_settings.png $(CURDIR)/SdOut/emulanders/res/
+	@mkdir -p $(CURDIR)/SdOut/switch/EmulandersPortal
+	@cp $(CURDIR)/EmulandersPortal/EmulandersPortal.nro $(CURDIR)/SdOut/switch/EmulandersPortal/
+	@echo "Creating Release Zips in dist/..."
+	@mkdir -p $(CURDIR)/dist
+	@rm -f $(CURDIR)/dist/*.zip
+	@cd $(CURDIR)/SdOut && zip -rq $(CURDIR)/dist/Emulanders-Bundle-1.0.0.zip .
+	@cd $(CURDIR)/SdOut && zip -rq $(CURDIR)/dist/Emulanders-Core-1.0.0.zip atmosphere switch/.overlays emulanders
+	@cd $(CURDIR)/SdOut && zip -rq $(CURDIR)/dist/Emulanders-Portal-1.0.0.zip switch/EmulandersPortal
+	@echo "Output created at $(CURDIR)/SdOut and release bundles at $(CURDIR)/dist"
 
-dist-dev: sysmodule-dev overlay
+dist-dev: sysmodule-dev overlay portal
 	@rm -rf $(CURDIR)/SdOut
 	@mkdir -p $(CURDIR)/SdOut/atmosphere/contents/$(PROGRAM_ID)/flags
 	@touch $(CURDIR)/SdOut/atmosphere/contents/$(PROGRAM_ID)/flags/boot2.flag
@@ -48,6 +66,16 @@ dist-dev: sysmodule-dev overlay
 	@mkdir -p $(CURDIR)/SdOut/emulanders/overlay
 	@mkdir -p $(CURDIR)/SdOut/emulanders/figures
 	@cp -r $(CURDIR)/overlay/lang $(CURDIR)/SdOut/emulanders/overlay/
+	@mkdir -p $(CURDIR)/SdOut/emulanders/res
+	@cp $(CURDIR)/res/logo.png $(CURDIR)/SdOut/emulanders/res/
+	@cp $(CURDIR)/res/icon_dumper.png $(CURDIR)/SdOut/emulanders/res/
+	@cp $(CURDIR)/res/icon_manager.png $(CURDIR)/SdOut/emulanders/res/
+	@cp $(CURDIR)/res/icon_editor.png $(CURDIR)/SdOut/emulanders/res/
+	@cp $(CURDIR)/res/icon_dumpdl.png $(CURDIR)/SdOut/emulanders/res/
+	@cp $(CURDIR)/res/icon_asset.png $(CURDIR)/SdOut/emulanders/res/
+	@cp $(CURDIR)/res/icon_settings.png $(CURDIR)/SdOut/emulanders/res/
+	@mkdir -p $(CURDIR)/SdOut/switch/EmulandersPortal
+	@cp $(CURDIR)/EmulandersPortal/EmulandersPortal.nro $(CURDIR)/SdOut/switch/EmulandersPortal/
 	@echo "Output (dev) created at $(CURDIR)/SdOut"
 
 emulandgen:
@@ -57,3 +85,4 @@ emulanders-clean:
 	@rm -rf $(CURDIR)/SdOut
 	@cd emulanders && cargo clean
 	@$(MAKE) clean -C overlay/
+	@$(MAKE) clean -C EmulandersPortal/
