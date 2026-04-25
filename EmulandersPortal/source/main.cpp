@@ -90,11 +90,18 @@ enum class ClipboardAction { NONE, COPY, CUT };
 ClipboardAction g_clipboard_action = ClipboardAction::NONE;
 std::string g_clipboard_path;
 
+static bool g_show_delete_confirm = false;
+static bool g_show_blank_name_warning = false;
+static std::string g_file_to_delete = "";
+static std::atomic<bool> g_is_deleting(false);
+static std::string g_delete_target_name;
+
 struct FileInfo {
     std::string name;
     std::string path;
     bool is_dir;
     uintmax_t size;
+    GLuint tex = 0;
 };
 
 std::vector<FileInfo> g_sd_files;
@@ -168,7 +175,7 @@ void RefreshFileList(std::string path) {
     g_current_path = path;
 
     if (path != "sdmc:/emulanders/figures/")
-        g_sd_files.push_back({"..", GetParentPath(path), true, 0});
+        g_sd_files.push_back({"<- Go back 1 directory", GetParentPath(path), true, 0});
 
     if (!fs::exists(path, ec))
         fs::create_directories(path, ec);
@@ -184,27 +191,47 @@ void RefreshFileList(std::string path) {
     }
 
     std::sort(g_sd_files.begin(), g_sd_files.end(), [](const FileInfo& a, const FileInfo& b) {
-        if (a.name == "..") return true;
-        if (b.name == "..") return false;
+        if (a.name == "<- Go back 1 directory") return true;
+        if (b.name == "<- Go back 1 directory") return false;
         if (a.is_dir != b.is_dir) return a.is_dir > b.is_dir;
         return a.name < b.name;
     });
 }
 
 void RecursiveListFiles(const std::string& dir, const std::vector<std::string>& exts, std::vector<FileInfo>& out) {
-    std::error_code ec;
-    if (!fs::exists(dir, ec)) return;
-    for (const auto& entry : fs::recursive_directory_iterator(dir, ec)) {
-        if (!entry.is_regular_file(ec)) continue;
-        std::string ext = entry.path().extension().string();
-        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-        for (const auto& target : exts) {
-            if (ext == target) {
-                out.push_back({entry.path().filename().string(), entry.path().string(), false, fs::file_size(entry, ec)});
-                break;
+    std::string path = dir;
+    if (!path.empty() && path.back() != '/') path += "/";
+
+    DIR* d = opendir(path.c_str());
+    if (!d) return;
+
+    struct dirent* e;
+    while ((e = readdir(d))) {
+        if (strcmp(e->d_name, ".") == 0 || strcmp(e->d_name, "..") == 0) continue;
+
+        std::string full = path + e->d_name;
+        struct stat st;
+        if (stat(full.c_str(), &st) != 0) continue;
+
+        if (S_ISDIR(st.st_mode)) {
+            RecursiveListFiles(full, exts, out);
+        } else {
+            std::string name = e->d_name;
+            std::string ext = "";
+            size_t dot = name.find_last_of('.');
+            if (dot != std::string::npos) {
+                ext = name.substr(dot);
+                std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+            }
+            for (const auto& target : exts) {
+                if (ext == target) {
+                    out.push_back({name, full, false, (uintmax_t)st.st_size, 0});
+                    break;
+                }
             }
         }
     }
+    closedir(d);
 }
 
 std::string LookupSkylanderName(u32 char_id, u16 variant_id) {
@@ -331,6 +358,7 @@ void SetupImGuiStyle(float scale) {
     style.FrameRounding     = 6.0f * scale;
     style.PopupRounding     = 8.0f * scale;
     style.ScrollbarRounding = 4.0f * scale;
+    style.ScrollbarSize     = 0.0f;
     style.GrabRounding      = 6.0f * scale;
     style.WindowPadding     = ImVec2(0.0f, 0.0f);
     style.FramePadding      = ImVec2(16.0f * scale, 10.0f * scale);
@@ -375,7 +403,7 @@ size_t CurlWriteCallback(void* ptr, size_t size, size_t nmemb, void* userdata) {
 int CurlDownloadProgressCallback(void* p, double dltotal, double dlnow, double ultotal, double ulnow) {
     g_dl_now.store(dlnow);
     if (dltotal > 0)
-        g_progress.store((float)(dlnow / dltotal));
+        g_progress.store((float)(dlnow / dltotal) * 0.5f);
     else if (dlnow > 0)
         g_progress.store(-1.0f); // Indeterminate (chunked transfer)
     return 0;
@@ -430,8 +458,8 @@ int main(int argc, char* argv[]) {
             ImFontConfig cfg;
             cfg.FontDataOwnedByAtlas = false;
             io.Fonts->AddFontFromMemoryTTF(font.address, font.size, 22.0f * ui_scale, &cfg);  // default font
-            f_large = io.Fonts->AddFontFromMemoryTTF(font.address, font.size, 30.0f * ui_scale, &cfg);
-            f_title = io.Fonts->AddFontFromMemoryTTF(font.address, font.size, 40.0f * ui_scale, &cfg);
+            f_large = io.Fonts->AddFontFromMemoryTTF(font.address, font.size, 36.0f * ui_scale, &cfg);
+            f_title = io.Fonts->AddFontFromMemoryTTF(font.address, font.size, 36.0f * ui_scale, &cfg);
             f_small = io.Fonts->AddFontFromMemoryTTF(font.address, font.size, 18.0f * ui_scale, &cfg);
         }
     }
@@ -459,7 +487,8 @@ int main(int argc, char* argv[]) {
     std::thread* bg_thread = nullptr;
     GLuint scan_texture = 0;
     static bool just_entered_content = true;
-    static int selected_sd_idx = -1;
+    static bool first_boot = true;
+    static int g_selected_sd_idx = -1;
 
     while (!done) {
         // -- Frame begin --
@@ -468,6 +497,14 @@ int main(int argc, char* argv[]) {
             UpdateSystemStatus();
             last_status_update = SDL_GetTicks();
         }
+        
+        // Initial boot focus hack: Force a D-Pad Down click
+        if (first_boot) {
+            ImGui::GetIO().AddKeyEvent(ImGuiKey_GamepadDpadDown, true);
+            ImGui::GetIO().AddKeyEvent(ImGuiKey_GamepadDpadDown, false);
+            first_boot = false;
+        }
+
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             ImGui_ImplSDL2_ProcessEvent(&event);
@@ -494,7 +531,8 @@ int main(int argc, char* argv[]) {
         ImGui::PushStyleColor(ImGuiCol_NavHighlight, ImVec4(0, 0, 0, 0));
 
         // B button → go back to menu
-        if (!g_in_menu && (ImGui::IsKeyPressed(ImGuiKey_GamepadFaceDown) || ImGui::IsKeyPressed(ImGuiKey_Escape))) {
+        bool any_modal_open = ImGui::IsPopupOpen((const char*)NULL, ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel);
+        if (!any_modal_open && !g_in_menu && (ImGui::IsKeyPressed(ImGuiKey_GamepadFaceDown) || ImGui::IsKeyPressed(ImGuiKey_Escape))) {
             g_in_menu = true;
             just_entered_content = true;
         }
@@ -585,7 +623,8 @@ int main(int argc, char* argv[]) {
         // ═══════════════════════════════════════════
         // CONTENT AREA
         // ═══════════════════════════════════════════
-        ImGui::SetCursorPos(ImVec2(0, header_h));
+
+
 
         if (g_in_menu) {
             // --- MAIN MENU (6 items, no scroll) ---
@@ -597,11 +636,15 @@ int main(int argc, char* argv[]) {
             }
 
             float item_h = content_h / 6.0f;
-            float icon_sz = item_h * 0.5f;
+            float icon_sz = item_h * 0.9f; // Even larger icons in menu
 
             auto DrawMenuOption = [&](const char* label, int idx, GLuint tex) {
                 bool sel = (g_selected_menu == idx);
                 ImVec2 p = ImGui::GetCursorScreenPos();
+
+                if (just_entered_content && idx == 0) {
+                    ImGui::SetKeyboardFocusHere();
+                }
 
                 // Selectable first (background)
                 ImGui::PushID(idx);
@@ -619,15 +662,15 @@ int main(int argc, char* argv[]) {
                 // Overlay text + icon (drawn AFTER selectable so it's on top)
                 ImDrawList* draw = ImGui::GetWindowDrawList();
                 ImVec2 label_size = ImGui::CalcTextSize(label);
-                float total_w = label_size.x + (tex ? icon_sz + 15 * ui_scale : 0);
+                float total_w = label_size.x + (tex ? icon_sz + 30 * ui_scale : 0);
                 ImVec2 start_p = ImVec2(p.x + (screen_w - total_w) / 2.0f, p.y + (item_h - label_size.y) / 2.0f);
                 
                 draw->AddText(start_p, ImColor(ImGui::GetStyle().Colors[ImGuiCol_Text]), label);
                 
                 if (tex) {
                     draw->AddImage((void*)(intptr_t)tex, 
-                                   ImVec2(start_p.x + label_size.x + 15 * ui_scale, p.y + (item_h - icon_sz) / 2.0f),
-                                   ImVec2(start_p.x + label_size.x + 15 * ui_scale + icon_sz, p.y + (item_h + icon_sz) / 2.0f));
+                                   ImVec2(start_p.x + label_size.x + 30 * ui_scale, p.y + (item_h - icon_sz) / 2.0f),
+                                   ImVec2(start_p.x + label_size.x + 30 * ui_scale + icon_sz, p.y + (item_h + icon_sz) / 2.0f));
                 }
 
                 if (f_large) ImGui::PopFont();
@@ -635,7 +678,7 @@ int main(int argc, char* argv[]) {
 
                 // Accent bar on left
                 if (sel) {
-                    draw->AddRectFilled(p, ImVec2(p.x + 8.0f * ui_scale, p.y + item_h), ImColor(g_accent));
+                    draw->AddRectFilled(p, ImVec2(p.x + 12.0f * ui_scale, p.y + item_h), ImColor(g_accent));
                 }
             };
 
@@ -649,8 +692,9 @@ int main(int argc, char* argv[]) {
             ImGui::PopStyleVar();
         } else {
             // --- CONTENT SCREENS ---
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(40.0f * ui_scale, 20.0f * ui_scale));
-            ImGui::BeginChild("Content", ImVec2(screen_w, content_h), false);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(100.0f * ui_scale, 20.0f * ui_scale)); // Reduced vertical padding
+            ImGui::BeginChild("Content", ImVec2(screen_w, content_h + 15.0f * ui_scale), ImGuiChildFlags_AlwaysUseWindowPadding, ImGuiWindowFlags_NoScrollbar);
+
             if (just_entered_content) {
                 ImGui::SetWindowFocus();
                 // Ensure focus on first element
@@ -663,19 +707,20 @@ int main(int argc, char* argv[]) {
                                 g_tex_icon_dumpdl, g_tex_icon_asset, g_tex_icon_settings};
 
             // Sub-header with title + icon (Centered)
-            float header_area_h = 80.0f * ui_scale;
+            float header_area_h = 60.0f * ui_scale; // Further reduced height as requested
             ImGui::BeginChild("ScreenHeader", ImVec2(0, header_area_h), false);
+
             {
                 if (f_large) ImGui::PushFont(f_large);
                 ImVec2 tsize = ImGui::CalcTextSize(titles[g_selected_menu]);
-                float icon_sz = 50.0f * ui_scale;
-                float total_w = tsize.x + (t_icons[g_selected_menu] ? icon_sz + 20 * ui_scale : 0);
+                float icon_sz = header_area_h * 0.80f;
+                float total_w = tsize.x + (t_icons[g_selected_menu] ? icon_sz + 30 * ui_scale : 0);
                 
                 ImGui::SetCursorPos(ImVec2((ImGui::GetContentRegionAvail().x - total_w) / 2.0f, (header_area_h - tsize.y) / 2.0f));
                 ImGui::TextColored(g_accent, "%s", titles[g_selected_menu]);
                 
                 if (t_icons[g_selected_menu]) {
-                    ImGui::SameLine(0, 20 * ui_scale);
+                    ImGui::SameLine(0, 30 * ui_scale);
                     ImGui::SetCursorPosY((header_area_h - icon_sz) / 2.0f);
                     ImGui::Image((void*)(intptr_t)t_icons[g_selected_menu], ImVec2(icon_sz, icon_sz));
                 }
@@ -683,16 +728,38 @@ int main(int argc, char* argv[]) {
             }
             ImGui::EndChild();
             ImGui::Separator();
-            ImGui::Spacing(); ImGui::Spacing();
 
             if (g_selected_menu == 0) { // DUMPER
                 if (g_scan_state == ScanState::IDLE) {
-                    ImGui::TextWrapped("Place a physical Skylander on the Right Joy-Con NFC reader.");
+                    float child_w = 900 * ui_scale; 
+                    float child_h = 300 * ui_scale;
+                    float avail_h = ImGui::GetContentRegionAvail().y;
+                    
+                    // Bypass parent padding for absolute centering
+                    ImGui::SetCursorPosX((screen_w - child_w) / 2.0f - ImGui::GetCursorPosX() + ImGui::GetStyle().WindowPadding.x);
+                    ImGui::SetCursorPosY((avail_h - child_h) / 2.0f);
+                    
+                    ImGui::BeginChild("DumperIdle", ImVec2(child_w, child_h), false, ImGuiWindowFlags_NoScrollbar);
                     ImGui::Spacing();
-                    ImGui::TextColored(ImVec4(1, 0.8f, 0, 1), "Keep it still and centered on the analog stick.");
-                    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1), "Note: Some third-party controllers only support Amiibo, not Skylander.");
+                    
+                    auto CenterText = [&](const char* text, ImVec4 color) {
+                        ImGui::PushTextWrapPos(child_w);
+                        ImVec2 sz = ImGui::CalcTextSize(text, NULL, false, child_w);
+                        ImGui::SetCursorPosX((child_w - sz.x) / 2.0f);
+                        ImGui::TextColored(color, "%s", text);
+                        ImGui::PopTextWrapPos();
+                    };
+
+                    CenterText("Place a physical Skylander on the Right Joy-Con NFC reader.", ImVec4(0.8f, 0.8f, 0.8f, 1));
                     ImGui::Spacing();
-                    if (ImGui::Button("Start Scanning", ImVec2(350 * ui_scale, 60 * ui_scale))) {
+                    CenterText("Keep it still and centered on the analog stick.", ImVec4(1, 0.8f, 0, 1));
+                    ImGui::Spacing();
+                    CenterText("Note: Some third-party controllers only support Amiibo, not Skylander.", ImVec4(0.6f, 0.6f, 0.6f, 1));
+                    
+                    ImGui::Spacing(); ImGui::Spacing();
+                    float btn_w = 350 * ui_scale;
+                    ImGui::SetCursorPosX((child_w - btn_w) / 2.0f);
+                    if (ImGui::Button("Start Scanning", ImVec2(btn_w, 60 * ui_scale))) {
                         if (emulandersIsInitialized()) emulandersSetEmulationStatus(EmulationStatus::Off);
                         g_scan_state = ScanState::PREPARING;
                         g_scan_progress_blocks = 0;
@@ -760,6 +827,7 @@ int main(int argc, char* argv[]) {
                             }
                         });
                     }
+                    ImGui::EndChild();
                 } else if (g_scan_state == ScanState::PREPARING) {
                     ImGui::Text("Initializing NFC hardware...");
                     ImGui::ProgressBar(-1.0f * (float)ImGui::GetTime(), ImVec2(400 * ui_scale, 20 * ui_scale));
@@ -767,15 +835,21 @@ int main(int argc, char* argv[]) {
                     ImGui::TextColored(g_accent, "Waiting for Skylander...");
                     ImGui::Text("Place the figure on the NFC reader now.");
                 } else if (g_scan_state == ScanState::READING_BLOCKS) {
+                    float cur_y = ImGui::GetCursorPosY();
+                    ImGui::BeginGroup();
                     ImGui::Text("Reading data... %d/64 blocks", g_scan_progress_blocks);
                     ImGui::ProgressBar(g_scan_progress_blocks / 64.0f, ImVec2(400 * ui_scale, 20 * ui_scale));
+                    ImGui::EndGroup();
                     if (scan_texture) {
-                        ImGui::SameLine(screen_w - 300 * ui_scale);
+                        ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 325 * ui_scale); // Moved 100px left from original
+                        ImGui::SetCursorPosY(cur_y - 20 * ui_scale);
+                        ImGui::BeginGroup();
+                        ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.5f, 1.0f), "Skylander detected!");
                         ImGui::Image((void*)(intptr_t)scan_texture, ImVec2(175 * ui_scale, 275 * ui_scale));
+                        ImGui::EndGroup();
                     }
                 } else if (g_scan_state == ScanState::WAITING_CONFIRM) {
-                    if (scan_texture) ImGui::Image((void*)(intptr_t)scan_texture, ImVec2(175 * ui_scale, 275 * ui_scale));
-                    ImGui::SameLine();
+                    float cur_y = ImGui::GetCursorPosY();
                     ImGui::BeginGroup();
                     ImGui::Text("Identified: %s", g_scan_suggested_name.c_str());
                     ImGui::Spacing();
@@ -806,11 +880,21 @@ int main(int argc, char* argv[]) {
                             chmod(p.c_str(), 0777);
                             g_scan_state = ScanState::DONE;
                             RefreshFileList(g_current_path);
+                        } else {
+                            g_show_blank_name_warning = true;
                         }
                     }
                     if (ImGui::Button("Cancel", ImVec2(300 * ui_scale, 50 * ui_scale)))
                         g_scan_state = ScanState::IDLE;
                     ImGui::EndGroup();
+                    if (scan_texture) {
+                        ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 325 * ui_scale); // Moved 100px left from original
+                        ImGui::SetCursorPosY(cur_y - 20 * ui_scale);
+                        ImGui::BeginGroup();
+                        ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.5f, 1.0f), "Skylander detected!");
+                        ImGui::Image((void*)(intptr_t)scan_texture, ImVec2(175 * ui_scale, 275 * ui_scale));
+                        ImGui::EndGroup();
+                    }
                 } else if (g_scan_state == ScanState::DONE) {
                     ImGui::TextColored(ImVec4(0, 1, 0, 1), "Dump saved successfully!");
                     ImGui::Spacing();
@@ -822,15 +906,40 @@ int main(int argc, char* argv[]) {
                     if (ImGui::Button("Try Again", ImVec2(250 * ui_scale, 50 * ui_scale)))
                         g_scan_state = ScanState::IDLE;
                 }
+
+                if (g_show_blank_name_warning) {
+                    ImGui::OpenPopup("NameWarning");
+                    g_show_blank_name_warning = false;
+                }
+                if (ImGui::BeginPopupModal("NameWarning", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar)) {
+                    ImGui::Text("File name cannot be empty!");
+                    ImGui::Spacing();
+                    if (ImGui::Button("OK", ImVec2(120 * ui_scale, 40 * ui_scale)))
+                        ImGui::CloseCurrentPopup();
+                    ImGui::EndPopup();
+                }
             } else if (g_selected_menu == 1) { // FILE MANAGER
                 // Utility buttons (NoNav — only touch or L/R)
-                ImGui::Text("Path: %s", g_current_path.c_str());
-                ImGui::SameLine(screen_w - (350 * ui_scale));
+                ImGui::TextColored(g_accent, "Path:");
+                ImGui::SameLine(0, 8.0f * ui_scale);
+                ImGui::Text("%s", g_current_path.c_str());
+                // ImGui::Spacing(); removed spacing
+
+                float avail_x = ImGui::GetContentRegionAvail().x;
+                float btn_w_total = (200 + 250 + 12) * ui_scale;
+                ImGui::SetCursorPosX((avail_x - btn_w_total) / 2.0f + 70.0f * ui_scale); // Moved 70px right
+
+
                 ImGui::PushItemFlag(ImGuiItemFlags_NoNav, true);
-                if (ImGui::SmallButton("(L) Refresh") || ImGui::IsKeyPressed(ImGuiKey_GamepadL1))
+                if (ImGui::Button("(L) Refresh", ImVec2(200 * ui_scale, 45 * ui_scale)) || ImGui::IsKeyPressed(ImGuiKey_GamepadL1)) {
                     RefreshFileList(g_current_path);
+                    ImGui::GetIO().AddKeyEvent(ImGuiKey_GamepadDpadUp, true);
+                    ImGui::GetIO().AddKeyEvent(ImGuiKey_GamepadDpadUp, false);
+                    ImGui::GetIO().AddKeyEvent(ImGuiKey_GamepadDpadDown, true);
+                    ImGui::GetIO().AddKeyEvent(ImGuiKey_GamepadDpadDown, false);
+                }
                 ImGui::SameLine();
-                if (ImGui::SmallButton("(R) New Folder") || ImGui::IsKeyPressed(ImGuiKey_GamepadR1)) {
+                if (ImGui::Button("(R) New Folder", ImVec2(250 * ui_scale, 45 * ui_scale)) || ImGui::IsKeyPressed(ImGuiKey_GamepadR1)) {
                     std::string n = ShowKeyboard("NewFolder", "Folder name");
                     if (!n.empty()) {
                         std::string p = g_current_path + SanitizeFileName(n);
@@ -875,27 +984,27 @@ int main(int argc, char* argv[]) {
                     ImGui::TableHeadersRow();
 
                     for (size_t i = 0; i < g_sd_files.size(); i++) {
+                        ImGui::PushID((int)i);
                         ImGui::TableNextRow();
                         ImGui::TableSetColumnIndex(0);
-                        bool clicked = ImGui::Selectable(g_sd_files[i].name.c_str(), selected_sd_idx == (int)i,
-                                                         ImGuiSelectableFlags_SpanAllColumns);
+                        bool clicked = ImGui::Selectable(g_sd_files[i].name.c_str(), g_selected_sd_idx == (int)i,
+                                                         ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap);
                         if (clicked) {
-                            if (g_sd_files[i].name == "..") {
+                            g_selected_sd_idx = (int)i;
+                            if (g_sd_files[i].name == "<- Go back 1 directory") {
                                 RefreshFileList(g_sd_files[i].path);
-                            } else if (g_sd_files[i].is_dir) {
-                                RefreshFileList(g_sd_files[i].path);
-                            } else {
-                                selected_sd_idx = (int)i;
+                                just_entered_content = true;
+                            } else if (!g_sd_files[i].is_dir) {
                                 ImGui::OpenPopup("FileActions");
                             }
                         }
-                        // Long-press A on folder → popup instead of enter
-                        if (g_sd_files[i].is_dir && g_sd_files[i].name != ".." && ImGui::IsItemFocused()) {
-                            if (ImGui::IsKeyPressed(ImGuiKey_GamepadFaceUp)) { // X on focused dir
-                                selected_sd_idx = (int)i;
-                                ImGui::OpenPopup("FileActions");
-                            }
+
+                        // For directories, enter with A (FaceRight)
+                        if (g_sd_files[i].is_dir && g_sd_files[i].name != "<- Go back 1 directory" && ImGui::IsItemFocused() && ImGui::IsKeyPressed(ImGuiKey_GamepadFaceRight)) {
+                            RefreshFileList(g_sd_files[i].path);
+                            just_entered_content = true;
                         }
+
 
                         ImGui::TableSetColumnIndex(1);
                         if (!g_sd_files[i].is_dir) {
@@ -908,13 +1017,16 @@ int main(int argc, char* argv[]) {
                         }
                         ImGui::TableSetColumnIndex(2);
                         ImGui::Text("%s", g_sd_files[i].is_dir ? "DIR" : "FILE");
+                        ImGui::PopID();
                     }
 
                     // File actions popup
-                    if (ImGui::BeginPopup("FileActions") && selected_sd_idx >= 0 && selected_sd_idx < (int)g_sd_files.size()) {
-                        auto& sel = g_sd_files[selected_sd_idx];
-                        if (sel.is_dir && ImGui::MenuItem("Open"))
+                    if (ImGui::BeginPopup("FileActions") && g_selected_sd_idx >= 0 && g_selected_sd_idx < (int)g_sd_files.size()) {
+                        auto& sel = g_sd_files[g_selected_sd_idx];
+                        if (sel.is_dir && ImGui::MenuItem("Open")) {
                             RefreshFileList(sel.path);
+                            just_entered_content = true;
+                        }
                         if (ImGui::MenuItem("Copy")) {
                             g_clipboard_path = sel.path;
                             g_clipboard_action = ClipboardAction::COPY;
@@ -933,12 +1045,51 @@ int main(int argc, char* argv[]) {
                             }
                         }
                         if (ImGui::MenuItem("Delete")) {
-                            RobustDelete(sel.path);
-                            RefreshFileList(g_current_path);
+                            g_file_to_delete = sel.path;
+                            g_show_delete_confirm = true;
                         }
                         ImGui::EndPopup();
                     }
                     ImGui::EndTable();
+                }
+
+                if (g_show_delete_confirm) {
+                    ImGui::OpenPopup("DeleteConfirm");
+                    g_show_delete_confirm = false;
+                }
+                if (ImGui::BeginPopupModal("DeleteConfirm", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar)) {
+                    ImGui::Text("Are you sure you want to delete this?");
+                    ImGui::Spacing();
+                    ImGui::TextColored(ImVec4(1, 0.2f, 0.2f, 1), "%s", GetFilename(g_file_to_delete).c_str());
+                    ImGui::Spacing();
+                    if (ImGui::Button("Yes, Delete", ImVec2(140 * ui_scale, 40 * ui_scale))) {
+                        g_delete_target_name = GetFilename(g_file_to_delete);
+                        g_is_deleting = true;
+                        if (bg_thread) { bg_thread->join(); delete bg_thread; }
+                        bg_thread = new std::thread([]() {
+                            RobustDelete(g_file_to_delete);
+                            g_is_deleting = false;
+                        });
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button("Cancel", ImVec2(140 * ui_scale, 40 * ui_scale)))
+                        ImGui::CloseCurrentPopup();
+                    ImGui::EndPopup();
+                }
+
+                if (g_is_deleting) {
+                    ImGui::OpenPopup("DeletingInProgress");
+                }
+                if (ImGui::BeginPopupModal("DeletingInProgress", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar)) {
+                    ImGui::Text("Deleting: %s", g_delete_target_name.c_str());
+                    ImGui::Spacing();
+                    ImGui::ProgressBar(-1.0f * (float)ImGui::GetTime(), ImVec2(300 * ui_scale, 20 * ui_scale), "Please wait...");
+                    if (!g_is_deleting) {
+                        ImGui::CloseCurrentPopup();
+                        RefreshFileList(g_current_path);
+                    }
+                    ImGui::EndPopup();
                 }
             } else if (g_selected_menu == 2) { // IMAGE EDITOR
                 if (g_editor_state == EditorState::SELECT_DUMP) {
@@ -949,68 +1100,105 @@ int main(int argc, char* argv[]) {
                         std::error_code ec;
                         for (auto const& entry : fs::directory_iterator(ed_current_path, ec)) {
                             FileInfo fi; fi.name = entry.path().filename().string(); fi.path = entry.path().string();
-                            fi.is_dir = entry.is_directory(); fi.size = fi.is_dir ? 0 : fs::file_size(entry.path(), ec);
+                            fi.is_dir = entry.is_directory(ec);
+                            if (fi.is_dir) fi.name = "[DIR] " + fi.name;
+                            fi.size = fi.is_dir ? 0 : fs::file_size(entry.path(), ec);
                             if (fi.is_dir || fi.name.find(".dump") != std::string::npos) ed_files.push_back(fi);
                         }
                     }
 
-                    ImGui::Text("Step 1: Select a .dump file (Path: %s)", ed_current_path.c_str());
-                    ImGui::BeginChild("Dumps", ImVec2(0, content_h - 180 * ui_scale), true);
-                    if (ed_current_path != "sdmc:/") {
-                        if (ImGui::Selectable(".. (Back)")) {
-                            ed_current_path = GetParentPath(ed_current_path);
-                            ed_files.clear();
-                        }
-                    }
-                    for (auto& d : ed_files) {
-                        if (ImGui::Selectable(d.name.c_str())) {
-                            if (d.is_dir) {
-                                ed_current_path = d.path + "/";
+                    if (f_large) ImGui::PushFont(f_large);
+                    ImGui::TextColored(g_accent, "Step 1:");
+                    if (f_large) ImGui::PopFont();
+                    ImGui::SameLine();
+                    ImGui::Text("Select a .dump file (Path: %s)", ed_current_path.c_str());
+
+                    if (ImGui::BeginTable("EditorDumps", 1, ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersH, ImVec2(0, content_h - 180 * ui_scale))) {
+                        ImGui::TableSetupColumn("File Name", ImGuiTableColumnFlags_WidthStretch);
+                        ImGui::TableHeadersRow();
+
+                        if (ed_current_path != "sdmc:/") {
+                            ImGui::TableNextRow();
+                            ImGui::TableSetColumnIndex(0);
+                            if (just_entered_content) ImGui::SetKeyboardFocusHere();
+                            if (ImGui::Selectable("<- Go back 1 directory", false, ImGuiSelectableFlags_SpanAllColumns)) {
+                                ed_current_path = GetParentPath(ed_current_path);
                                 ed_files.clear();
-                            } else {
-                                g_editor_dump_path = d.path;
-                                g_editor_state = EditorState::SELECT_PHOTO;
-                                g_album_photos.clear();
+                                just_entered_content = true;
                             }
                         }
+                        for (size_t i = 0; i < ed_files.size(); i++) {
+                            ImGui::TableNextRow();
+                            ImGui::TableSetColumnIndex(0);
+                            if (just_entered_content && i == 0 && ed_current_path == "sdmc:/emulanders/figures/") ImGui::SetKeyboardFocusHere();
+                            if (ImGui::Selectable(ed_files[i].name.c_str(), false, ImGuiSelectableFlags_SpanAllColumns)) {
+                                if (ed_files[i].is_dir) {
+                                    ed_current_path = ed_files[i].path + "/";
+                                    ed_files.clear();
+                                    just_entered_content = true;
+                                } else {
+                                    g_editor_dump_path = ed_files[i].path;
+                                    g_editor_state = EditorState::SELECT_PHOTO;
+                                    g_album_photos.clear();
+                                    just_entered_content = true;
+                                }
+                            }
+                        }
+                        if (just_entered_content) just_entered_content = false;
+                        ImGui::EndTable();
                     }
-                    ImGui::EndChild();
                 } else if (g_editor_state == EditorState::SELECT_PHOTO) {
-                    static std::string ph_current_path = "sdmc:/Nintendo/Album/";
                     static std::vector<FileInfo> ph_files;
                     if (ph_files.empty()) {
+                        for(auto& f : ph_files) if(f.tex) glDeleteTextures(1, &f.tex);
                         ph_files.clear();
-                        std::error_code ec;
-                        for (auto const& entry : fs::directory_iterator(ph_current_path, ec)) {
-                            FileInfo fi; fi.name = entry.path().filename().string(); fi.path = entry.path().string();
-                            fi.is_dir = entry.is_directory();
-                            std::string ext = entry.path().extension().string();
-                            if (fi.is_dir || ext == ".jpg" || ext == ".png" || ext == ".jpeg") ph_files.push_back(fi);
-                        }
+                        RecursiveListFiles("sdmc:/Nintendo/Album/", {".jpg", ".jpeg", ".png"}, ph_files);
+                        std::sort(ph_files.begin(), ph_files.end(), [](const FileInfo& a, const FileInfo& b){ return a.path > b.path; });
                     }
-                    ImGui::Text("Step 2: Select a screenshot (for: %s)", GetFilename(g_editor_dump_path).c_str());
-                    ImGui::BeginChild("Photos", ImVec2(0, content_h - 180 * ui_scale), true);
-                    if (ph_current_path != "sdmc:/") {
-                        if (ImGui::Selectable(".. (Back)")) {
-                            ph_current_path = GetParentPath(ph_current_path);
-                            ph_files.clear();
-                        }
-                    }
-                    for (auto& p : ph_files) {
-                        if (ImGui::Selectable(p.name.c_str())) {
-                            if (p.is_dir) {
-                                ph_current_path = p.path + "/";
-                                ph_files.clear();
-                            } else {
-                                g_editor_photo_path = p.path;
-                                if (g_editor_photo_tex) glDeleteTextures(1, &g_editor_photo_tex);
-                                g_editor_photo_tex = LoadTextureFromFile(p.path.c_str());
-                                g_crop_pos = ImVec2(100, 100); g_crop_size = ImVec2(175, 275);
-                                g_editor_state = EditorState::CROP_EDIT;
+                    
+                    if (f_large) ImGui::PushFont(f_large);
+                    ImGui::TextColored(g_accent, "Step 2:");
+                    if (f_large) ImGui::PopFont();
+                    ImGui::SameLine();
+                    ImGui::Text("Select a screenshot (for: %s)", GetFilename(g_editor_dump_path).c_str());
+
+                    float table_height = ImGui::GetContentRegionAvail().y - 30.0f * ui_scale;
+                    if (ImGui::BeginTable("EditorPhotos", 1, ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersH, ImVec2(0, table_height))) {
+                        ImGui::TableSetupColumn("File Name", ImGuiTableColumnFlags_WidthStretch);
+                        ImGui::TableHeadersRow();
+
+                        ImGuiListClipper clipper;
+                        clipper.Begin((int)ph_files.size());
+                        while (clipper.Step()) {
+                            for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
+                                auto& p = ph_files[row];
+                                ImGui::TableNextRow();
+                                ImGui::TableSetColumnIndex(0);
+
+                                if (p.tex == 0) p.tex = LoadTextureFromFile(p.path.c_str());
+
+                                float item_h = 80.0f * ui_scale;
+                                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + (item_h - ImGui::GetTextLineHeight()) * 0.5f);
+
+                                if (p.tex) {
+                                    ImGui::Image((void*)(intptr_t)p.tex, ImVec2(item_h * 1.77f, item_h));
+                                    ImGui::SameLine();
+                                }
+                                ImGui::PushID(row);
+                                if (ImGui::Selectable(p.name.c_str(), false, ImGuiSelectableFlags_SpanAllColumns, ImVec2(0, item_h))) {
+                                    g_editor_photo_path = p.path;
+                                    if (g_editor_photo_tex) glDeleteTextures(1, &g_editor_photo_tex);
+                                    g_editor_photo_tex = LoadTextureFromFile(p.path.c_str());
+                                    g_crop_pos = ImVec2(100, 100);
+                                    g_crop_size = ImVec2(175, 275);
+                                    g_editor_state = EditorState::CROP_EDIT;
+                                }
+                                ImGui::PopID();
                             }
                         }
+                        if (just_entered_content) just_entered_content = false;
+                        ImGui::EndTable();
                     }
-                    ImGui::EndChild();
                 } else if (g_editor_state == EditorState::CROP_EDIT) {
                     ImGui::Text("D-Pad: Move  |  R-Stick: Resize  |  A: Save  |  B: Cancel");
                     if (g_editor_photo_tex) {
@@ -1060,40 +1248,14 @@ int main(int argc, char* argv[]) {
                 static char url_buf[512] = "";
                 static std::vector<std::string> detected_urls;
                 ImGui::TextWrapped("Download .dump files from a remote ZIP URL.");
-                ImGui::Spacing();
-                ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1), "Detected URLs in sdmc:/emulanders/dumps_urls.txt:");
-
-                if (detected_urls.empty() || just_entered_content) {
-                    detected_urls.clear();
-                    std::ifstream urlf("sdmc:/emulanders/dumps_urls.txt");
-                    if (urlf.is_open()) {
-                        std::string line;
-                        while (std::getline(urlf, line)) {
-                            if (line.find("http") != std::string::npos) {
-                                // Strip \r \n
-                                line.erase(std::remove(line.begin(), line.end(), '\n'), line.end());
-                                line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
-                                detected_urls.push_back(line);
-                            }
-                        }
-                        urlf.close();
-                    }
-                    if (detected_urls.size() == 1 && url_buf[0] == '\0') {
-                        strncpy(url_buf, detected_urls[0].c_str(), sizeof(url_buf)-1);
-                    }
-                }
-
-                ImGui::BeginChild("URLList", ImVec2(0, 120 * ui_scale), true);
-                for (auto& u : detected_urls) {
-                    if (ImGui::Button(u.c_str())) strncpy(url_buf, u.c_str(), sizeof(url_buf)-1);
-                }
-                ImGui::EndChild();
-
-                ImGui::Spacing();
+                ImGui::Spacing(); ImGui::Spacing();
+                
+                ImGui::PushItemWidth(screen_w * 0.5f);
                 ImGui::InputText("Custom URL", url_buf, sizeof(url_buf));
+                ImGui::PopItemWidth();
                 ImGui::SameLine();
                 ImGui::PushItemFlag(ImGuiItemFlags_NoNav, true);
-                if (ImGui::SmallButton("(L) Edit URL") || ImGui::IsKeyPressed(ImGuiKey_GamepadL1)) {
+                if (ImGui::Button("(L) Edit URL", ImVec2(150 * ui_scale, 0)) || ImGui::IsKeyPressed(ImGuiKey_GamepadL1)) {
                     std::string res = ShowKeyboard(url_buf, "Enter ZIP URL");
                     if (!res.empty()) {
                         strncpy(url_buf, res.c_str(), sizeof(url_buf) - 1);
@@ -1101,7 +1263,7 @@ int main(int argc, char* argv[]) {
                     }
                 }
                 ImGui::PopItemFlag();
-                ImGui::Spacing();
+                ImGui::Spacing(); ImGui::Spacing();
 
                 if (!g_dl_running) {
                     if (ImGui::Button("Download & Extract", ImVec2(300 * ui_scale, 50 * ui_scale))) {
@@ -1113,9 +1275,15 @@ int main(int argc, char* argv[]) {
                             bg_thread = new std::thread([url]() {
                                 // Convert GitHub tree URL to archive ZIP
                                 std::string target = url;
+                                std::string expected_subfolder = "";
                                 if (url.find("github.com") != std::string::npos && url.find("/tree/") != std::string::npos) {
                                     size_t p = url.find("/tree/");
-                                    target = url.substr(0, p) + "/archive/refs/heads/" + url.substr(p + 6) + ".zip";
+                                    std::string branch_and_path = url.substr(p + 6);
+                                    size_t slash = branch_and_path.find("/");
+                                    if (slash != std::string::npos) {
+                                        expected_subfolder = branch_and_path.substr(slash + 1);
+                                    }
+                                    target = url.substr(0, p) + "/archive/refs/heads/" + branch_and_path.substr(0, slash) + ".zip";
                                 }
                                 // Download
                                 g_status_msg = "Downloading...";
@@ -1134,11 +1302,15 @@ int main(int argc, char* argv[]) {
 
                                 // Extract
                                 g_status_msg = "Extracting...";
+                                g_progress.store(0.5f); // Start at 50% immediately
                                 unzFile uf = unzOpen("sdmc:/emulanders/tmp_dump.zip");
                                 if (uf) {
                                     unz_global_info gi;
                                     unzGetGlobalInfo(uf, &gi);
                                     for (uLong i = 0; i < gi.number_entry; i++) {
+                                        g_progress.store(0.5f + ((float)i / gi.number_entry) * 0.5f);
+                                        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
                                         char fzip[512];
                                         unz_file_info fi;
                                         unzGetCurrentFileInfo(uf, &fi, fzip, sizeof(fzip), NULL, 0, NULL, 0);
@@ -1147,19 +1319,57 @@ int main(int argc, char* argv[]) {
                                             if (fzip[j] == '\\') fzip[j] = '/';
                                             if ((unsigned char)fzip[j] > 126) fzip[j] = '_';
                                         }
-                                        std::string full = "sdmc:/emulanders/figures/" + std::string(fzip);
+                                        std::string fzip_str(fzip);
+                                        std::string relative_path = fzip_str;
+
+                                        // If downloading a specific github folder, strip the root folder and everything before the target folder
+                                        if (!expected_subfolder.empty()) {
+                                            size_t pos = fzip_str.find(expected_subfolder);
+                                            if (pos == std::string::npos) {
+                                                if (i + 1 < gi.number_entry) unzGoToNextFile(uf);
+                                                continue;
+                                            }
+                                            // The path inside the expected_subfolder
+                                            relative_path = fzip_str.substr(pos + expected_subfolder.length());
+                                            if (!relative_path.empty() && relative_path[0] == '/') {
+                                                relative_path = relative_path.substr(1);
+                                            }
+                                            // If the entry is the subfolder itself, just skip it
+                                            if (relative_path.empty()) {
+                                                if (i + 1 < gi.number_entry) unzGoToNextFile(uf);
+                                                continue;
+                                            }
+                                        } else {
+                                            // Normal zip: remove the top-level folder if it's a typical github zip
+                                            // e.g., Repo-main/folder/file -> folder/file
+                                            size_t first_slash = fzip_str.find('/');
+                                            if (first_slash != std::string::npos && first_slash < fzip_str.length() - 1) {
+                                                relative_path = fzip_str.substr(first_slash + 1);
+                                            } else if (fzip[strlen(fzip) - 1] == '/') {
+                                                // Skip the root folder itself
+                                                if (i + 1 < gi.number_entry) unzGoToNextFile(uf);
+                                                continue;
+                                            }
+                                        }
+
+                                        std::string full = "sdmc:/emulanders/figures/Downloads/" + relative_path;
+
                                         if (fzip[strlen(fzip) - 1] == '/') {
-                                            fs::create_directories(full);
+                                            std::error_code ec;
+                                            fs::create_directories(full, ec);
+                                            chmod(full.c_str(), 0777);
                                         } else {
                                             std::error_code ec;
                                             fs::create_directories(fs::path(full).parent_path(), ec);
                                             if (unzOpenCurrentFile(uf) == UNZ_OK) {
                                                 FILE* out = fopen(full.c_str(), "wb");
-                                                char buf[8192]; int r;
-                                                while ((r = unzReadCurrentFile(uf, buf, sizeof(buf))) > 0)
-                                                    fwrite(buf, 1, r, out);
-                                                fclose(out);
-                                                chmod(full.c_str(), 0777);
+                                                if (out) {
+                                                    char buf[8192]; int r;
+                                                    while ((r = unzReadCurrentFile(uf, buf, sizeof(buf))) > 0)
+                                                        fwrite(buf, 1, r, out);
+                                                    fclose(out);
+                                                    chmod(full.c_str(), 0777);
+                                                }
                                                 unzCloseCurrentFile(uf);
                                             }
                                         }
@@ -1168,7 +1378,7 @@ int main(int argc, char* argv[]) {
                                     unzClose(uf);
                                 }
                                 fs::remove("sdmc:/emulanders/tmp_dump.zip");
-                                g_status_msg = "Done!";
+                                g_status_msg = "Download finished! Files saved to sdmc:/emulanders/figures/Downloads/";
                                 g_progress.store(1.0f);
                                 g_dl_running = false;
                                 g_dl_finished_popup = true;
@@ -1177,11 +1387,51 @@ int main(int argc, char* argv[]) {
                     }
                 } else {
                     float prog = g_progress.load();
-                    if (prog >= 0.0f)
+                    if (prog >= 0.0f) {
                         ImGui::ProgressBar(prog, ImVec2(screen_w * 0.6f, 30 * ui_scale));
-                    else
-                        ImGui::Text("Downloading... (%.1f KB)", g_dl_now.load() / 1024.0);
-                    ImGui::Text("%s", g_status_msg.c_str());
+                    } else {
+                        ImGui::ProgressBar(-1.0f * (float)ImGui::GetTime(), ImVec2(screen_w * 0.6f, 30 * ui_scale), "Processing...");
+                        ImGui::Text("%.1f MB processed", g_dl_now.load() / (1024.0 * 1024.0));
+                    }
+                    ImGui::TextColored(g_accent, "%s", g_status_msg.c_str());
+                }
+
+                // --- DETECTED URLS LIST ---
+                ImGui::Spacing(); ImGui::Spacing();
+                ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1), "Detected URLs in sdmc:/emulanders/dumps_urls.txt:");
+
+                if (detected_urls.empty() || just_entered_content) {
+                    detected_urls.clear();
+                    std::ifstream urlf("sdmc:/emulanders/dumps_urls.txt");
+                    if (urlf.is_open()) {
+                        std::string line;
+                        while (std::getline(urlf, line)) {
+                            if (line.find("http") != std::string::npos) {
+                                line.erase(std::remove(line.begin(), line.end(), '\n'), line.end());
+                                line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+                                detected_urls.push_back(line);
+                            }
+                        }
+                        urlf.close();
+                    }
+                    if (detected_urls.size() == 1 && url_buf[0] == '\0') {
+                        strncpy(url_buf, detected_urls[0].c_str(), sizeof(url_buf)-1);
+                    }
+                }
+
+                if (ImGui::BeginChild("URLList", ImVec2(0, 200 * ui_scale), true, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
+                    for (size_t i = 0; i < detected_urls.size(); i++) {
+                        ImGui::PushID((int)i);
+                        if (ImGui::Button(detected_urls[i].c_str(), ImVec2(ImGui::GetContentRegionAvail().x - 110 * ui_scale, 45 * ui_scale))) {
+                            strncpy(url_buf, detected_urls[i].c_str(), sizeof(url_buf)-1);
+                        }
+                        ImGui::SameLine();
+                        if (ImGui::Button("Use", ImVec2(100 * ui_scale, 45 * ui_scale))) {
+                            strncpy(url_buf, detected_urls[i].c_str(), sizeof(url_buf)-1);
+                        }
+                        ImGui::PopID();
+                    }
+                    ImGui::EndChild();
                 }
             } else if (g_selected_menu == 4) { // ASSET DOWNLOADER
                 ImGui::TextWrapped("Download the community asset pack (figure images for all Skylanders).");
@@ -1211,11 +1461,15 @@ int main(int argc, char* argv[]) {
                             curl_easy_cleanup(curl);
                             // Extract
                             g_status_msg = "Extracting assets...";
+                            g_progress.store(0.5f);
                             unzFile uf = unzOpen("sdmc:/emulanders/tmp_assets.zip");
                             if (uf) {
                                 unz_global_info gi;
                                 unzGetGlobalInfo(uf, &gi);
                                 for (uLong i = 0; i < gi.number_entry; i++) {
+                                    g_progress.store(0.5f + ((float)i / gi.number_entry) * 0.5f);
+                                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
                                     char fzip[512]; unz_file_info fi;
                                     unzGetCurrentFileInfo(uf, &fi, fzip, sizeof(fzip), NULL, 0, NULL, 0);
                                     for (int j = 0; fzip[j]; j++) {
@@ -1224,7 +1478,9 @@ int main(int argc, char* argv[]) {
                                     }
                                     std::string full = "sdmc:/" + std::string(fzip);
                                     if (fzip[strlen(fzip) - 1] == '/') {
-                                        fs::create_directories(full);
+                                        std::error_code ec;
+                                        fs::create_directories(full, ec);
+                                        chmod(full.c_str(), 0777);
                                     } else {
                                         std::error_code ec;
                                         fs::create_directories(fs::path(full).parent_path(), ec);
@@ -1254,10 +1510,11 @@ int main(int argc, char* argv[]) {
                     float prog = g_progress.load();
                     if (prog >= 0.0f) {
                         ImGui::ProgressBar(prog, ImVec2(screen_w * 0.6f, 30 * ui_scale));
-                        ImGui::Text("%s", g_status_msg.c_str());
                     } else {
-                        ImGui::Text("Downloading... (%.1f KB)", g_dl_now.load() / 1024.0);
+                        ImGui::ProgressBar(-1.0f * (float)ImGui::GetTime(), ImVec2(screen_w * 0.6f, 30 * ui_scale), "Downloading...");
+                        ImGui::Text("%.1f MB downloaded", g_dl_now.load() / (1024.0 * 1024.0));
                     }
+                    ImGui::TextColored(g_accent, "%s", g_status_msg.c_str());
                 }
             } else if (g_selected_menu == 5) { // SETTINGS
                 ImGui::Text("Accent Color");
@@ -1279,16 +1536,37 @@ int main(int argc, char* argv[]) {
             g_dl_finished_popup = false;
             RefreshFileList(g_current_path); // auto-refresh
         }
-        if (ImGui::BeginPopupModal("DownloadDone", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove)) {
-            ImGui::SetWindowPos(ImVec2(screen_w / 2.0f - 200.0f * ui_scale, screen_h / 2.0f - 80.0f * ui_scale));
-            ImGui::TextColored(ImVec4(0, 1, 0.5f, 1), "Download Complete!");
-            ImGui::Spacing();
+        // Temporary style
+        ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+        ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, 12.0f * ui_scale);
+        ImVec2 popup_size(700 * ui_scale, 300 * ui_scale);
+        ImGui::SetNextWindowPos(ImVec2((screen_w - popup_size.x) * 0.5f, (screen_h - popup_size.y) * 0.5f));
+        ImGui::SetNextWindowSize(popup_size);
+        if (ImGui::BeginPopupModal("DownloadDone", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar)) {
+            // Colored header
+            ImDrawList* dl = ImGui::GetWindowDrawList();
+            ImVec2 p = ImGui::GetWindowPos();
+            dl->AddRectFilled(p, ImVec2(p.x + popup_size.x, p.y + 50 * ui_scale), ImColor(g_accent));
+            
+            ImGui::SetCursorPos(ImVec2(30 * ui_scale, 12 * ui_scale));
+            if (f_large) ImGui::PushFont(f_large);
+            ImGui::TextColored(ImVec4(1,1,1,1), "Download Complete");
+            if (f_large) ImGui::PopFont();
+
+            ImGui::SetCursorPos(ImVec2(30 * ui_scale, 80 * ui_scale));
+            ImGui::PushTextWrapPos(popup_size.x - 60 * ui_scale);
             ImGui::Text("%s", g_status_msg.c_str());
-            ImGui::Spacing();
-            if (ImGui::Button("OK", ImVec2(200 * ui_scale, 40 * ui_scale)))
+            ImGui::PopTextWrapPos();
+
+            ImGui::SetCursorPos(ImVec2((popup_size.x - 200 * ui_scale) * 0.5f, popup_size.y - 80 * ui_scale));
+            if (ImGui::Button("DISMISS", ImVec2(200 * ui_scale, 55 * ui_scale)))
                 ImGui::CloseCurrentPopup();
+            
             ImGui::EndPopup();
         }
+        ImGui::PopStyleVar(2);
+        ImGui::PopStyleColor();
         // ═══════════════════════════════════════════
         // FOOTER (permanent)
         // ═══════════════════════════════════════════
@@ -1297,8 +1575,13 @@ int main(int argc, char* argv[]) {
         if (f_small) ImGui::PushFont(f_small);
         ImGui::SetCursorPosY(footer_h / 2.0f - 9.0f * ui_scale);
         ImGui::SetCursorPosX(30.0f * ui_scale);
-        ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f),
-            "[D-Pad] Navigate  |  [A] Confirm  |  [B] Back  |  [+] Exit");
+        
+        const char* footer_text = "[D-Pad] Navigate  |  [A] Confirm  |  [B] Back  |  [+] Exit";
+        if (g_selected_menu == 1 || g_selected_menu == 2 || g_selected_menu == 3) {
+            footer_text = "[D-Pad] Navigate  |  [L-Analog] Scroll  |  [A] Confirm  |  [B] Back  |  [+] Exit";
+        }
+        
+        ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "%s", footer_text);
         if (f_small) ImGui::PopFont();
         ImGui::EndChild();
 
