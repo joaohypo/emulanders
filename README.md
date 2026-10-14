@@ -49,33 +49,39 @@ Always ensure you are using the version compatible with your current Atmosphère
 ## 🚀 Core Features
 
 - **Mifare Protocol Emulation:** Comprehensive implementation of the `nfc:mf:u` service stack.
-- **Hot-swapping:** Change active figures via the Tesla Overlay during gameplay.
-- **Figure Identification:** Support for `.png` preview images within the menu.
-- **State Persistence:** Retains emulation state and selected figures across reboots.
-- **Tool Compatibility:** Operates in parallel with Amiibo emulators (e.g., Emuiibo) without service conflict.
-- **Resource Efficiency:** Low-overhead background processing and on-demand asset loading.
+- **Tesla Overlay:** In-game hot-swapping and mounting of virtual Skylander `.dump` files without leaving *Skylanders: Imaginators*.
+- **Physical Joy-Con NFC Dumper (Portal App):** Scan real toys using the Right Joy-Con (`nfp:user`), preview character art, and save 1KB Mifare dumps straight to SD.
+- **Cryptographic Cloning Engine:** 1:1 exact duplication and New Identity cloning with UID randomization, sector trailer Key A calculation, Header CRC16 recalculation, data decryption/re-encryption, and Creation Crystal UID conflict safeguards.
+- **Interactive Screenshot Cropper:** Direct Switch Album integration, 16:9 previews, Joy-Con D-Pad/stick adjustment, and 1:1 touch cropping to overlay portraits (175x275).
+- **OTA Downloaders:** In-app asset pack and figure dump downloaders with real-time extraction.
+- **Bilingual Localization:** Complete native support for English and Brazilian Portuguese (PT-BR) with automatic system language detection and runtime switcher.
+- **Customizable UI & Themes:** 7 built-in color themes, RGB fine-tuning sliders, and interactive color picker.
+- **State Persistence:** Retains emulation state and mounted figures across reboots.
+- **Tool Compatibility:** Operates seamlessly alongside Amiibo emulators (e.g., Emuiibo) without service conflict.
 
 ---
 
 ## ✅ Compatibility
 
 - **Target Game:** Skylanders: Imaginators (Nintendo Switch Version).
-- **Firmware Support:** Theoretically compatible with Firmware **4.0.0** and higher (due to `nfc:mf:u` requirements).
-- **Validated Environment:** Extensively developed and tested on **Firmware 21.2.0** and **Atmosphère 11.1.1**.
+- **Firmware Support:** Compatible with Firmware **4.0.0** and higher (due to `nfc:mf:u` requirements).
+- **Validated Environment:** Extensively tested on **Firmware 21.2.0** and **Atmosphère 11.1.1** / 1.10.x.
 
 ---
 
 ## 📂 Installation
 
 ### Quick Start (Recommended)
-To install Emulanders, simply **extract the release archive and drag all folders** (`atmosphere`, `switch`, `emulanders`) to the root of your Switch's SD card.
+To install Emulanders, simply download **`Emulanders-Bundle-1.0.0.zip`** from the [Releases Page](https://github.com/joaohypo/emulanders/releases/latest) and extract all folders (`atmosphere`, `switch`, `emulanders`) directly to the root of your Switch's SD card.
 
-For figure portraits in the overlay, also download the **Assets Pack** from the same release page and extract it to the root of your SD card — the zip already contains the correct `emulanders/assets/` structure. This pack provides artwork for **every Skylander and accessory** across all generations.
+For figure portraits in the overlay, also download the **Assets Pack** from the releases page and extract it to the root of your SD card — it contains the ready-to-use `emulanders/assets/` structure with portraits for **every Skylander and accessory** across all generations.
 
 ### Manual File Placement
 Alternatively, you can place the files manually:
 - **Sysmodule**: `sd:/atmosphere/contents/420000000000E311/exefs.nsp`
 - **Tesla Overlay**: `sd:/switch/.overlays/emulanders.ovl`
+- **Standalone App (Emulanders Portal)**: `sd:/switch/EmulandersPortal/EmulandersPortal.nro`
+- **Overlay Translations**: `sd:/emulanders/overlay/lang/`
 
 ### SD Card Structure
 The project utilizes the `sdmc:/emulanders/` directory.

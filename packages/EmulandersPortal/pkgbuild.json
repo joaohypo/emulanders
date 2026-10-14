@@ -1,0 +1,35 @@
+{
+  "package": "EmulandersPortal",
+  "info": {
+    "title": "Emulanders Portal",
+    "author": "joaoHypo",
+    "category": "tool",
+    "version": "1.0.0",
+    "url": "https://github.com/joaohypo/emulanders/releases",
+    "license": "GPLv3",
+    "description": "Skylanders Joy-Con physical dumper, clone engine & figure manager",
+    "details": "Emulanders Portal is a standalone full-screen manager for Skylanders on Nintendo Switch.\n\nFeatures:\n- Joy-Con Physical Tag Dumper (nfp:user)\n- 1:1 Exact & New Identity Figure Cloning Engine\n- Interactive Screenshot Cropper for custom figure portraits\n- Sandboxed SD figure file manager with lazy thumbnails\n- OTA Asset Pack and Dump Downloaders\n- Full English & Portuguese support with customizable color themes."
+  },
+  "changelog": "v1.0.0\n- Initial release for Nintendo Switch Homebrew App Store!\n- Native Joy-Con physical figure scanner and 1KB Mifare dumper.\n- Figure Cloning Engine with UID randomization and sector trailer recalculation.\n- Interactive crop tool with Switch Album integration.\n- Bilingual localization (EN / PT-BR) and docked controller navigation.",
+  "assets": [
+    {
+      "url": "https://github.com/joaohypo/emulanders/releases/download/1.0.0/Emulanders-Portal-1.0.0.zip",
+      "type": "zip",
+      "zip": [
+        {
+          "path": "/**/*",
+          "dest": "/",
+          "type": "update"
+        }
+      ]
+    },
+    {
+      "url": "icon.png",
+      "type": "icon"
+    },
+    {
+      "url": "screen.png",
+      "type": "banner"
+    }
+  ]
+}

@@ -37,14 +37,7 @@ dist: sysmodule overlay portal
 	@mkdir -p $(CURDIR)/SdOut/emulanders/overlay
 	@mkdir -p $(CURDIR)/SdOut/emulanders/figures
 	@cp -r $(CURDIR)/overlay/lang $(CURDIR)/SdOut/emulanders/overlay/
-	@mkdir -p $(CURDIR)/SdOut/emulanders/res
-	@cp $(CURDIR)/res/logo.png $(CURDIR)/SdOut/emulanders/res/
-	@cp $(CURDIR)/res/icon_dumper.png $(CURDIR)/SdOut/emulanders/res/
-	@cp $(CURDIR)/res/icon_manager.png $(CURDIR)/SdOut/emulanders/res/
-	@cp $(CURDIR)/res/icon_editor.png $(CURDIR)/SdOut/emulanders/res/
-	@cp $(CURDIR)/res/icon_dumpdl.png $(CURDIR)/SdOut/emulanders/res/
-	@cp $(CURDIR)/res/icon_asset.png $(CURDIR)/SdOut/emulanders/res/
-	@cp $(CURDIR)/res/icon_settings.png $(CURDIR)/SdOut/emulanders/res/
+	@cp $(CURDIR)/dumps_urls.txt $(CURDIR)/SdOut/emulanders/dumps_urls.txt
 	@mkdir -p $(CURDIR)/SdOut/switch/EmulandersPortal
 	@cp $(CURDIR)/EmulandersPortal/EmulandersPortal.nro $(CURDIR)/SdOut/switch/EmulandersPortal/
 	@echo "Creating Release Zips in dist/..."
@@ -66,14 +59,7 @@ dist-dev: sysmodule-dev overlay portal
 	@mkdir -p $(CURDIR)/SdOut/emulanders/overlay
 	@mkdir -p $(CURDIR)/SdOut/emulanders/figures
 	@cp -r $(CURDIR)/overlay/lang $(CURDIR)/SdOut/emulanders/overlay/
-	@mkdir -p $(CURDIR)/SdOut/emulanders/res
-	@cp $(CURDIR)/res/logo.png $(CURDIR)/SdOut/emulanders/res/
-	@cp $(CURDIR)/res/icon_dumper.png $(CURDIR)/SdOut/emulanders/res/
-	@cp $(CURDIR)/res/icon_manager.png $(CURDIR)/SdOut/emulanders/res/
-	@cp $(CURDIR)/res/icon_editor.png $(CURDIR)/SdOut/emulanders/res/
-	@cp $(CURDIR)/res/icon_dumpdl.png $(CURDIR)/SdOut/emulanders/res/
-	@cp $(CURDIR)/res/icon_asset.png $(CURDIR)/SdOut/emulanders/res/
-	@cp $(CURDIR)/res/icon_settings.png $(CURDIR)/SdOut/emulanders/res/
+	@cp $(CURDIR)/dumps_urls.txt $(CURDIR)/SdOut/emulanders/dumps_urls.txt
 	@mkdir -p $(CURDIR)/SdOut/switch/EmulandersPortal
 	@cp $(CURDIR)/EmulandersPortal/EmulandersPortal.nro $(CURDIR)/SdOut/switch/EmulandersPortal/
 	@echo "Output (dev) created at $(CURDIR)/SdOut"

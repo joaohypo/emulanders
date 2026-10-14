@@ -62,11 +62,11 @@
         },
         {
             "key": "EnableEmulation",
-            "value": "Ativar Emulacao"
+            "value": "Ativar Emulação"
         },
         {
             "key": "DisableEmulation",
-            "value": "Desativar Emulacao"
+            "value": "Desativar Emulação"
         },
         {
             "key": "SelectSkylanderFolder",
@@ -114,7 +114,7 @@
         },
         {
             "key": "No",
-            "value": "Nao"
+            "value": "Não"
         },
         {
             "key": "FolderSelected",
@@ -126,15 +126,15 @@
         },
         {
             "key": "UpngInvalidFile",
-            "value": "Arquivo invalido"
+            "value": "Arquivo inválido"
         },
         {
             "key": "UpngUnsupportedRgbPng",
-            "value": "RGB nao suportado"
+            "value": "RGB não suportado"
         },
         {
             "key": "UpngUpscaleUnsupported",
-            "value": "Upscale nao suportado"
+            "value": "Upscale não suportado"
         },
         {
             "key": "UpngImageTooLarge",
@@ -142,11 +142,11 @@
         },
         {
             "key": "UpngImageNotFound",
-            "value": "Imagem nao encontrada"
+            "value": "Imagem não encontrada"
         },
         {
             "key": "UpngNotPngImage",
-            "value": "Nao e um PNG"
+            "value": "Não é um PNG"
         },
         {
             "key": "UpngMalformedPng",
@@ -154,19 +154,19 @@
         },
         {
             "key": "UpngUnsupportedPng",
-            "value": "PNG nao suportado"
+            "value": "PNG não suportado"
         },
         {
             "key": "UpngUnsupportedInterlacing",
-            "value": "Entrelacamento nao suportado"
+            "value": "Entrelaçamento não suportado"
         },
         {
             "key": "UpngUnsupportedColorFormat",
-            "value": "Formato de cor nao suportado"
+            "value": "Formato de cor não suportado"
         },
         {
             "key": "UpngInvalidParameter",
-            "value": "Parametro invalido"
+            "value": "Parâmetro inválido"
         },
         {
             "key": "LegendActive",

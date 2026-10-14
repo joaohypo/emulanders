@@ -1,4 +1,5 @@
 # Emulanders Portal Makefile (ImGui UI)
+# Modular screen + utils structure
 
 DEVKITPRO ?= /opt/devkitpro
 export DEVKITPRO
@@ -13,18 +14,16 @@ TOPDIR ?= $(CURDIR)
 
 TARGET		:= EmulandersPortal
 BUILD		:= build
-SOURCES		:= source source/imgui source/3rd_party
+SOURCES		:= source source/imgui source/3rd_party source/utils
 DATA		:= data
-INCLUDES	:= include source/imgui
+INCLUDES	:= include source source/imgui source/screens source/utils
 ICON		:= res/icon.png
 
-# Export app metadata so the sub-make (and switch_rules/nacptool) picks it up properly
 export APP_TITLE   := Emulanders Portal
 export APP_AUTHOR  := joaoHypo
 export APP_VERSION := 1.0.0
 export APP_ICON    := $(TOPDIR)/$(ICON)
 
-# Include Switch Rules after defining TARGET, BUILD, APP_TITLE, etc.
 include $(DEVKITPRO)/libnx/switch_rules
 
 ARCH		:= -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
@@ -32,7 +31,7 @@ ARCH		:= -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 CFLAGS		:= -g -Wall -O3 -ffunction-sections $(ARCH) $(DEFINES)
 CFLAGS		+= $(INCLUDE) -D__SWITCH__ -DIMGUI_IMPL_OPENGL_LOADER_CUSTOM -include glad/glad.h -DIMGUI_DISABLE_DEFAULT_SHELL_FUNCTIONS
 
-CXXFLAGS	:= $(CFLAGS) -std=c++17 -O3 -Wno-volatile -fno-rtti -fno-exceptions
+CXXFLAGS	:= $(CFLAGS) -std=c++20 -O3 -Wno-volatile -fno-rtti -fno-exceptions
 ASFLAGS		:= -g $(ARCH)
 LDFLAGS		= -specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 

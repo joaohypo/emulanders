@@ -52,6 +52,7 @@ Result emulandersGetActiveSkylander(std::string& out_path) {
     );
     
     if (R_SUCCEEDED(rc)) {
+        path_buf[511] = '\0'; // Guarantee null termination
         out_path = std::string(path_buf);
     }
     return rc;
