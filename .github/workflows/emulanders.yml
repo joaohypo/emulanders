@@ -27,7 +27,8 @@ jobs:
     - name: Update packages
       run: |
         sudo -n apt-get update
-        sudo -n apt-get upgrade -y git build-essential zip
+        sudo -n apt-get install -y git build-essential zip
+        dkp-pacman -S --noconfirm switch-glad switch-sdl2 switch-sdl2_image switch-sdl2_ttf switch-curl switch-mbedtls switch-libminizip || true
 
     - name: Prepare Rust
       run: |
