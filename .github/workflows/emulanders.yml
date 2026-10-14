@@ -73,9 +73,11 @@ jobs:
         if [[ ${{ github.ref }} == refs/tags/* ]]; then
           TAG_NAME=${GITHUB_REF#refs/tags/}
           echo "RELEASE_NAME=emulanders-${TAG_NAME}" >> $GITHUB_ENV
+          echo "RELEASE_VERSION=${TAG_NAME}" >> $GITHUB_ENV
         else
           SHORT_SHA=$(echo ${GITHUB_SHA} | cut -c1-7)
           echo "RELEASE_NAME=emulanders-${SHORT_SHA}" >> $GITHUB_ENV
+          echo "RELEASE_VERSION=${SHORT_SHA}" >> $GITHUB_ENV
         fi
 
     - name: Package Output
@@ -83,6 +85,12 @@ jobs:
       run: |
         cd SdOut
         zip -r ../${{ env.RELEASE_NAME }}.zip *
+
+    - name: Fetch Asset Pack
+      if: startsWith(github.ref, 'refs/tags/')
+      shell: bash
+      run: |
+        curl -sL -o emulanders_assets_pack.zip https://github.com/joaohypo/emulanders/releases/download/0.9.1/emulanders_assets_pack.zip
 
     - name: Upload CI Artifact
       uses: actions/upload-artifact@v4
@@ -96,7 +104,9 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v2
       with:
+        name: Emulanders ${{ env.RELEASE_VERSION }}
+        body_path: RELEASE_NOTES.md
         files: |
           ${{ env.RELEASE_NAME }}.zip
           dist/*.zip
-        generate_release_notes: true
+          emulanders_assets_pack.zip
