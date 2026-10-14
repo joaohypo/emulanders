@@ -15,10 +15,10 @@ emulanders: sysmodule overlay portal dist
 emulanders-dev: sysmodule-dev overlay portal dist-dev
 
 sysmodule:
-	@cd emulanders && cargo update && cargo nx build --release
+	@cd emulanders && cargo nx build --release
 
 sysmodule-dev:
-	@cd emulanders && cargo update && cargo nx build
+	@cd emulanders && cargo nx build
 
 overlay:
 	@$(MAKE) -C overlay/
@@ -26,7 +26,7 @@ overlay:
 portal:
 	@$(MAKE) -C EmulandersPortal/
 
-dist: sysmodule overlay portal
+dist:
 	@rm -rf $(CURDIR)/SdOut
 	@mkdir -p $(CURDIR)/SdOut/atmosphere/contents/$(PROGRAM_ID)/flags
 	@touch $(CURDIR)/SdOut/atmosphere/contents/$(PROGRAM_ID)/flags/boot2.flag

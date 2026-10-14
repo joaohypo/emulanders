@@ -144,6 +144,51 @@ An **Assets Pack** is available as a separate download on the [Releases Page](ht
 
 ---
 
+## 🌟 Emulanders Portal (Standalone App Guide)
+
+**Emulanders Portal** is the companion homebrew application for managing your collection directly on the Nintendo Switch without needing a PC. Launch it from the **Homebrew Menu** (`hbmenu`).
+
+```
+sd:/switch/EmulandersPortal/EmulandersPortal.nro
+```
+
+### 1. Physical Joy-Con NFC Dumper
+Back up your physical Skylander toys directly using your Nintendo Switch hardware:
+- **How to use:** Navigate to the **Dump Figure** tab and place your physical toy onto the Right Joy-Con analog stick (or the NFC contact point on a Nintendo Switch Pro Controller).
+- **Automated Detection:** The app utilizes the low-level `nfp:user` service to read the Mifare Classic 1K tag, identifies the Character ID and Variant ID, and immediately displays the official portrait art and character details.
+- **One-Click Backup:** Press **[A]** to save a clean 1KB Mifare dump (`.dump`) directly into `sdmc:/emulanders/figures/`.
+
+### 2. File Manager & Cryptographic Cloning Engine
+Manage your library and create duplicate figures with custom identities:
+- **File Browser:** Browse folders, view high-resolution figure previews, organize directories, delete old dumps, and mark figures as **Favorites** for quick access in the Tesla overlay.
+- **1:1 Exact Duplication:** Duplicates the dump file byte-for-byte. Perfect for simple backups.
+- **New Identity Duplication:**
+  - Generates a completely new randomized 4-byte Mifare UID.
+  - Recomputes the Sector 0 BCC (Block Check Character) checksum.
+  - Derives all 16 Mifare Sector Trailer Key A values using the Mifare cryptographic key derivation algorithm.
+  - Decrypts the figure data blocks with the old UID, re-encrypts them under the new UID keys, and recalculates the Sector 0 Block 1 Header CRC16 checksum.
+  - *Why this matters:* The game rejects two figures on the portal with identical UIDs. New Identity cloning allows you to run multiple instances of the same figure simultaneously or reset/level up duplicate Creation Crystals without conflicts!
+
+### 3. Figure Image Editor & Album Cropper
+Personalize any figure's portrait directly from your console screenshots:
+- **Album Integration:** Opens your Nintendo Switch Screenshot Album (`sdmc:/Nintendo/Album/`, including emuMMC paths) or any custom folder with PNG/JPG images.
+- **Interactive Cropping Tool:**
+  - View full 16:9 screenshots on screen.
+  - Adjust the crop window using the **D-Pad / Left Stick** or drag directly via the **Touchscreen**.
+  - Zoom and scale with the **Right Stick / Shoulder Buttons**.
+  - Save the cropped 175×275 portrait alongside the dump (`figure.png`), instantly updating thumbnails across both Emulanders Portal and the Tesla overlay.
+
+### 4. Over-The-Air (OTA) Downloaders
+- **Asset Pack Downloader:** Download and extract the full community portrait asset collection directly to `sdmc:/emulanders/assets/` over Wi-Fi.
+- **Figure Dumps Downloader:** Pull figure archives and packs directly from remote repositories onto your SD card without needing an FTP client or SD card reader.
+
+### 5. Custom Themes & Accessibility
+- **Color Themes:** Choose between 7 pre-configured color palettes (Emulanders Blue, Portal Purple, Magma Red, Life Green, Tech Orange, Undead Violet, Dark Void) or design your own with the RGB sliders and color palette picker.
+- **Bilingual Localization:** Fully translated into **English** and **Português (Brasil)** with automatic system language detection and on-the-fly toggling.
+- **Docked & Handheld Navigation:** Full support for Joy-Cons, Pro Controllers, and capacitive multi-touch gestures.
+
+---
+
 ## ⚠️ Known Issues
 
 ### Docked Mode UI Disappearance

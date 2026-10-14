@@ -28,7 +28,7 @@ jobs:
       run: |
         sudo -n apt-get update
         sudo -n apt-get install -y git build-essential zip
-        dkp-pacman -S --noconfirm switch-glad switch-sdl2 switch-sdl2_image switch-sdl2_ttf switch-curl switch-mbedtls switch-libminizip || true
+        dkp-pacman -S --noconfirm switch-portlibs switch-mesa switch-glad switch-sdl2 switch-sdl2_image switch-sdl2_ttf switch-curl switch-mbedtls switch-minizip || true
 
     - name: Prepare Rust
       run: |
@@ -50,10 +50,22 @@ jobs:
         cd libnx
         make install -j$(nproc)
 
-    - name: Build Project
+    - name: Build Sysmodule
       run: |
         export PATH="$HOME/.cargo/bin:$PATH"
-        make dist -j$(nproc)
+        make sysmodule
+
+    - name: Build Overlay
+      run: |
+        make overlay
+
+    - name: Build Portal
+      run: |
+        make portal
+
+    - name: Assemble Distribution & Zips
+      run: |
+        make dist
 
     - name: Set Release Name
       shell: bash
