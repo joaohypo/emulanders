@@ -29,7 +29,8 @@ documentation and/or software.
 #ifndef H__MD5
 #define H__MD5
 
-typedef unsigned long UINT4;
+#include <stdint.h>
+typedef uint32_t UINT4;
 
 typedef struct
 {

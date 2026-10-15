@@ -43,7 +43,7 @@ void Runes::decryptBlock(uint8_t* header, uint8_t* cBlockData, uint8_t* pBlockDa
 	uint8_t key[0x10];
 	Runes::computeKey(header, blockId, key);
 
-	unsigned long rk[RKLENGTH(128)];
+	uint32_t rk[RKLENGTH(128)];
 	uint32_t rounds = rijndaelSetupDecrypt(rk, key, 128);
 	rijndaelDecrypt(rk, rounds, cBlockData, pBlockData);
 }
@@ -53,7 +53,7 @@ void Runes::encryptBlock(uint8_t* header, uint8_t* pBlockData, uint8_t* cBlockDa
 	uint8_t key[0x10];
 	Runes::computeKey(header, blockId, key);
 
-	unsigned long rk[RKLENGTH(128)];
+	uint32_t rk[RKLENGTH(128)];
 	uint32_t rounds = rijndaelSetupEncrypt(rk, key, 128);
 	rijndaelEncrypt(rk, rounds, pBlockData, cBlockData);
 }

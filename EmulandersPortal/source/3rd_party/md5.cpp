@@ -217,11 +217,12 @@ void MD5Digest(MD5 *md5, const void *input, unsigned int inputLen)
 order.
 */
 
-#ifdef LITTLE_ENDIAN
-#define ENCODE(p,n) *(UINT4 *)(p) = n
-#else
-#define ENCODE(p,n) (p)[0]=static_cast<unsigned char>(n),(p)[1]=static_cast<unsigned char>(n>>8),(p)[2]=static_cast<unsigned char>(n>>16),(p)[3]=static_cast<unsigned char>(n>>24)
-#endif
+#define ENCODE(p,n) do { \
+    (p)[0] = (unsigned char)((n) & 0xff); \
+    (p)[1] = (unsigned char)(((n) >> 8) & 0xff); \
+    (p)[2] = (unsigned char)(((n) >> 16) & 0xff); \
+    (p)[3] = (unsigned char)(((n) >> 24) & 0xff); \
+} while(0)
 
 void MD5Close(MD5 *md5, unsigned char digest[16])
 {

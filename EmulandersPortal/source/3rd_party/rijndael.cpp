@@ -1,9 +1,10 @@
 #define FULL_UNROLL
 
 #include "rijndael.h"
+#include <stdint.h>
 
-typedef unsigned long u32;
-typedef unsigned char u8;
+typedef uint32_t u32;
+typedef uint8_t u8;
 
 static const u32 Te0[256] =
 {
