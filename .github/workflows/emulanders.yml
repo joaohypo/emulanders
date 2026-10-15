@@ -90,7 +90,7 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/')
       shell: bash
       run: |
-        curl -sL -o emulanders_assets_pack.zip https://github.com/joaohypo/emulanders/releases/download/0.9.1/emulanders_assets_pack.zip
+        curl -sL -o emulanders_assets_pack.zip https://github.com/joaohypo/emulanders/releases/download/1.0.0/emulanders_assets_pack.zip
 
     - name: Upload CI Artifact
       uses: actions/upload-artifact@v4

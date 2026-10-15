@@ -1834,7 +1834,7 @@ void RenderScreenDownloaders(float screen_w, float content_h, float ui_scale, bo
                 G.progress.store(0.0f);
                 G.dl_running = true;
                 G.bg_thread.launch([]() {
-                    const char* asset_url = "https://github.com/joaohypo/emulanders/releases/download/0.9.1/emulanders_assets_pack.zip";
+                    const char* asset_url = "https://github.com/joaohypo/emulanders/releases/download/1.0.0/emulanders_assets_pack.zip";
                     strncpy(G.status_msg, "Downloading assets...", sizeof(G.status_msg) - 1);
                     CURL* curl = curl_easy_init();
                     FILE* fp = fopen("sdmc:/emulanders/tmp_assets.zip", "wb");

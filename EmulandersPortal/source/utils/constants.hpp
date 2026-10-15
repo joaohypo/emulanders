@@ -24,3 +24,4 @@ constexpr const char* SCANS_SUBDIR     = "myScans/";
 
 constexpr const char* EMULANDERS_SERVICE = "emulande";
 constexpr const char* APP_USER_AGENT     = "EmulandersPortal/1.0";
+constexpr const char* APP_VERSION_STRING = "v1.0.0";

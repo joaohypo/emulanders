@@ -320,7 +320,7 @@ int main(int argc, char* argv[]) {
             ImGui::SameLine(0, 10.0f * ui_scale);
             ImGui::SetCursorPosY((header_h / 2.0f) + (5.0f * ui_scale));
             if (f_small) ImGui::PushFont(f_small);
-            ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "v0.9.2");
+            ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), APP_VERSION_STRING);
             if (f_small) ImGui::PopFont();
 
             float info_cy = (header_h / 2.0f) - (11.0f * ui_scale);
