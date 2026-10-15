@@ -18,259 +18,245 @@
   </a>
 </p>
 
-## ⚠️ Disclaimer
+## Disclaimer
 
-**This project is a clean-room reverse engineering effort for educational and archival purposes.**
-Emulanders does **not** distribute copyrighted material, encryption keys, Nintendo SDK code, or Skylander game data. Users are expected to provide their own backups (`.dump` or `.bin` files) extracted from physical hardware they legally own.
-
----
-
-## 📖 Overview
-
-Emulanders is a background sysmodule and Tesla Overlay for the Atmosphère CFW. It enables the loading and hot-swapping of Skylander figures directly from your SD card within *Skylanders: Imaginators*.
-
-Development status and future objectives are documented in the [Project Roadmap](ROADMAP.md).
-
-### Technical Foundation
-Standard Nintendo Amiibos utilize NTAG formats via the `nfp` (Nintendo Figurine Platform) service. In contrast, Skylanders hardware relies on NXP Mifare Classic 1K tags. *Skylanders: Imaginators* bypasses the standard Amiibo stack and communicates directly with the low-level **`nfc:mf:u`** (Mifare User) IPC service.
-
-Emulanders acts as a protocol bridge for the `nfc:mf:u` interface, providing a virtualized data path. It intercepts IPC requests and serves figure data from the SD card, ensuring compatibility with the game's official communication standards.
+This project does not distribute copyrighted game files, encryption keys, or proprietary Nintendo SDK code. Users must supply their own figure backups (`.dump` / `.bin`) dumped from physical toys they legally own.
 
 ---
 
-## 📥 Download
+## Overview
 
-The latest stable binaries, including the sysmodule (`exefs.nsp`) and the Tesla overlay (`emulanders.ovl`), can be found on the **[Releases Page](https://github.com/joaohypo/emulanders/releases/latest)**. 
+Emulanders is an ecosystem for Nintendo Switch (Atmosphère CFW) that emulates Skylanders NFC figures directly from the SD card in *Skylanders: Imaginators*.
 
-Always ensure you are using the version compatible with your current Atmosphère and Firmware setup.
+It consists of three main components:
+- **Sysmodule**: Background service intercepting `nfc:mf:u` IPC calls.
+- **Tesla Overlay**: In-game menu to select, swap, and unmount figures on-the-fly.
+- **Emulanders Portal**: Standalone Homebrew Menu app to dump physical toys via Joy-Con NFC, clone dumps, crop screenshot portraits, and download community assets.
 
----
+Development status and future objectives are tracked in [ROADMAP.md](ROADMAP.md).
 
-## 🚀 Core Features
-
-- **Mifare Protocol Emulation:** Comprehensive implementation of the `nfc:mf:u` service stack.
-- **Tesla Overlay:** In-game hot-swapping and mounting of virtual Skylander `.dump` files without leaving *Skylanders: Imaginators*.
-- **Physical Joy-Con NFC Dumper (Portal App):** Scan real toys using the Right Joy-Con (`nfp:user`), preview character art, and save 1KB Mifare dumps straight to SD.
-- **Cryptographic Cloning Engine:** 1:1 exact duplication and New Identity cloning with UID randomization, sector trailer Key A calculation, Header CRC16 recalculation, data decryption/re-encryption, and Creation Crystal UID conflict safeguards.
-- **Interactive Screenshot Cropper:** Direct Switch Album integration, 16:9 previews, Joy-Con D-Pad/stick adjustment, and 1:1 touch cropping to overlay portraits (175x275).
-- **OTA Downloaders:** In-app asset pack and figure dump downloaders with real-time extraction.
-- **Bilingual Localization:** Complete native support for English and Brazilian Portuguese (PT-BR) with automatic system language detection and runtime switcher.
-- **Customizable UI & Themes:** 7 built-in color themes, RGB fine-tuning sliders, and interactive color picker.
-- **State Persistence:** Retains emulation state and mounted figures across reboots.
-- **Tool Compatibility:** Operates seamlessly alongside Amiibo emulators (e.g., Emuiibo) without service conflict.
+### Technical Background
+Standard Nintendo Amiibos use NTAG215 tags through the high-level `nfp` service. Skylanders figures use NXP Mifare Classic 1K tags. *Skylanders: Imaginators* bypasses the standard Amiibo stack and communicates directly with the console's low-level `nfc:mf:u` (Mifare User) interface. Emulanders intercepts these calls and serves figure data from the SD card (`sdmc:/emulanders/figures/`).
 
 ---
 
-## ✅ Compatibility
+## Features
 
-- **Target Game:** Skylanders: Imaginators (Nintendo Switch Version).
-- **Firmware Support:** Compatible with Firmware **4.0.0** and higher (due to `nfc:mf:u` requirements).
-- **Validated Environment:** Extensively tested on **Firmware 21.2.0** and **Atmosphère 11.1.1** / 1.10.x.
+- **Mifare Protocol Emulation**: Implements the `nfc:mf:u` service interface for in-game toy detection.
+- **Tesla Overlay**: Mount, unmount, and hot-swap figures during gameplay without closing the title.
+- **Joy-Con NFC Dumper**: Dump physical toys using the Right Joy-Con or Switch Pro Controller NFC reader.
+- **Figure Cloning**: 1:1 exact duplication or New Identity cloning (randomized UID, recomputed checksums, and recalculated sector keys) to avoid duplicate figure collisions in-game.
+- **Screenshot Cropper**: Crop screenshots directly from the Switch Album (`Nintendo/Album`) to generate figure portraits (`figure.png`).
+- **OTA Downloaders**: In-app downloaders for community asset packs and dump archives over Wi-Fi.
+- **Localization**: English and Portuguese (PT-BR) support with runtime switching.
+- **Custom Themes**: 7 color presets and RGB sliders for custom UI styling.
+- **State Persistence**: Retains active figure and emulation toggle across console reboots.
+- **Emuiibo Coexistence**: Runs alongside Emuiibo without service conflicts.
 
 ---
 
-## 📂 Installation
+## Compatibility
 
-### Quick Start (Recommended)
-To install Emulanders, simply download **`Emulanders-Bundle-1.0.0.zip`** from the [Releases Page](https://github.com/joaohypo/emulanders/releases/latest) and extract all folders (`atmosphere`, `switch`, `emulanders`) directly to the root of your Switch's SD card.
+- **Target Game**: *Skylanders: Imaginators* (Nintendo Switch version)
+- **Firmware Support**: 4.0.0+ (minimum required by `nfc:mf:u`)
+- **Tested On**: Firmware 21.2.0 with Atmosphère 1.10.x / 1.11.x
 
-For figure portraits in the overlay, also download the **Assets Pack** from the releases page and extract it to the root of your SD card — it contains the ready-to-use `emulanders/assets/` structure with portraits for **every Skylander and accessory** across all generations.
+---
 
-### Manual File Placement
-Alternatively, you can place the files manually:
+## Installation
+
+### Quick Install (Recommended)
+1. Download `Emulanders-Bundle-1.0.0.zip` from the [Releases](https://github.com/joaohypo/emulanders/releases/latest) page.
+2. Extract the archive directly to the root of your SD card (copies `atmosphere`, `switch`, and `emulanders` folders).
+3. *(Optional)* Download `emulanders_assets_pack.zip` and extract to the SD card root for full figure portrait artwork.
+4. Restart your console.
+
+### Manual Placement
 - **Sysmodule**: `sd:/atmosphere/contents/420000000000E311/exefs.nsp`
 - **Tesla Overlay**: `sd:/switch/.overlays/emulanders.ovl`
-- **Standalone App (Emulanders Portal)**: `sd:/switch/EmulandersPortal/EmulandersPortal.nro`
+- **Portal App**: `sd:/switch/EmulandersPortal/EmulandersPortal.nro`
 - **Overlay Translations**: `sd:/emulanders/overlay/lang/`
 
-### SD Card Structure
-The project utilizes the `sdmc:/emulanders/` directory.
-
-1. **`/figures/`**: Place raw `.dump` or `.bin` backups here. Subfolders are supported and recommended for organization (e.g., by Element or Series).
-   *Example:* `sd:/emulanders/figures/Senseis/King_Pen.dump`
-2. **`/assets/`**: *(Optional)* Shared portrait images, resolved automatically by Character ID. See **Image Resolution** below.
-3. **`/overlay/lang/`**: Language definition files (JSON).
-4. **`/flags/`**: System-managed files for state persistence.
+### SD Card Layout
+```text
+sdmc:/
+├── atmosphere/contents/420000000000E311/
+│   ├── exefs.nsp
+│   ├── toolbox.json
+│   └── flags/boot2.flag
+├── switch/
+│   ├── .overlays/
+│   │   └── emulanders.ovl
+│   └── EmulandersPortal/
+│       ├── EmulandersPortal.nro
+│       └── dumps_urls.txt
+└── emulanders/
+    ├── figures/        # Place your .dump / .bin backups here (subfolders supported)
+    ├── assets/         # Character portrait PNGs ({CharID}.png)
+    ├── overlay/lang/   # Language JSON files
+    └── flags/          # System-managed state flags
+```
 
 ---
 
-## 🎮 Usage
+## Usage
 
 <div align="center">
   <video src="https://github.com/user-attachments/assets/7e61b20a-e117-4c3a-9585-9310cc56cbc0" autoplay="autoplay" loop="loop" muted="muted" playsinline width="480"></video>
   <br>
-  <em><a href="https://youtu.be/oYJi1xWd5xI">Watch the full Usage Demonstration on YouTube</a></em>
+  <em><a href="https://youtu.be/oYJi1xWd5xI">Video demonstration on YouTube</a></em>
 </div>
 
-### ⚠️ Important Prerequisites
-- **Sysmodule Status:** Ensure the Emulanders sysmodule is running in the background. If you use tools like **Hekate Toolbox** (homebrew app) or the **Sysmodules** overlay (Tesla/Ultrahand) to toggle background modules ON/OFF, **you must restart your console** for the changes to take effect.
-- **Enable Before Launch:** Emulation **must be set to ON** in the Emulanders Tesla menu *before* you start the game. *Skylanders: Imaginators* initializes its NFC services during the loading screen. If emulation is off when the game boots, the sysmodule will miss the initial IPC calls and will not intercept the game.
+### Prerequisites
+- The sysmodule must be running in the background (enabled by default via `boot2.flag`).
+- **Turn emulation ON before launching the game**. The game initializes NFC during the boot screen. If emulation is off at boot, the sysmodule will not intercept the session.
+- Wait until you are inside the game world before opening the Tesla overlay. The initial loading screen is memory-intensive and may cause overlay stutter if accessed during boot.
 
 ### Basic Workflow
-1. Open the Tesla menu (**L + D-Pad Down + Right Stick Click**).
+1. Open the Tesla menu: `L + D-Pad Down + R3` (Right Stick click).
 2. Select **emulanders**.
-3. Set **Emulation** to **ON**.
-4. **Important:** Minimize the overlay and launch the game. It is highly recommended to only re-open the overlay once you are inside the game world, **after all initial loading screens have finished**. The game's loading process is extremely resource-intensive and may cause lag or instability in the overlay interface if used simultaneously.
-5. Navigate to **View Figures Folder** and select a file (`.dump` or `.bin`).
-6. The `>> ACTIVE` indicator confirms the figure is mounted.
-7. **To swap:** Select a different file.
-8. **To unmount:** Select the active file again, use the **Clear active Skylander** menu option, or press the **X** button while the overlay is open.
+3. Toggle Emulation to **ON**.
+4. Launch *Skylanders: Imaginators*.
+5. Open the overlay in-game, choose **View Figures Folder**, and select a `.dump` file to mount.
+6. The `>> ACTIVE` indicator confirms the figure is loaded.
+7. To swap figures, select another file. To unmount, select the active file again or press `X`.
 
-### Commands
-- **Enable Emulation:** `[ZR]`
-- **Disable Emulation:** `[ZL]`
-- **Select Skylander / Folder:** `[A]`
-- **Toggle Favorite:** `[Y]`
-- **Clear active Skylander:** `[X]`
-- **Show Help:** `[+]` (Plus)
+### Overlay Controls
+- Enable Emulation: `ZR`
+- Disable Emulation: `ZL`
+- Select Figure / Folder: `A`
+- Toggle Favorite: `Y`
+- Clear Active Figure: `X`
+- Help: `+`
 
 ### Technical Notes
-- **Polling Overhead:** To reduce CPU usage after a character has loaded, it is recommended to unmount the figure. This suspends the high-frequency IPC polling.
-- **Swap Force:** *Skylanders: Imaginators* on Switch provides full compatibility for Swap Force figures. However, because the game itself does not implement the "part-mixing" mechanic on this platform, you only need to select a single backup file (either the base or the top half) to load the character in its entirety.
+- **Polling Overhead**: Unmounting the figure after loading a character in-game stops NFC polling and reduces background CPU overhead.
+- **Swap Force**: *Skylanders: Imaginators* on Switch provides compatibility for Swap Force figures. Because the game does not implement the top/bottom mixing mechanic on this platform, selecting either the top or base dump loads the complete character.
 
-### 🖼️ Image Resolution
+### Image Resolution
 
-The overlay displays a portrait for each figure using a **3-tier fallback** system. No manual configuration is required — the overlay reads the Character ID and Variant ID directly from the dump file.
+The overlay displays portraits using a 3-tier fallback. Character ID and Variant ID are parsed directly from the dump file.
 
 | Priority | Path Pattern | Example |
 |:--|:--|:--|
-| 1. **Same-name PNG** | `<figure_path_without_ext>.png` | `figures/King_Pen.png` (beside `King_Pen.dump`) |
-| 2. **Shared asset (variant)** | `assets/{CharID}_{VariantID}.png` | `assets/000259_5000.png` |
-| 3. **Shared asset (base)** | `assets/{CharID}.png` | `assets/000259.png` |
+| 1. Same-name PNG | `<figure_path_without_ext>.png` | `figures/King_Pen.png` |
+| 2. Shared asset (variant) | `assets/{CharID}_{VariantID}.png` | `assets/000259_5000.png` |
+| 3. Shared asset (base) | `assets/{CharID}.png` | `assets/000259.png` |
 
-**How it works:** When no same-name PNG is found, the overlay reads bytes `16-18` (Character ID) and `28-29` (Variant ID) from the `.dump` / `.bin` file, then looks for a matching image in `sd:/emulanders/assets/`.
+If no local PNG is found next to the dump, the overlay reads bytes `16-18` (Character ID) and `28-29` (Variant ID) from the file and looks in `sd:/emulanders/assets/`.
 
-An **Assets Pack** is available as a separate download on the [Releases Page](https://github.com/joaohypo/emulanders/releases). It includes portraits for **every known Skylander figure, variant, and accessory**. To install, simply extract the zip to the **root of your SD card** — the folder structure is ready to go. Recommended image resolution: **RGBA PNG, ≤200×275px**.
+An **Assets Pack** with portraits for every Skylander and variant is available on the [Releases](https://github.com/joaohypo/emulanders/releases) page. Recommended image resolution: **RGBA PNG, ≤200×275px**.
 
 ---
 
-## 🌟 Emulanders Portal (Standalone App Guide)
+## Emulanders Portal
 
 <p align="center">
   <img alt="Emulanders Portal Feature Showcase" src="res/portal_showcase.png" width="850">
 </p>
 
-**Emulanders Portal** is the companion homebrew application for managing your collection directly on the Nintendo Switch without needing a PC. Launch it from the **Homebrew Menu** (`hbmenu`).
+Emulanders Portal (`switch/EmulandersPortal/EmulandersPortal.nro`) is the collection manager app for the console. Launch it from the Homebrew Menu (`hbmenu`).
 
-```
-sd:/switch/EmulandersPortal/EmulandersPortal.nro
-```
-
-### 1. Physical Joy-Con NFC Dumper
+### Joy-Con NFC Dumper
 
 <p align="center">
   <img alt="Joy-Con Physical NFC Dumper" src="res/screenshots/04_nfc_dumper.jpg" width="580">
 </p>
 
-Back up your physical Skylander toys directly using your Nintendo Switch hardware:
-- **How to use:** Navigate to the **Dump Figure** tab and place your physical toy onto the Right Joy-Con analog stick (or the NFC contact point on a Nintendo Switch Pro Controller).
-- **Automated Detection:** The app utilizes the low-level `nfp:user` service to read the Mifare Classic 1K tag, identifies the Character ID and Variant ID, and immediately displays the official portrait art and character details.
-- **One-Click Backup:** Press **[A]** to save a clean 1KB Mifare dump (`.dump`) directly into `sdmc:/emulanders/figures/`.
+Dump physical figures directly using the console:
+- Navigate to **Dump Figure** and place a toy on the Right Joy-Con analog stick (or Pro Controller NFC sweet spot).
+- Reads the Mifare Classic 1K tag through `nfp:user`, resolves Character/Variant IDs, and displays portrait artwork.
+- Press `A` to save a 1KB `.dump` to `sdmc:/emulanders/figures/`.
 
-### 2. File Manager & Cryptographic Cloning Engine
+### File Manager & Figure Cloning
 
 <p align="center">
   <img alt="File Manager & Dump Cloning" src="res/screenshots/03_file_manager.jpg" width="580">
 </p>
 
-Manage your library and create duplicate figures with custom identities:
-- **File Browser:** Browse folders, view high-resolution figure previews, organize directories, delete old dumps, and mark figures as **Favorites** for quick access in the Tesla overlay.
-- **1:1 Exact Duplication:** Duplicates the dump file byte-for-byte. Perfect for simple backups.
-- **New Identity Duplication:**
-  - Generates a completely new randomized 4-byte Mifare UID.
-  - Recomputes the Sector 0 BCC (Block Check Character) checksum.
-  - Derives all 16 Mifare Sector Trailer Key A values using the Mifare cryptographic key derivation algorithm.
-  - Decrypts the figure data blocks with the old UID, re-encrypts them under the new UID keys, and recalculates the Sector 0 Block 1 Header CRC16 checksum.
-  - *Why this matters:* The game rejects two figures on the portal with identical UIDs. New Identity cloning allows you to run multiple instances of the same figure simultaneously or reset/level up duplicate Creation Crystals without conflicts!
+- **File Browser**: Browse folders, preview figures, organize directories, delete old dumps, and mark favorites for quick access in the overlay.
+- **1:1 Clone**: Byte-for-byte duplicate of the dump file for simple backups.
+- **New Identity Clone**: Generates a randomized 4-byte UID, updates Sector 0 BCC, calculates sector Key A values, re-encrypts data blocks under the new keys, and recalculates the Header CRC16 checksum. This allows running multiple copies of the same character simultaneously or leveling duplicate Creation Crystals independently without UID conflicts.
 
-### 3. Figure Image Editor & Album Cropper
+### Screenshot Cropper
 
 <p align="center">
   <img alt="Figure Image Editor & Album Cropper" src="res/screenshots/02_image_cropper.jpg" width="580">
 </p>
 
-Personalize any figure's portrait directly from your console screenshots:
-- **Album Integration:** Opens your Nintendo Switch Screenshot Album (`sdmc:/Nintendo/Album/`, including emuMMC paths) or any custom folder with PNG/JPG images.
-- **Interactive Cropping Tool:**
-  - View full 16:9 screenshots on screen.
-  - Adjust the crop window using the **D-Pad / Left Stick** or drag directly via the **Touchscreen**.
-  - Zoom and scale with the **Right Stick / Shoulder Buttons**.
-  - Save the cropped 175×275 portrait alongside the dump (`figure.png`), instantly updating thumbnails across both Emulanders Portal and the Tesla overlay.
+- Opens console screenshots directly from the Switch Album (`sdmc:/Nintendo/Album/` or custom folders).
+- Preview 16:9 images, adjust the crop box with the D-Pad / left stick or drag via touchscreen, and zoom with right stick / shoulder buttons.
+- Saves a 175×275 portrait alongside the dump (`figure.png`), immediately updating thumbnails in both Portal and overlay.
 
-### 4. Over-The-Air (OTA) Downloaders
+### OTA Downloaders
 
 <p align="center">
   <img alt="OTA Dump Downloader" src="res/screenshots/05_dump_downloader.jpg" width="580">
 </p>
 
-- **Asset Pack Downloader:** Download and extract the full community portrait asset collection directly to `sdmc:/emulanders/assets/` over Wi-Fi.
-- **Figure Dumps Downloader:** Pull figure archives and packs directly from remote repositories onto your SD card without needing an FTP client or SD card reader.
+- **Asset Pack Downloader**: Downloads and extracts the community portrait library directly to `sdmc:/emulanders/assets/` over Wi-Fi.
+- **Figure Dumps Downloader**: Downloads figure packs directly to the SD card.
 
-### 5. Custom Themes & Accessibility
+### Settings & Themes
 
 <p align="center">
   <img alt="Settings, Themes and Bilingual Support" src="res/screenshots/06_settings_themes.jpg" width="580">
 </p>
 
-- **Color Themes:** Choose between 7 pre-configured color palettes (Emulanders Blue, Portal Purple, Magma Red, Life Green, Tech Orange, Undead Violet, Dark Void) or design your own with the RGB sliders and color palette picker.
-- **Bilingual Localization:** Fully translated into **English** and **Português (Brasil)** with automatic system language detection and on-the-fly toggling.
-- **Docked & Handheld Navigation:** Full support for Joy-Cons, Pro Controllers, and capacitive multi-touch gestures.
+- **Themes**: 7 color presets (Emulanders Blue, Portal Purple, Magma Red, Life Green, Tech Orange, Undead Violet, Dark Void) or custom RGB adjustment.
+- **Localization**: English and Portuguese (PT-BR) with system auto-detection and runtime toggle.
+- **Input**: Supports Joy-Cons, Pro Controllers, and capacitive touchscreen.
 
 ---
 
-## ⚠️ Known Issues
+## Known Issues
 
 ### Docked Mode UI Disappearance
-In **Docked Mode**, if the Nintendo Switch's **"Adjust Screen Size"** setting is set to less than **100%**, the main Emulanders UI window may disappear when selected from the Tesla menu (though the Tesla base menu itself remains functional). This is a known system-level compositing conflict with overscan rescaling.
+In Docked Mode, if the console's **Adjust Screen Size** setting is set below 100%, selecting emulanders from the Tesla menu may cause the overlay window to disappear while the base Tesla menu remains responsive. This is a system compositor limitation with overscan rescaling.
 
-**Workaround:** Set your Switch's **Adjust Screen Size** to **100%** (**System Settings > TV Settings > Adjust Screen Size**). If the image cuts off on your TV, adjust the "Overscan" or "Aspect Ratio" settings on your **TV itself** (e.g., set to "Just Scan" or "1:1 Pixel Mapping").
+**Workaround**: Set your console's screen scaling to 100% (**System Settings > TV Settings > Adjust Screen Size**). If the image is clipped on your TV, adjust the overscan or aspect ratio setting on your TV itself (e.g. "Just Scan", "1:1 Pixel Mapping", or "Fit to Screen").
 
----
-
-## 🤝 Coexistence
-Emulanders and Emuiibo target different logical interfaces (`nfc:mf:u` and `nfp`, respectively). They can be installed and used simultaneously without service-level conflicts.
+### Handheld Mode Joy-Con Attachment
+When Joy-Cons are physically attached in handheld mode, the game may display a notice stating "Controller not compatible with reading toys." Detach the Joy-Cons to continue. This is an internal limitation of *Skylanders: Imaginators* and not an issue with the sysmodule.
 
 ---
 
-## 🐛 Debugging
+## Coexistence
+Emulanders and Emuiibo target different system interfaces (`nfc:mf:u` and `nfp`, respectively). Both can remain installed and active simultaneously without service conflicts.
+
+---
+
+## Debugging
 If a specific dump fails to load:
-1. Open the overlay and enter the **Logs Manager**.
+1. Open the overlay and navigate to **Logs Manager**.
 2. Enable **Debug Logging**.
-3. Reproduce the error in-game.
-4. Select **Extract to SD** to save the buffer to `sdmc:/emulanders/debug_log_dump.txt`.
-5. Attach the log when opening an issue.
+3. Reproduce the issue in-game.
+4. Select **Extract to SD** to write the log buffer to `sdmc:/emulanders/debug_log_dump.txt`.
+5. Attach the file when opening an issue.
 
 ---
 
-## 🛠️ Compilation
-Requires the [Switch Rust Toolchain](https://github.com/aarch64-switch-rs/setup-guide) and devkitPro (devkitA64).
-Run `make dist` for release builds or `make dist-dev` for debug builds.
+## Building
+Requires devkitPro (devkitA64) and the [Switch Rust Toolchain](https://github.com/aarch64-switch-rs/setup-guide).
+- Release build: `make dist`
+- Debug build: `make dist-dev`
 
 ---
 
-## ❤️ Credits & Acknowledgments
+## Credits
+Emulanders builds upon the research, sysmodule architecture, and UI concepts originally created for the **Emuiibo** project by XorTroll and its contributors.
 
-**The primary credit for this project belongs to XorTroll and the incredible contributors of the Emuiibo project.**
-Emulanders is built upon the foundational research, sysmodule architecture, and UI logic originally developed for Emuiibo. While this software has been fully refactored to specialize in the `nfc:mf:u` service for Skylanders, its existence is a direct result of the brilliant work and open-source spirit of XorTroll and everyone who collaborated on the original Amiibo emulation system.
-
-Special thanks to:
-- [**XorTroll**](https://github.com/XorTroll): For the original Emuiibo project, sysmodule framework, and continuous inspiration to the Switch homebrew scene.
-- **Emuiibo Contributors**: *Subv, ogniK, averne, spx01, SciresM* and everyone involved in the original **nfp-mitm** research.
-- **Overlay Devs**: *AD2076* and *AmonRaNet* for their essential work on the Tesla overlay framework.
-- [**Switchbrew**](https://switchbrew.org/): For the peerless technical documentation that makes all Switch homebrew possible.
-- [**nx (aarch64-switch-rs)**](https://github.com/aarch64-switch-rs/nx): For the native Rust bindings.
-- [**SkylandersNFC**](https://github.com/skylandersNFC): For the deep-dive research into Mifare figure structures.
-
-Finally, a massive thank you to the **Skylanders community** for their tireless passion in building tools, creating tutorials, and keeping the magic of the game alive for future generations.
+- [**XorTroll**](https://github.com/XorTroll): Original Emuiibo project, sysmodule framework, and Switch homebrew tooling.
+- **Emuiibo Contributors**: *Subv, ogniK, averne, spx01, SciresM* and everyone involved in early `nfp-mitm` research.
+- **libtesla Developers**: *AD2076* and *AmonRaNet* for the Tesla overlay framework.
+- [**Switchbrew**](https://switchbrew.org/): Technical documentation and libnx.
+- [**nx (aarch64-switch-rs)**](https://github.com/aarch64-switch-rs/nx): Native Rust bindings.
+- [**SkylandersNFC**](https://github.com/skylandersNFC): Mifare figure format research.
 
 ---
 
-## 📜 License
+## License
 
-Emulanders is licensed under **GNU GPLv3**. 
-
-By adopting **GPLv3**, we ensure that the project remains open and protected against "Tivoization" (blocking users from running modified versions on their hardware) and provides stronger patent protections. This is an established standard for preserving freedom in modern console homebrew. 
-
-See the [**LICENSE**](LICENSE) file for full details.
+Emulanders is licensed under **GNU GPLv3**. See [LICENSE](LICENSE) for full details.
 
 *Ryujinx project exemption: The Ryujinx team is exempt from GPLv3 licensing for this codebase.*
