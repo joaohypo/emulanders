@@ -1432,7 +1432,7 @@ void RenderScreenImageEditor(float screen_w, float content_h, float ui_scale, bo
             const char* lbl_save  = TR("Save Artwork (A)", "Salvar Arte (A)");
             const char* lbl_reset = TR("Reset Frame (X)", "Redefinir (X)");
             const char* lbl_back  = TR("Back to Photos (B)", "Voltar (B)");
-            float act_btn_h = 42.0f * ui_scale;
+            float act_btn_h = 38.0f * ui_scale;
 
             float right_panel_w = std::max({
                 250.0f * ui_scale,
@@ -1571,7 +1571,7 @@ void RenderScreenImageEditor(float screen_w, float content_h, float ui_scale, bo
             ImVec2 uv0(G.crop_pos.x / disp_w, G.crop_pos.y / disp_h);
             ImVec2 uv1((G.crop_pos.x + G.crop_size.x) / disp_w, (G.crop_pos.y + G.crop_size.y) / disp_h);
 
-            float prev_h = std::min(165.0f * ui_scale, std::max(90.0f * ui_scale, avail_h - 185.0f * ui_scale));
+            float prev_h = std::min(125.0f * ui_scale, std::max(65.0f * ui_scale, avail_h - 215.0f * ui_scale));
             float prev_w = prev_h * target_ratio;
             float center_off_x = (right_panel_w - prev_w) * 0.5f;
             if (center_off_x > 0) ImGui::SetCursorPosX(ImGui::GetCursorPosX() + center_off_x);

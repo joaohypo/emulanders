@@ -1,57 +1,42 @@
-# Emulanders 1.0.0
+# Emulanders 1.0.1
 
-Initial release of the Emulanders suite for Nintendo Switch, featuring the standalone Emulanders Portal manager alongside the background sysmodule and Tesla overlay.
+Maintenance release. No change to the sysmodule's behaviour; the main changes are in Emulanders Portal and the overlay translations.
 
-<div align="center">
-  <video src="https://github.com/user-attachments/assets/7e61b20a-e117-4c3a-9585-9310cc56cbc0" autoplay="autoplay" loop="loop" muted="muted" playsinline width="480"></video>
-  <br>
-  <em><a href="https://youtu.be/oYJi1xWd5xI">Video demonstration on YouTube</a></em>
-</div>
+## Changes
 
----
+### Emulanders Portal
+- Language support expanded from 2 to 10: English, Portuguese (Brazil), Spanish, French, German, Italian, Russian, Korean, Simplified Chinese and Traditional Chinese. The selection is stored in `sdmc:/emulanders/config.json` and shared with the overlay.
+- Buttons now size themselves to their label, and the language and theme lists wrap onto a new row, so longer translations no longer overflow.
+- Cyrillic and CJK text is rendered with the console's shared system fonts.
+- Figure Image Editor: the `Figures / Scans / Favorites` and `Menu / Back` buttons are on a single row, and the step header is one line instead of three. This gives the figure and photo lists roughly 95 px of extra height (about seven visible rows instead of four).
+- Download failures (no network, bad URL) are reported instead of silently extracting an empty archive.
+- Fixed controller hot-plugging when docking and undocking, and resizing between 720p and 1080p.
 
-## What's Included
+### Tesla overlay
+- All 10 languages are fully translated (previously only English and Portuguese were).
+- Reads the language chosen in the Portal; falls back to the system language otherwise.
+- Fixed the version-mismatch warning, which was being overwritten and never shown.
 
-### Emulanders Portal (`EmulandersPortal.nro`)
-Standalone homebrew application for managing your collection directly on the console:
-
-- **Joy-Con NFC Dumper**: Dump physical Skylanders tags using the Right Joy-Con or Pro Controller NFC reader directly to `sdmc:/emulanders/figures/`.
-- **Figure Cloning**:
-  - 1:1 duplicate for simple backups.
-  - New Identity cloning: generates a new UID, rederives sector Key A values, re-encrypts data blocks, and recalculates CRC16 checksums so duplicate figures can be used simultaneously without in-game collisions.
-- **Screenshot Cropper**: Load 16:9 console captures from the Switch Album (`Nintendo/Album`) and crop them to 175×275 figure portraits (`figure.png`).
-- **OTA Downloaders**: Download community figure dump sets and asset packs over Wi-Fi.
-- **Themes & Languages**: 7 built-in themes, custom RGB color picker, and native English / Portuguese (PT-BR) support.
-
-### Tesla Overlay (`emulanders.ovl`) & Sysmodule
-- In-game figure mounting, unmounting, and hot-swapping (`L + D-Pad Down + R3`).
-- Mifare Classic 1K protocol emulation intercepting `nfc:mf:u`.
-- Low memory footprint with lazy thumbnail rendering.
-- Operates alongside Amiibo tools (Emuiibo) without conflict.
-
----
+### Sysmodule
+- Fixed a possible panic when the debug log was trimmed in the middle of a multi-byte character (for example accented figure names).
 
 ## Packages
 
-| File | Target | Contents |
-|:--|:--|:--|
-| **`Emulanders-Bundle-1.0.0.zip`** | Recommended | Complete suite: Sysmodule (`atmosphere/`), Tesla Overlay (`switch/.overlays/`), Portal app (`switch/EmulandersPortal/`), and language files |
-| **`Emulanders-Portal-1.0.0.zip`** | Standalone App | Emulanders Portal application only (`switch/EmulandersPortal/`) |
-| **`Emulanders-Core-1.0.0.zip`** | Sysmodule & Overlay | Background sysmodule (`exefs.nsp`) and Tesla overlay (`emulanders.ovl`) |
-| **`emulanders_assets_pack.zip`** | Asset Library | Ready-to-use portrait pack for all characters and variants |
+| File | Contents |
+|:--|:--|
+| `Emulanders-Bundle-1.0.1.zip` | Everything: sysmodule, overlay, Portal and language files. Extract to the SD card root. |
+| `Emulanders-Portal-1.0.1.zip` | Portal only (`switch/EmulandersPortal/`). |
+| `Emulanders-Core-1.0.1.zip` | Sysmodule and overlay only. |
+| `emulanders_assets_pack.zip` | Portrait pack (unchanged, from 1.0.0). |
 
----
+## Upgrading from 1.0.0
+Extract the bundle over the existing install and restart the console. Figures, assets and settings are kept. The sysmodule and overlay must be updated together; the overlay warns if their versions differ.
 
-## Installation
-1. Extract `Emulanders-Bundle-1.0.0.zip` to the root of your SD card.
-2. *(Optional)* Extract `emulanders_assets_pack.zip` to the SD root for character portraits.
-3. Restart the console.
-4. Manage figures with **Emulanders Portal** from the Homebrew Menu, and mount them in-game via the Tesla overlay.
-
----
+## Compatibility
+Tested on firmware 22.1 with Atmosphere 1.11.1. Support for firmware 23.0 / Atmosphere 1.12.x has not been tested yet and will be reported in a later release.
 
 ## Credits
-- **XorTroll & Emuiibo Contributors** (*Subv, ogniK, averne, spx01, SciresM*): Original sysmodule architecture and nfp-mitm research.
-- **libtesla Developers** (*AD2076, AmonRaNet*): Overlay framework.
-- **Switchbrew & aarch64-switch-rs team**: libnx and Rust Switch bindings.
-- **Skylanders Community**: Research into figure structures and preservation.
+- XorTroll and Emuiibo contributors (Subv, ogniK, averne, spx01, SciresM): original sysmodule architecture and `nfp-mitm` research.
+- libtesla developers (AD2076, AmonRaNet): overlay framework.
+- Switchbrew and the aarch64-switch-rs team: libnx and the Rust bindings.
+- Skylanders community: research on the figure format.

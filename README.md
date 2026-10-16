@@ -48,7 +48,7 @@ Standard Nintendo Amiibos use NTAG215 tags through the high-level `nfp` service.
 - **Figure Cloning**: 1:1 exact duplication or New Identity cloning (randomized UID, recomputed checksums, and recalculated sector keys) to avoid duplicate figure collisions in-game.
 - **Screenshot Cropper**: Crop screenshots directly from the Switch Album (`Nintendo/Album`) to generate figure portraits (`figure.png`).
 - **OTA Downloaders**: In-app downloaders for community asset packs and dump archives over Wi-Fi.
-- **Localization**: English and Portuguese (PT-BR) support with runtime switching.
+- **Localization**: 10 languages (English, Portuguese, Spanish, French, German, Italian, Russian, Korean, Simplified and Traditional Chinese), switchable at runtime and shared between the Portal and the overlay.
 - **Custom Themes**: 7 color presets and RGB sliders for custom UI styling.
 - **State Persistence**: Retains active figure and emulation toggle across console reboots.
 - **Emuiibo Coexistence**: Runs alongside Emuiibo without service conflicts.
@@ -59,14 +59,14 @@ Standard Nintendo Amiibos use NTAG215 tags through the high-level `nfp` service.
 
 - **Target Game**: *Skylanders: Imaginators* (Nintendo Switch version)
 - **Firmware Support**: 4.0.0+ (minimum required by `nfc:mf:u`)
-- **Tested On**: Firmware 21.2.0 with Atmosphère 1.10.x / 1.11.x
+- **Tested On**: Firmware 22.1 with Atmosphère 1.11.1 (firmware 23.0 / Atmosphère 1.12.x not yet tested)
 
 ---
 
 ## Installation
 
 ### Quick Install (Recommended)
-1. Download `Emulanders-Bundle-1.0.0.zip` from the [Releases](https://github.com/joaohypo/emulanders/releases/latest) page.
+1. Download `Emulanders-Bundle-1.0.1.zip` from the [Releases](https://github.com/joaohypo/emulanders/releases/latest) page.
 2. Extract the archive directly to the root of your SD card (copies `atmosphere`, `switch`, and `emulanders` folders).
 3. *(Optional)* Download `emulanders_assets_pack.zip` and extract to the SD card root for full figure portrait artwork.
 4. Restart your console.
@@ -204,7 +204,7 @@ Dump physical figures directly using the console:
 </p>
 
 - **Themes**: 7 color presets (Emulanders Blue, Portal Purple, Magma Red, Life Green, Tech Orange, Undead Violet, Dark Void) or custom RGB adjustment.
-- **Localization**: English and Portuguese (PT-BR) with system auto-detection and runtime toggle.
+- **Localization**: 10 languages, selectable in Settings. The overlay follows the same choice.
 - **Input**: Supports Joy-Cons, Pro Controllers, and capacitive touchscreen.
 
 ---

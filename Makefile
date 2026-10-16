@@ -43,9 +43,9 @@ dist:
 	@echo "Creating Release Zips in dist/..."
 	@mkdir -p $(CURDIR)/dist
 	@rm -f $(CURDIR)/dist/*.zip
-	@cd $(CURDIR)/SdOut && zip -rq $(CURDIR)/dist/Emulanders-Bundle-1.0.0.zip .
-	@cd $(CURDIR)/SdOut && zip -rq $(CURDIR)/dist/Emulanders-Core-1.0.0.zip atmosphere switch/.overlays emulanders
-	@cd $(CURDIR)/SdOut && zip -rq $(CURDIR)/dist/Emulanders-Portal-1.0.0.zip switch/EmulandersPortal
+	@cd $(CURDIR)/SdOut && zip -rq $(CURDIR)/dist/Emulanders-Bundle-1.0.1.zip .
+	@cd $(CURDIR)/SdOut && zip -rq $(CURDIR)/dist/Emulanders-Core-1.0.1.zip atmosphere switch/.overlays emulanders
+	@cd $(CURDIR)/SdOut && zip -rq $(CURDIR)/dist/Emulanders-Portal-1.0.1.zip switch/EmulandersPortal
 	@echo "Output created at $(CURDIR)/SdOut and release bundles at $(CURDIR)/dist"
 
 dist-dev: sysmodule-dev overlay portal

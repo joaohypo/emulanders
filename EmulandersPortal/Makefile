@@ -21,7 +21,7 @@ ICON		:= res/icon.png
 
 export APP_TITLE   := Emulanders Portal
 export APP_AUTHOR  := joaoHypo
-export APP_VERSION := 1.0.0
+export APP_VERSION := 1.0.1
 export APP_ICON    := $(TOPDIR)/$(ICON)
 
 include $(DEVKITPRO)/libnx/switch_rules
