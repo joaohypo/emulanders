@@ -2,195 +2,195 @@
     "strings": [
         {
             "key": "OtherServiceError",
-            "value": "An error occurred accessing services:"
+            "value": "서비스 접근 중 오류 발생:"
         },
         {
             "key": "EmulationStatus",
-            "value": "Emulation status"
+            "value": "에뮬레이션 상태"
         },
         {
             "key": "On",
-            "value": "On"
+            "value": "켜짐"
         },
         {
             "key": "Off",
-            "value": "Off"
+            "value": "꺼짐"
         },
         {
             "key": "InterceptingGame",
-            "value": "Intercepting Game"
+            "value": "게임 연동 상태"
         },
         {
             "key": "Intercepted",
-            "value": "intercepted"
+            "value": "연동됨"
         },
         {
             "key": "NotIntercepted",
-            "value": "not intercepted"
+            "value": "대기 중"
         },
         {
             "key": "Connected",
-            "value": "connected"
+            "value": "연결됨"
         },
         {
             "key": "Disconnected",
-            "value": "disconnected"
+            "value": "연결 안 됨"
         },
         {
             "key": "ViewFavorites",
-            "value": "View favorites"
+            "value": "즐겨찾기 보기"
         },
         {
             "key": "Help",
-            "value": "Help"
+            "value": "도움말"
         },
         {
             "key": "DebugLogging",
-            "value": "Debug Logging"
+            "value": "디버그 로그"
         },
         {
             "key": "ViewRAMLog",
-            "value": "View RAM Log"
+            "value": "RAM 로그 보기"
         },
         {
             "key": "ExtractToSD",
-            "value": "Extract to SD"
+            "value": "SD 카드로 추출"
         },
         {
             "key": "ClearRAMLog",
-            "value": "Clear RAM Log"
+            "value": "RAM 로그 지우기"
         },
         {
             "key": "EnableEmulation",
-            "value": "Enable Emulation"
+            "value": "에뮬레이션 켜기"
         },
         {
             "key": "DisableEmulation",
-            "value": "Disable Emulation"
+            "value": "에뮬레이션 끄기"
         },
         {
             "key": "SelectSkylanderFolder",
-            "value": "Select Skylander/folder"
+            "value": "스카이랜더/폴더 선택"
         },
         {
             "key": "ClearActiveSkylander",
-            "value": "Clear active Skylander"
+            "value": "활성 피규어 해제"
         },
         {
             "key": "LogsManager",
-            "value": "Logs Manager"
+            "value": "로그 관리자"
         },
         {
             "key": "ViewFiguresFolder",
-            "value": "View Figures Folder"
+            "value": "피규어 폴더 보기"
         },
         {
             "key": "AvailableSkylanders",
-            "value": "Available Skylanders in"
+            "value": "사용 가능한 피규어:"
         },
         {
             "key": "NoActiveFigure",
-            "value": "None Selected"
+            "value": "선택 안 됨"
         },
         {
             "key": "SkylanderLoaded",
-            "value": "Skylander loaded"
+            "value": "피규어 로드됨"
         },
         {
             "key": "SystemReady",
-            "value": "System ready"
+            "value": "시스템 준비 완료"
         },
         {
             "key": "SkylanderLabel",
-            "value": "Skylander:"
+            "value": "피규어:"
         },
         {
             "key": "ToggleFavorite",
-            "value": "Toggle Favorite"
+            "value": "즐겨찾기 전환"
         },
         {
             "key": "Yes",
-            "value": "Yes"
+            "value": "예"
         },
         {
             "key": "No",
-            "value": "No"
+            "value": "아니오"
         },
         {
             "key": "FolderSelected",
-            "value": "Folder"
+            "value": "폴더"
         },
         {
             "key": "NoFigure",
-            "value": "None Selected"
+            "value": "선택 안 됨"
         },
         {
             "key": "UpngInvalidFile",
-            "value": "Invalid file"
+            "value": "잘못된 파일"
         },
         {
             "key": "UpngUnsupportedRgbPng",
-            "value": "Unsupported RGB"
+            "value": "지원되지 않는 RGB"
         },
         {
             "key": "UpngUpscaleUnsupported",
-            "value": "Upscale not supported"
+            "value": "업스케일 미지원"
         },
         {
             "key": "UpngImageTooLarge",
-            "value": "Image too large"
+            "value": "이미지가 너무 큼"
         },
         {
             "key": "UpngImageNotFound",
-            "value": "Image not found"
+            "value": "이미지 없음"
         },
         {
             "key": "UpngNotPngImage",
-            "value": "Not a PNG"
+            "value": "PNG 파일 아님"
         },
         {
             "key": "UpngMalformedPng",
-            "value": "Malformed PNG"
+            "value": "손상된 PNG"
         },
         {
             "key": "UpngUnsupportedPng",
-            "value": "Unsupported PNG"
+            "value": "미지원 PNG"
         },
         {
             "key": "UpngUnsupportedInterlacing",
-            "value": "Interlacing not supported"
+            "value": "인터레이싱 미지원"
         },
         {
             "key": "UpngUnsupportedColorFormat",
-            "value": "Color format not supported"
+            "value": "색상 포맷 미지원"
         },
         {
             "key": "UpngInvalidParameter",
-            "value": "Invalid parameter"
+            "value": "잘못된 매개변수"
         },
         {
             "key": "LegendActive",
-            "value": "ACTIVE"
+            "value": "활성"
         },
         {
             "key": "LegendCursor",
-            "value": "CURSOR"
+            "value": "커서"
         },
         {
             "key": "LogsWarningTitle",
-            "value": "IMPORTANT: Debug Logging"
+            "value": "중요: 디버그 로깅"
         },
         {
             "key": "LogsWarningRAM",
-            "value": "Enabling debug logs consumes system RAM."
+            "value": "디버그 로그는 시스템 RAM을 사용합니다."
         },
         {
             "key": "LogsWarningTrouble",
-            "value": "Use only for troubleshooting purposes."
+            "value": "문제 해결 시에만 사용하세요."
         },
         {
             "key": "LogsWarningDisable",
-            "value": "Disable it for normal gameplay."
+            "value": "일반 플레이 시에는 비활성화하세요."
         }
     ]
 }

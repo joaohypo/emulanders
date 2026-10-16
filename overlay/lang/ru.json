@@ -2,195 +2,195 @@
     "strings": [
         {
             "key": "OtherServiceError",
-            "value": "An error occurred accessing services:"
+            "value": "Ошибка доступа к службам:"
         },
         {
             "key": "EmulationStatus",
-            "value": "Emulation status"
+            "value": "Статус эмуляции"
         },
         {
             "key": "On",
-            "value": "On"
+            "value": "Вкл"
         },
         {
             "key": "Off",
-            "value": "Off"
+            "value": "Выкл"
         },
         {
             "key": "InterceptingGame",
-            "value": "Intercepting Game"
+            "value": "Перехват игры"
         },
         {
             "key": "Intercepted",
-            "value": "intercepted"
+            "value": "активен"
         },
         {
             "key": "NotIntercepted",
-            "value": "not intercepted"
+            "value": "не активен"
         },
         {
             "key": "Connected",
-            "value": "connected"
+            "value": "подключено"
         },
         {
             "key": "Disconnected",
-            "value": "disconnected"
+            "value": "отключено"
         },
         {
             "key": "ViewFavorites",
-            "value": "View favorites"
+            "value": "Избранное"
         },
         {
             "key": "Help",
-            "value": "Help"
+            "value": "Справка"
         },
         {
             "key": "DebugLogging",
-            "value": "Debug Logging"
+            "value": "Отладочный лог"
         },
         {
             "key": "ViewRAMLog",
-            "value": "View RAM Log"
+            "value": "Лог в ОЗУ"
         },
         {
             "key": "ExtractToSD",
-            "value": "Extract to SD"
+            "value": "Сохранить на SD"
         },
         {
             "key": "ClearRAMLog",
-            "value": "Clear RAM Log"
+            "value": "Очистить лог ОЗУ"
         },
         {
             "key": "EnableEmulation",
-            "value": "Enable Emulation"
+            "value": "Включить эмуляцию"
         },
         {
             "key": "DisableEmulation",
-            "value": "Disable Emulation"
+            "value": "Выключить эмуляцию"
         },
         {
             "key": "SelectSkylanderFolder",
-            "value": "Select Skylander/folder"
+            "value": "Выбрать фигурку/папку"
         },
         {
             "key": "ClearActiveSkylander",
-            "value": "Clear active Skylander"
+            "value": "Убрать фигурку"
         },
         {
             "key": "LogsManager",
-            "value": "Logs Manager"
+            "value": "Управление логами"
         },
         {
             "key": "ViewFiguresFolder",
-            "value": "View Figures Folder"
+            "value": "Папка фигурок"
         },
         {
             "key": "AvailableSkylanders",
-            "value": "Available Skylanders in"
+            "value": "Доступные фигурки в"
         },
         {
             "key": "NoActiveFigure",
-            "value": "None Selected"
+            "value": "Не выбрано"
         },
         {
             "key": "SkylanderLoaded",
-            "value": "Skylander loaded"
+            "value": "Фигурка загружена"
         },
         {
             "key": "SystemReady",
-            "value": "System ready"
+            "value": "Система готова"
         },
         {
             "key": "SkylanderLabel",
-            "value": "Skylander:"
+            "value": "Фигурка:"
         },
         {
             "key": "ToggleFavorite",
-            "value": "Toggle Favorite"
+            "value": "В избранное"
         },
         {
             "key": "Yes",
-            "value": "Yes"
+            "value": "Да"
         },
         {
             "key": "No",
-            "value": "No"
+            "value": "Нет"
         },
         {
             "key": "FolderSelected",
-            "value": "Folder"
+            "value": "Папка"
         },
         {
             "key": "NoFigure",
-            "value": "None Selected"
+            "value": "Не выбрано"
         },
         {
             "key": "UpngInvalidFile",
-            "value": "Invalid file"
+            "value": "Неверный файл"
         },
         {
             "key": "UpngUnsupportedRgbPng",
-            "value": "Unsupported RGB"
+            "value": "RGB не поддерживается"
         },
         {
             "key": "UpngUpscaleUnsupported",
-            "value": "Upscale not supported"
+            "value": "Масштаб не поддерживается"
         },
         {
             "key": "UpngImageTooLarge",
-            "value": "Image too large"
+            "value": "Слишком большое фото"
         },
         {
             "key": "UpngImageNotFound",
-            "value": "Image not found"
+            "value": "Фото не найдено"
         },
         {
             "key": "UpngNotPngImage",
-            "value": "Not a PNG"
+            "value": "Не PNG файл"
         },
         {
             "key": "UpngMalformedPng",
-            "value": "Malformed PNG"
+            "value": "Ошибка PNG"
         },
         {
             "key": "UpngUnsupportedPng",
-            "value": "Unsupported PNG"
+            "value": "PNG не поддерживается"
         },
         {
             "key": "UpngUnsupportedInterlacing",
-            "value": "Interlacing not supported"
+            "value": "Чересстрочность не подд."
         },
         {
             "key": "UpngUnsupportedColorFormat",
-            "value": "Color format not supported"
+            "value": "Формат цвета не подд."
         },
         {
             "key": "UpngInvalidParameter",
-            "value": "Invalid parameter"
+            "value": "Неверный параметр"
         },
         {
             "key": "LegendActive",
-            "value": "ACTIVE"
+            "value": "АКТИВЕН"
         },
         {
             "key": "LegendCursor",
-            "value": "CURSOR"
+            "value": "КУРСОР"
         },
         {
             "key": "LogsWarningTitle",
-            "value": "IMPORTANT: Debug Logging"
+            "value": "ВАЖНО: Отладочный лог"
         },
         {
             "key": "LogsWarningRAM",
-            "value": "Enabling debug logs consumes system RAM."
+            "value": "Логи потребляют системную ОЗУ."
         },
         {
             "key": "LogsWarningTrouble",
-            "value": "Use only for troubleshooting purposes."
+            "value": "Используйте только для диагностики."
         },
         {
             "key": "LogsWarningDisable",
-            "value": "Disable it for normal gameplay."
+            "value": "Отключайте во время обычной игры."
         }
     ]
 }

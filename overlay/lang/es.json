@@ -2,103 +2,103 @@
     "strings": [
         {
             "key": "OtherServiceError",
-            "value": "An error occurred accessing services:"
+            "value": "Error al acceder a los servicios:"
         },
         {
             "key": "EmulationStatus",
-            "value": "Emulation status"
+            "value": "Estado de emulación"
         },
         {
             "key": "On",
-            "value": "On"
+            "value": "Activado"
         },
         {
             "key": "Off",
-            "value": "Off"
+            "value": "Desactivado"
         },
         {
             "key": "InterceptingGame",
-            "value": "Intercepting Game"
+            "value": "Interceptando juego"
         },
         {
             "key": "Intercepted",
-            "value": "intercepted"
+            "value": "interceptado"
         },
         {
             "key": "NotIntercepted",
-            "value": "not intercepted"
+            "value": "no interceptado"
         },
         {
             "key": "Connected",
-            "value": "connected"
+            "value": "conectado"
         },
         {
             "key": "Disconnected",
-            "value": "disconnected"
+            "value": "desconectado"
         },
         {
             "key": "ViewFavorites",
-            "value": "View favorites"
+            "value": "Ver favoritos"
         },
         {
             "key": "Help",
-            "value": "Help"
+            "value": "Ayuda"
         },
         {
             "key": "DebugLogging",
-            "value": "Debug Logging"
+            "value": "Registro de depuración"
         },
         {
             "key": "ViewRAMLog",
-            "value": "View RAM Log"
+            "value": "Ver registro RAM"
         },
         {
             "key": "ExtractToSD",
-            "value": "Extract to SD"
+            "value": "Extraer a la SD"
         },
         {
             "key": "ClearRAMLog",
-            "value": "Clear RAM Log"
+            "value": "Borrar registro RAM"
         },
         {
             "key": "EnableEmulation",
-            "value": "Enable Emulation"
+            "value": "Activar emulación"
         },
         {
             "key": "DisableEmulation",
-            "value": "Disable Emulation"
+            "value": "Desactivar emulación"
         },
         {
             "key": "SelectSkylanderFolder",
-            "value": "Select Skylander/folder"
+            "value": "Seleccionar Skylander/Carpeta"
         },
         {
             "key": "ClearActiveSkylander",
-            "value": "Clear active Skylander"
+            "value": "Quitar Skylander activo"
         },
         {
             "key": "LogsManager",
-            "value": "Logs Manager"
+            "value": "Gestor de registros"
         },
         {
             "key": "ViewFiguresFolder",
-            "value": "View Figures Folder"
+            "value": "Ver carpeta de figuras"
         },
         {
             "key": "AvailableSkylanders",
-            "value": "Available Skylanders in"
+            "value": "Skylanders disponibles en"
         },
         {
             "key": "NoActiveFigure",
-            "value": "None Selected"
+            "value": "Ninguno seleccionado"
         },
         {
             "key": "SkylanderLoaded",
-            "value": "Skylander loaded"
+            "value": "Skylander cargado"
         },
         {
             "key": "SystemReady",
-            "value": "System ready"
+            "value": "Sistema listo"
         },
         {
             "key": "SkylanderLabel",
@@ -106,11 +106,11 @@
         },
         {
             "key": "ToggleFavorite",
-            "value": "Toggle Favorite"
+            "value": "Favorito Sí/No"
         },
         {
             "key": "Yes",
-            "value": "Yes"
+            "value": "Sí"
         },
         {
             "key": "No",
@@ -118,59 +118,59 @@
         },
         {
             "key": "FolderSelected",
-            "value": "Folder"
+            "value": "Carpeta"
         },
         {
             "key": "NoFigure",
-            "value": "None Selected"
+            "value": "Ninguno seleccionado"
         },
         {
             "key": "UpngInvalidFile",
-            "value": "Invalid file"
+            "value": "Archivo inválido"
         },
         {
             "key": "UpngUnsupportedRgbPng",
-            "value": "Unsupported RGB"
+            "value": "RGB no soportado"
         },
         {
             "key": "UpngUpscaleUnsupported",
-            "value": "Upscale not supported"
+            "value": "Escalado no soportado"
         },
         {
             "key": "UpngImageTooLarge",
-            "value": "Image too large"
+            "value": "Imagen muy grande"
         },
         {
             "key": "UpngImageNotFound",
-            "value": "Image not found"
+            "value": "Imagen no encontrada"
         },
         {
             "key": "UpngNotPngImage",
-            "value": "Not a PNG"
+            "value": "No es un PNG"
         },
         {
             "key": "UpngMalformedPng",
-            "value": "Malformed PNG"
+            "value": "PNG dañado"
         },
         {
             "key": "UpngUnsupportedPng",
-            "value": "Unsupported PNG"
+            "value": "PNG no soportado"
         },
         {
             "key": "UpngUnsupportedInterlacing",
-            "value": "Interlacing not supported"
+            "value": "Entrelazado no soportado"
         },
         {
             "key": "UpngUnsupportedColorFormat",
-            "value": "Color format not supported"
+            "value": "Formato de color no soportado"
         },
         {
             "key": "UpngInvalidParameter",
-            "value": "Invalid parameter"
+            "value": "Parámetro inválido"
         },
         {
             "key": "LegendActive",
-            "value": "ACTIVE"
+            "value": "ACTIVO"
         },
         {
             "key": "LegendCursor",
@@ -178,19 +178,19 @@
         },
         {
             "key": "LogsWarningTitle",
-            "value": "IMPORTANT: Debug Logging"
+            "value": "IMPORTANTE: Depuración"
         },
         {
             "key": "LogsWarningRAM",
-            "value": "Enabling debug logs consumes system RAM."
+            "value": "Activar registros consume memoria RAM."
         },
         {
             "key": "LogsWarningTrouble",
-            "value": "Use only for troubleshooting purposes."
+            "value": "Úselo solo para diagnóstico."
         },
         {
             "key": "LogsWarningDisable",
-            "value": "Disable it for normal gameplay."
+            "value": "Desactívelo para jugar normalmente."
         }
     ]
 }

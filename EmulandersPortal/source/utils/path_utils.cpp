@@ -252,11 +252,7 @@ void LoadAppConfig() {
         u64 lang_code = 0;
         if (R_SUCCEEDED(setGetSystemLanguage(&lang_code))) {
             std::string base_lang(reinterpret_cast<const char*>(&lang_code));
-            if (base_lang.find("pt") != std::string::npos) {
-                G.language = AppLanguage::PT_BR;
-            } else {
-                G.language = AppLanguage::EN;
-            }
+            G.language = CodeToLanguage(base_lang.c_str());
         }
         setExit();
     }
@@ -270,8 +266,10 @@ void LoadAppConfig() {
         if (line.find("\"accent_g\"") != std::string::npos) sscanf(line.c_str(), "%*[^0-9.]%f", &g);
         if (line.find("\"accent_b\"") != std::string::npos) sscanf(line.c_str(), "%*[^0-9.]%f", &b);
         if (line.find("\"language\"") != std::string::npos) {
-            if (line.find("pt") != std::string::npos) G.language = AppLanguage::PT_BR;
-            else if (line.find("en") != std::string::npos) G.language = AppLanguage::EN;
+            size_t colon = line.find(':');
+            if (colon != std::string::npos) {
+                G.language = CodeToLanguage(line.c_str() + colon + 1);
+            }
         }
     }
     f.close();
@@ -289,7 +287,7 @@ void SaveAppConfig() {
     f << "  \"accent_r\": " << G.accent.x << ",\n";
     f << "  \"accent_g\": " << G.accent.y << ",\n";
     f << "  \"accent_b\": " << G.accent.z << ",\n";
-    f << "  \"language\": \"" << (G.language == AppLanguage::PT_BR ? "pt-BR" : "en") << "\"\n";
+    f << "  \"language\": \"" << LanguageToCode(G.language) << "\"\n";
     f << "}\n";
     f.close();
     chmod("sdmc:/emulanders/config.json", 0777);

@@ -13,11 +13,11 @@
 #include "utils/constants.hpp"
 #include "utils/path_utils.hpp"
 #include "utils/thread_raii.hpp"
+#include "utils/translations.hpp"
 
 enum class ScanState     { IDLE, PREPARING, WAITING_NFC, READING_BLOCKS, WAITING_CONFIRM, DONE, ERROR };
 enum class EditorState   { SELECT_DUMP, SELECT_PHOTO, CROP_EDIT };
 enum class ClipboardAction { NONE, COPY, CUT };
-enum class AppLanguage   { EN, PT_BR };
 
 struct Globals {
     u32 battery_charge = 100;
@@ -97,5 +97,5 @@ struct Globals {
 extern Globals G;
 
 inline const char* TR(const char* en, const char* pt) {
-    return (G.language == AppLanguage::PT_BR) ? pt : en;
+    return TranslateString(en, pt, G.language);
 }

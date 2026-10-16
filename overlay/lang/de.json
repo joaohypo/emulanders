@@ -2,103 +2,103 @@
     "strings": [
         {
             "key": "OtherServiceError",
-            "value": "An error occurred accessing services:"
+            "value": "Fehler beim Dienstzugriff:"
         },
         {
             "key": "EmulationStatus",
-            "value": "Emulation status"
+            "value": "Emulationsstatus"
         },
         {
             "key": "On",
-            "value": "On"
+            "value": "Ein"
         },
         {
             "key": "Off",
-            "value": "Off"
+            "value": "Aus"
         },
         {
             "key": "InterceptingGame",
-            "value": "Intercepting Game"
+            "value": "Spiel-Interception"
         },
         {
             "key": "Intercepted",
-            "value": "intercepted"
+            "value": "aktiv"
         },
         {
             "key": "NotIntercepted",
-            "value": "not intercepted"
+            "value": "inaktiv"
         },
         {
             "key": "Connected",
-            "value": "connected"
+            "value": "verbunden"
         },
         {
             "key": "Disconnected",
-            "value": "disconnected"
+            "value": "getrennt"
         },
         {
             "key": "ViewFavorites",
-            "value": "View favorites"
+            "value": "Favoriten anzeigen"
         },
         {
             "key": "Help",
-            "value": "Help"
+            "value": "Hilfe"
         },
         {
             "key": "DebugLogging",
-            "value": "Debug Logging"
+            "value": "Debug-Protokoll"
         },
         {
             "key": "ViewRAMLog",
-            "value": "View RAM Log"
+            "value": "RAM-Log anzeigen"
         },
         {
             "key": "ExtractToSD",
-            "value": "Extract to SD"
+            "value": "Auf SD speichern"
         },
         {
             "key": "ClearRAMLog",
-            "value": "Clear RAM Log"
+            "value": "RAM-Log leeren"
         },
         {
             "key": "EnableEmulation",
-            "value": "Enable Emulation"
+            "value": "Emulation aktivieren"
         },
         {
             "key": "DisableEmulation",
-            "value": "Disable Emulation"
+            "value": "Emulation deaktivieren"
         },
         {
             "key": "SelectSkylanderFolder",
-            "value": "Select Skylander/folder"
+            "value": "Skylander/Ordner wählen"
         },
         {
             "key": "ClearActiveSkylander",
-            "value": "Clear active Skylander"
+            "value": "Aktiven Skylander entfernen"
         },
         {
             "key": "LogsManager",
-            "value": "Logs Manager"
+            "value": "Protokoll-Manager"
         },
         {
             "key": "ViewFiguresFolder",
-            "value": "View Figures Folder"
+            "value": "Figuren-Ordner öffnen"
         },
         {
             "key": "AvailableSkylanders",
-            "value": "Available Skylanders in"
+            "value": "Verfügbare Skylanders in"
         },
         {
             "key": "NoActiveFigure",
-            "value": "None Selected"
+            "value": "Keine Auswahl"
         },
         {
             "key": "SkylanderLoaded",
-            "value": "Skylander loaded"
+            "value": "Skylander geladen"
         },
         {
             "key": "SystemReady",
-            "value": "System ready"
+            "value": "System bereit"
         },
         {
             "key": "SkylanderLabel",
@@ -106,71 +106,71 @@
         },
         {
             "key": "ToggleFavorite",
-            "value": "Toggle Favorite"
+            "value": "Favorit umschalten"
         },
         {
             "key": "Yes",
-            "value": "Yes"
+            "value": "Ja"
         },
         {
             "key": "No",
-            "value": "No"
+            "value": "Nein"
         },
         {
             "key": "FolderSelected",
-            "value": "Folder"
+            "value": "Ordner"
         },
         {
             "key": "NoFigure",
-            "value": "None Selected"
+            "value": "Keine Auswahl"
         },
         {
             "key": "UpngInvalidFile",
-            "value": "Invalid file"
+            "value": "Ungültige Datei"
         },
         {
             "key": "UpngUnsupportedRgbPng",
-            "value": "Unsupported RGB"
+            "value": "RGB nicht unterstützt"
         },
         {
             "key": "UpngUpscaleUnsupported",
-            "value": "Upscale not supported"
+            "value": "Hochskalieren nicht unterstützt"
         },
         {
             "key": "UpngImageTooLarge",
-            "value": "Image too large"
+            "value": "Bild zu groß"
         },
         {
             "key": "UpngImageNotFound",
-            "value": "Image not found"
+            "value": "Bild nicht gefunden"
         },
         {
             "key": "UpngNotPngImage",
-            "value": "Not a PNG"
+            "value": "Kein PNG-Bild"
         },
         {
             "key": "UpngMalformedPng",
-            "value": "Malformed PNG"
+            "value": "Fehlerhaftes PNG"
         },
         {
             "key": "UpngUnsupportedPng",
-            "value": "Unsupported PNG"
+            "value": "PNG nicht unterstützt"
         },
         {
             "key": "UpngUnsupportedInterlacing",
-            "value": "Interlacing not supported"
+            "value": "Interlacing nicht unterstützt"
         },
         {
             "key": "UpngUnsupportedColorFormat",
-            "value": "Color format not supported"
+            "value": "Farbformat nicht unterstützt"
         },
         {
             "key": "UpngInvalidParameter",
-            "value": "Invalid parameter"
+            "value": "Ungültiger Parameter"
         },
         {
             "key": "LegendActive",
-            "value": "ACTIVE"
+            "value": "AKTIV"
         },
         {
             "key": "LegendCursor",
@@ -178,19 +178,19 @@
         },
         {
             "key": "LogsWarningTitle",
-            "value": "IMPORTANT: Debug Logging"
+            "value": "WICHTIG: Debug-Protokoll"
         },
         {
             "key": "LogsWarningRAM",
-            "value": "Enabling debug logs consumes system RAM."
+            "value": "Debug-Logs verbrauchen System-RAM."
         },
         {
             "key": "LogsWarningTrouble",
-            "value": "Use only for troubleshooting purposes."
+            "value": "Nur zur Fehlersuche verwenden."
         },
         {
             "key": "LogsWarningDisable",
-            "value": "Disable it for normal gameplay."
+            "value": "Für normales Spielen deaktivieren."
         }
     ]
 }

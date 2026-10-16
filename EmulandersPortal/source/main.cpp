@@ -90,20 +90,49 @@ int main(int argc, char* argv[]) {
     SetupImGuiStyle(ui_scale, G.accent, G.accent_hover, G.accent_active);
 
     ImFont *f_large = nullptr, *f_title = nullptr, *f_small = nullptr;
+    static ImVector<ImWchar> extra_cjk_ko_ranges;
     if (R_SUCCEEDED(plInitialize(PlServiceType_User))) {
-        PlFontData font;
-        if (R_SUCCEEDED(plGetSharedFontByType(&font, PlSharedFontType_Standard))) {
-            static const ImWchar glyph_ranges[] = {
-                0x0020, 0x00FF, // Basic Latin + Latin Supplement (accents)
+        PlFontData font_std = {};
+        PlFontData font_sc = {};
+        PlFontData font_tc = {};
+        PlFontData font_ko = {};
+        bool has_std = R_SUCCEEDED(plGetSharedFontByType(&font_std, PlSharedFontType_Standard));
+        bool has_sc  = R_SUCCEEDED(plGetSharedFontByType(&font_sc, PlSharedFontType_ChineseSimplified));
+        bool has_tc  = R_SUCCEEDED(plGetSharedFontByType(&font_tc, PlSharedFontType_ChineseTraditional));
+        bool has_ko  = R_SUCCEEDED(plGetSharedFontByType(&font_ko, PlSharedFontType_KO));
+
+        if (has_std) {
+            static const ImWchar std_glyph_ranges[] = {
+                0x0020, 0x017F, // Basic Latin + Latin-1 Supplement + Latin Extended-A
+                0x0400, 0x04FF, // Cyrillic (Russian)
+                0x2000, 0x206F, // General Punctuation
                 0x2600, 0x26FF, // Miscellaneous Symbols (for ★ U+2605)
                 0
             };
-            ImFontConfig cfg;
-            cfg.FontDataOwnedByAtlas = false;
-            io.Fonts->AddFontFromMemoryTTF(font.address, font.size, 22.0f * ui_scale, &cfg, glyph_ranges);
-            f_large = io.Fonts->AddFontFromMemoryTTF(font.address, font.size, 36.0f * ui_scale, &cfg, glyph_ranges);
-            f_title = io.Fonts->AddFontFromMemoryTTF(font.address, font.size, 36.0f * ui_scale, &cfg, glyph_ranges);
-            f_small = io.Fonts->AddFontFromMemoryTTF(font.address, font.size, 18.0f * ui_scale, &cfg, glyph_ranges);
+
+            ImFontGlyphRangesBuilder builder;
+            BuildExtraLanguageGlyphRanges(builder);
+            builder.BuildRanges(&extra_cjk_ko_ranges);
+
+            auto AddFontWithMergedLangs = [&]( float px_size ) -> ImFont* {
+                ImFontConfig cfg;
+                cfg.FontDataOwnedByAtlas = false;
+                ImFont* base_f = io.Fonts->AddFontFromMemoryTTF(font_std.address, font_std.size, px_size, &cfg, std_glyph_ranges);
+                if (!extra_cjk_ko_ranges.empty()) {
+                    ImFontConfig merge_cfg;
+                    merge_cfg.FontDataOwnedByAtlas = false;
+                    merge_cfg.MergeMode = true;
+                    if (has_sc) io.Fonts->AddFontFromMemoryTTF(font_sc.address, font_sc.size, px_size, &merge_cfg, extra_cjk_ko_ranges.Data);
+                    if (has_tc) io.Fonts->AddFontFromMemoryTTF(font_tc.address, font_tc.size, px_size, &merge_cfg, extra_cjk_ko_ranges.Data);
+                    if (has_ko) io.Fonts->AddFontFromMemoryTTF(font_ko.address, font_ko.size, px_size, &merge_cfg, extra_cjk_ko_ranges.Data);
+                }
+                return base_f;
+            };
+
+            AddFontWithMergedLangs(22.0f * ui_scale);
+            f_large = AddFontWithMergedLangs(36.0f * ui_scale);
+            f_title = AddFontWithMergedLangs(36.0f * ui_scale);
+            f_small = AddFontWithMergedLangs(18.0f * ui_scale);
         }
     }
     ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
@@ -193,6 +222,24 @@ int main(int argc, char* argv[]) {
                 io.AddMousePosEvent(-10000.0f, -10000.0f);
                 s_touch_is_dragging = false;
                 s_touch_drag_accum_y = 0.0f;
+            }
+            else if (event.type == SDL_CONTROLLERDEVICEADDED) {
+                if (!G.controller && SDL_IsGameController(event.cdevice.which)) {
+                    G.controller = SDL_GameControllerOpen(event.cdevice.which);
+                }
+            }
+            else if (event.type == SDL_CONTROLLERDEVICEREMOVED) {
+                if (G.controller && event.cdevice.which == SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(G.controller))) {
+                    SDL_GameControllerClose(G.controller);
+                    G.controller = nullptr;
+                    for (int i = 0; i < SDL_NumJoysticks(); ++i) {
+                        if (SDL_IsGameController(i)) { G.controller = SDL_GameControllerOpen(i); break; }
+                    }
+                }
+            }
+            else if (event.type == SDL_WINDOWEVENT && (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED || event.window.event == SDL_WINDOWEVENT_RESIZED)) {
+                SDL_GetWindowSize(window, &win_w, &win_h);
+                if (win_h > 0) ui_scale = (float)win_h / 720.0f;
             }
         }
 
@@ -558,6 +605,9 @@ int main(int argc, char* argv[]) {
     glDeleteTextures(1, &G.tex_icon_dumpdl);
     glDeleteTextures(1, &G.tex_icon_settings);
     if (G.editor_photo_tex) glDeleteTextures(1, &G.editor_photo_tex);
+    for (auto& f : G.sd_files) {
+        if (f.tex) { glDeleteTextures(1, &f.tex); f.tex = 0; }
+    }
 
     if (G.controller) SDL_GameControllerClose(G.controller);
 

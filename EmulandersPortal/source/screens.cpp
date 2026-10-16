@@ -197,10 +197,11 @@ void RenderScreenDumper(float screen_w, float content_h, float ui_scale, bool& j
         CenterText(TR("Note: Some third-party controllers only support Amiibo, not Skylander.", "Nota: Alguns controles paralelos suportam apenas Amiibo, não Skylander."), ImVec4(0.6f, 0.6f, 0.6f, 1));
 
         ImGui::Spacing(); ImGui::Spacing();
-        float btn_w = 350 * ui_scale;
-        ImGui::SetCursorPosX((child_w - btn_w) / 2.0f);
+        const char* start_lbl = TR("Start Scanning", "Iniciar Leitura");
+        ImVec2 start_sz = AutoBtnSize(start_lbl, 350.0f * ui_scale, 60.0f * ui_scale);
+        ImGui::SetCursorPosX(std::max(0.0f, (child_w - start_sz.x) / 2.0f));
         if (just_entered_content) ImGui::SetKeyboardFocusHere();
-        if (ImGui::Button(TR("Start Scanning", "Iniciar Leitura"), ImVec2(btn_w, 60 * ui_scale))) {
+        if (ImGui::Button(start_lbl, start_sz)) {
             if (emulandersIsInitialized()) emulandersSetEmulationStatus(EmulationStatus::Off);
             G.scan_state = ScanState::PREPARING;
             G.scan_progress_blocks = 0;
@@ -337,10 +338,20 @@ void RenderScreenDumper(float screen_w, float content_h, float ui_scale, bool& j
             RefreshFileList(G.current_path, G.sd_files, G.current_path);
         };
 
-        if (ImGui::Button(TR("Save with Official Name", "Salvar com Nome Oficial"), ImVec2(300 * ui_scale, 50 * ui_scale))) {
+        const char* lbl_off = TR("Save with Official Name", "Salvar com Nome Oficial");
+        const char* lbl_cus = TR("Save with Custom Name", "Salvar com Nome Personalizado");
+        const char* lbl_can = TR("Cancel", "Cancelar");
+        float confirm_btn_w = std::max({
+            300.0f * ui_scale,
+            AutoBtnSize(lbl_off, 300.0f * ui_scale, 50.0f * ui_scale).x,
+            AutoBtnSize(lbl_cus, 300.0f * ui_scale, 50.0f * ui_scale).x,
+            AutoBtnSize(lbl_can, 300.0f * ui_scale, 50.0f * ui_scale).x
+        });
+
+        if (ImGui::Button(lbl_off, ImVec2(confirm_btn_w, 50 * ui_scale))) {
             SaveDump(G.scan_suggested_name);
         }
-        if (ImGui::Button(TR("Save with Custom Name", "Salvar com Nome Personalizado"), ImVec2(300 * ui_scale, 50 * ui_scale))) {
+        if (ImGui::Button(lbl_cus, ImVec2(confirm_btn_w, 50 * ui_scale))) {
             std::string res = ShowKeyboard("", TR("Enter filename", "Digite o nome do arquivo"));
             if (!res.empty()) {
                 SaveDump(res);
@@ -348,7 +359,7 @@ void RenderScreenDumper(float screen_w, float content_h, float ui_scale, bool& j
                 G.show_blank_name_warning = true;
             }
         }
-        if (ImGui::Button(TR("Cancel", "Cancelar"), ImVec2(300 * ui_scale, 50 * ui_scale)))
+        if (ImGui::Button(lbl_can, ImVec2(confirm_btn_w, 50 * ui_scale)))
             G.scan_state = ScanState::IDLE;
         ImGui::EndGroup();
 
@@ -364,13 +375,15 @@ void RenderScreenDumper(float screen_w, float content_h, float ui_scale, bool& j
     } else if (G.scan_state == ScanState::DONE) {
         ImGui::TextColored(ImVec4(0, 1, 0, 1), "%s", TR("Dump saved successfully!", "Dump salvo com sucesso!"));
         ImGui::Spacing();
-        if (ImGui::Button(TR("Scan Another", "Ler Outro"), ImVec2(250 * ui_scale, 50 * ui_scale)))
+        const char* lbl_ano = TR("Scan Another", "Ler Outro");
+        if (ImGui::Button(lbl_ano, AutoBtnSize(lbl_ano, 250 * ui_scale, 50 * ui_scale)))
             G.scan_state = ScanState::IDLE;
 
     } else if (G.scan_state == ScanState::ERROR) {
         ImGui::TextColored(ImVec4(1, 0.2f, 0.2f, 1), "%s: %s", TR("Scan Error", "Erro de Leitura"), G.scan_error_msg.c_str());
         ImGui::Spacing();
-        if (ImGui::Button(TR("Try Again", "Tentar Novamente"), ImVec2(250 * ui_scale, 50 * ui_scale)))
+        const char* lbl_try = TR("Try Again", "Tentar Novamente");
+        if (ImGui::Button(lbl_try, AutoBtnSize(lbl_try, 250 * ui_scale, 50 * ui_scale)))
             G.scan_state = ScanState::IDLE;
     }
 
@@ -422,18 +435,26 @@ void RenderScreenFileManager(float screen_w, float content_h, float ui_scale, bo
     }
 
     if (G.current_path == "<favorites>") {
-        ImGui::TextColored(G.accent, "Source: ★ Tesla Overlay Favorites (sdmc:/emulanders/overlay/favorites.txt)");
+        ImGui::TextColored(G.accent, "%s", TR("Source: ★ Tesla Overlay Favorites (sdmc:/emulanders/overlay/favorites.txt)",
+                                              "Origem: ★ Favoritos do Overlay (sdmc:/emulanders/overlay/favorites.txt)"));
     } else {
-        ImGui::TextColored(G.accent, "Path:");
+        ImGui::TextColored(G.accent, "%s", TR("Path:", "Caminho:"));
         ImGui::SameLine(0, 8.0f * ui_scale);
         ImGui::Text("%s", G.current_path.c_str());
     }
 
+    const char* lbl_refresh = TR("(L) Refresh", "(L) Atualizar");
+    const char* lbl_newdir  = TR("(R) New Folder", "(R) Nova Pasta");
+    const char* lbl_favs    = TR("[Y] ★ Favorites", "[Y] ★ Favoritos");
+    ImVec2 sz_refresh = AutoBtnSize(lbl_refresh, 180.0f * ui_scale, 45.0f * ui_scale);
+    ImVec2 sz_newdir  = AutoBtnSize(lbl_newdir,  210.0f * ui_scale, 45.0f * ui_scale);
+    ImVec2 sz_favs    = AutoBtnSize(lbl_favs,    210.0f * ui_scale, 45.0f * ui_scale);
+
     float avail_x = ImGui::GetContentRegionAvail().x;
-    float btn_w_total = (180 + 210 + 210 + 24) * ui_scale;
+    float btn_w_total = sz_refresh.x + sz_newdir.x + sz_favs.x + 24.0f * ui_scale;
     ImGui::SetCursorPosX(std::max(0.0f, (avail_x - btn_w_total) / 2.0f));
 
-    if (ImGui::Button(TR("(L) Refresh", "(L) Atualizar"), ImVec2(180 * ui_scale, 45 * ui_scale)) || ImGui::IsKeyPressed(ImGuiKey_GamepadL1)) {
+    if (ImGui::Button(lbl_refresh, sz_refresh) || ImGui::IsKeyPressed(ImGuiKey_GamepadL1)) {
         if (G.current_path == "<favorites>") {
             LoadOverlayFavoritesList(G.sd_files);
         } else {
@@ -443,7 +464,7 @@ void RenderScreenFileManager(float screen_w, float content_h, float ui_scale, bo
         request_nav_focus = true;
     }
     ImGui::SameLine(0, 12.0f * ui_scale);
-    if (ImGui::Button(TR("(R) New Folder", "(R) Nova Pasta"), ImVec2(210 * ui_scale, 45 * ui_scale)) || ImGui::IsKeyPressed(ImGuiKey_GamepadR1)) {
+    if (ImGui::Button(lbl_newdir, sz_newdir) || ImGui::IsKeyPressed(ImGuiKey_GamepadR1)) {
         if (G.current_path != "<favorites>") {
             std::string n = ShowKeyboard("NewFolder", TR("Folder name", "Nome da pasta"));
             if (!n.empty()) {
@@ -460,7 +481,7 @@ void RenderScreenFileManager(float screen_w, float content_h, float ui_scale, bo
     bool is_fav_view = (G.current_path == "<favorites>");
     if (is_fav_view) ImGui::PushStyleColor(ImGuiCol_Button, G.accent);
     if (G.sd_files.empty() && is_fav_view) ImGui::SetItemDefaultFocus();
-    if (ImGui::Button(TR("[Y] ★ Favorites", "[Y] ★ Favoritos"), ImVec2(210 * ui_scale, 45 * ui_scale)) || ImGui::IsKeyPressed(ImGuiKey_GamepadFaceLeft)) {
+    if (ImGui::Button(lbl_favs, sz_favs) || ImGui::IsKeyPressed(ImGuiKey_GamepadFaceLeft)) {
         G.current_path = "<favorites>";
         LoadOverlayFavoritesList(G.sd_files);
         selected_sd_idx = 0;
@@ -489,15 +510,15 @@ void RenderScreenFileManager(float screen_w, float content_h, float ui_scale, bo
             G.clipboard_action = ClipboardAction::NONE;
     }
 
-    float extra = (G.clipboard_action != ClipboardAction::NONE) ? 45.0f : 0.0f;
-    float table_h = content_h - (content_h / 6.0f) - 130.0f * ui_scale - extra * ui_scale;
+    (void)content_h;
+    float table_h = std::max(120.0f * ui_scale, ImGui::GetContentRegionAvail().y - 6.0f * ui_scale);
     if (just_entered_content || request_nav_focus) {
         ImGui::SetNextWindowFocus();
     }
     if (ImGui::BeginTable("Files", 3, ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersH, ImVec2(0, table_h))) {
-        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
-        ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthFixed, 120 * ui_scale);
-        ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed, 80 * ui_scale);
+        ImGui::TableSetupColumn(TR("Name", "Nome"), ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableSetupColumn(TR("Size", "Tamanho"), ImGuiTableColumnFlags_WidthFixed, 120 * ui_scale);
+        ImGui::TableSetupColumn(TR("Type", "Tipo"), ImGuiTableColumnFlags_WidthFixed, 80 * ui_scale);
         ImGui::TableHeadersRow();
 
         int open_actions_idx = -1;
@@ -717,8 +738,11 @@ void RenderScreenFileManager(float screen_w, float content_h, float ui_scale, bo
         ImGui::TextColored(ImVec4(1, 0.4f, 0.4f, 1), "%s", GetFilename(G.file_to_delete).c_str());
         ImGui::Spacing(); ImGui::Spacing();
 
-        float b_w = 180 * ui_scale;
-        if (ImGui::Button(TR("Yes, Delete", "Sim, Excluir"), ImVec2(b_w, 50 * ui_scale))) {
+        const char* lbl_del = TR("Yes, Delete", "Sim, Excluir");
+        const char* lbl_can = TR("Cancel", "Cancelar");
+        ImVec2 sz_del = AutoBtnSize(lbl_del, 180 * ui_scale, 50 * ui_scale);
+        ImVec2 sz_can = AutoBtnSize(lbl_can, 180 * ui_scale, 50 * ui_scale);
+        if (ImGui::Button(lbl_del, sz_del)) {
             G.delete_target_name = GetFilename(G.file_to_delete);
             size_t dot = G.file_to_delete.find_last_of('.');
             if (dot != std::string::npos) {
@@ -733,7 +757,7 @@ void RenderScreenFileManager(float screen_w, float content_h, float ui_scale, bo
             ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
-        if (ImGui::Button(TR("Cancel", "Cancelar"), ImVec2(b_w, 50 * ui_scale)) || ImGui::IsKeyPressed(ImGuiKey_GamepadFaceDown)) {
+        if (ImGui::Button(lbl_can, sz_can) || ImGui::IsKeyPressed(ImGuiKey_GamepadFaceDown)) {
             ImGui::CloseCurrentPopup();
             request_nav_focus = true;
         }
@@ -799,8 +823,11 @@ void RenderScreenFileManager(float screen_w, float content_h, float ui_scale, bo
         ImGui::TextColored(ImVec4(1, 0.85f, 0.2f, 1), "%s: %s", TR("Target", "Alvo"), GetFilename(G.clone_source_path).c_str());
         ImGui::Spacing(); ImGui::Spacing();
 
-        float b_w = 200 * ui_scale;
-        if (ImGui::Button(TR("Proceed with Clone", "Prosseguir com Clone"), ImVec2(b_w, 50 * ui_scale))) {
+        const char* lbl_proc = TR("Proceed with Clone", "Prosseguir com Clone");
+        const char* lbl_can  = TR("Cancel", "Cancelar");
+        ImVec2 sz_proc = AutoBtnSize(lbl_proc, 200 * ui_scale, 50 * ui_scale);
+        ImVec2 sz_can  = AutoBtnSize(lbl_can,  200 * ui_scale, 50 * ui_scale);
+        if (ImGui::Button(lbl_proc, sz_proc)) {
             std::string src_name = GetFilename(G.clone_source_path);
             std::string stem = (src_name.size() >= 5) ? src_name.substr(0, src_name.size() - 5) : src_name;
             std::string default_clone = stem + "_new_id";
@@ -821,7 +848,7 @@ void RenderScreenFileManager(float screen_w, float content_h, float ui_scale, bo
             request_nav_focus = true;
         }
         ImGui::SameLine();
-        if (ImGui::Button(TR("Cancel", "Cancelar"), ImVec2(b_w, 50 * ui_scale)) || ImGui::IsKeyPressed(ImGuiKey_GamepadFaceDown)) {
+        if (ImGui::Button(lbl_can, sz_can) || ImGui::IsKeyPressed(ImGuiKey_GamepadFaceDown)) {
             ImGui::CloseCurrentPopup();
             request_nav_focus = true;
         }
@@ -927,25 +954,31 @@ void RenderScreenImageEditor(float screen_w, float content_h, float ui_scale, bo
             ed_dump_request_focus = true;
         }
 
-        if (f_large) ImGui::PushFont(f_large);
-        ImGui::TextColored(G.accent, "%s", TR("Step 1: Select Figure Dump", "Passo 1: Selecionar Boneco"));
-        if (f_large) ImGui::PopFont();
-        ImGui::TextColored(ImVec4(0.75f, 0.75f, 0.75f, 1.0f), "%s",
-            TR("Choose a figure (.dump) to assign or update custom artwork.", "Escolha um boneco (.dump) para adicionar ou alterar a foto."));
-
+        ImGui::TextColored(G.accent, "%s", TR("Step 1/3: Select Figure Dump", "Passo 1/3: Selecionar Boneco"));
+        ImGui::SameLine(0, 16.0f * ui_scale);
         if (ed_dump_browser_path == "<favorites>") {
-            ImGui::TextColored(G.accent, "%s", TR("Source: ★ Tesla Overlay Favorites (sdmc:/emulanders/overlay/favorites.txt)", "Origem: ★ Favoritos do Overlay (sdmc:/emulanders/overlay/favorites.txt)"));
+            ImGui::TextColored(ImVec4(0.82f, 0.82f, 0.82f, 1.0f), "%s",
+                TR("Source: ★ Tesla Overlay Favorites (sdmc:/emulanders/overlay/favorites.txt)",
+                   "Origem: ★ Favoritos do Overlay (sdmc:/emulanders/overlay/favorites.txt)"));
         } else {
-            ImGui::TextColored(G.accent, TR("Folder: %s", "Pasta: %s"), ed_dump_browser_path.c_str());
+            ImGui::TextColored(ImVec4(0.82f, 0.82f, 0.82f, 1.0f), TR("Folder: %s", "Pasta: %s"), ed_dump_browser_path.c_str());
         }
-        ImGui::Spacing();
 
-        // Responsive Step 1 Toolbar with Gamepad Shortcuts
-        float btn_h = 44.0f * ui_scale;
+        // Responsive Step 1 Single-Row Toolbar with Gamepad Shortcuts
+        float btn_h = 42.0f * ui_scale;
+        const char* lbl_fig  = TR("[L] Figures", "[L] Bonecos");
+        const char* lbl_scn  = TR("[R] Scans", "[R] Scans");
+        const char* lbl_fav  = TR("[Y] ★ Favorites", "[Y] ★ Favoritos");
+        const char* lbl_menu = TR("(B) Menu", "(B) Menu");
+
+        ImVec2 sz_fig  = AutoBtnSize(lbl_fig,  155.0f * ui_scale, btn_h);
+        ImVec2 sz_scn  = AutoBtnSize(lbl_scn,  135.0f * ui_scale, btn_h);
+        ImVec2 sz_fav  = AutoBtnSize(lbl_fav,  195.0f * ui_scale, btn_h);
+        ImVec2 sz_menu = AutoBtnSize(lbl_menu, 135.0f * ui_scale, btn_h);
 
         bool is_figures = (ed_dump_browser_path == FIGURES_DIR);
         if (is_figures) ImGui::PushStyleColor(ImGuiCol_Button, G.accent);
-        if (ImGui::Button(TR("[L] Figures", "[L] Bonecos"), ImVec2(165.0f * ui_scale, btn_h)) || ImGui::IsKeyPressed(ImGuiKey_GamepadL1)) {
+        if (ImGui::Button(lbl_fig, sz_fig) || ImGui::IsKeyPressed(ImGuiKey_GamepadL1)) {
             ed_dump_browser_path = FIGURES_DIR;
             for (auto& item : ed_dump_files) if (item.tex) { glDeleteTextures(1, &item.tex); item.tex = 0; }
             ed_dump_files.clear();
@@ -958,7 +991,7 @@ void RenderScreenImageEditor(float screen_w, float content_h, float ui_scale, bo
 
         bool is_scans = (ed_dump_browser_path == SCANS_DIR);
         if (is_scans) ImGui::PushStyleColor(ImGuiCol_Button, G.accent);
-        if (ImGui::Button(TR("[R] Scans", "[R] Scans"), ImVec2(140.0f * ui_scale, btn_h)) || ImGui::IsKeyPressed(ImGuiKey_GamepadR1)) {
+        if (ImGui::Button(lbl_scn, sz_scn) || ImGui::IsKeyPressed(ImGuiKey_GamepadR1)) {
             ed_dump_browser_path = SCANS_DIR;
             for (auto& item : ed_dump_files) if (item.tex) { glDeleteTextures(1, &item.tex); item.tex = 0; }
             ed_dump_files.clear();
@@ -972,7 +1005,7 @@ void RenderScreenImageEditor(float screen_w, float content_h, float ui_scale, bo
         bool is_favs = (ed_dump_browser_path == "<favorites>");
         if (is_favs) ImGui::PushStyleColor(ImGuiCol_Button, G.accent);
         if (ed_dump_files.empty() && is_favs) ImGui::SetItemDefaultFocus();
-        if (ImGui::Button(TR("[Y] ★ Favorites", "[Y] ★ Favoritos"), ImVec2(210.0f * ui_scale, btn_h)) || ImGui::IsKeyPressed(ImGuiKey_GamepadFaceLeft)) {
+        if (ImGui::Button(lbl_fav, sz_fav) || ImGui::IsKeyPressed(ImGuiKey_GamepadFaceLeft)) {
             ed_dump_browser_path = "<favorites>";
             for (auto& item : ed_dump_files) if (item.tex) { glDeleteTextures(1, &item.tex); item.tex = 0; }
             ed_dump_files.clear();
@@ -982,20 +1015,17 @@ void RenderScreenImageEditor(float screen_w, float content_h, float ui_scale, bo
         }
         if (is_favs) ImGui::PopStyleColor();
 
-        // Right-aligned Back to Home Menu button
-        float back_btn_w = 140.0f * ui_scale;
+        // Keep (B) Menu on the exact same horizontal row, right-aligned
+        ImGui::SameLine(0, 10.0f * ui_scale);
         float avail_w = ImGui::GetContentRegionAvail().x;
-        if (avail_w > back_btn_w + 10.0f * ui_scale) {
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + avail_w - back_btn_w);
-        } else {
-            ImGui::SameLine(0, 10.0f * ui_scale);
+        if (avail_w > sz_menu.x) {
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + avail_w - sz_menu.x);
         }
-        if (ImGui::Button(TR("(B) Menu", "(B) Menu"), ImVec2(back_btn_w, btn_h))) {
+        if (ImGui::Button(lbl_menu, sz_menu)) {
             G.in_menu = true;
             G.menu_needs_nav_focus = true;
             just_entered_content = true;
         }
-        ImGui::Spacing();
 
         if (ed_dump_browser_path == "<favorites>" && ed_dump_files.empty()) {
             ImGui::Spacing();
@@ -1007,7 +1037,7 @@ void RenderScreenImageEditor(float screen_w, float content_h, float ui_scale, bo
         }
 
         if (ed_dump_request_focus) ImGui::SetNextWindowFocus();
-        float tbl_h = content_h - 195.0f * ui_scale;
+        float tbl_h = std::max(120.0f * ui_scale, ImGui::GetContentRegionAvail().y - 6.0f * ui_scale);
         if (ImGui::BeginTable("EditorDumps", 3, ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersH, ImVec2(0, tbl_h))) {
             ImGui::TableSetupColumn(TR("Figure / File", "Boneco / Arquivo"), ImGuiTableColumnFlags_WidthStretch);
             ImGui::TableSetupColumn(TR("Type", "Tipo"), ImGuiTableColumnFlags_WidthFixed, 110 * ui_scale);
@@ -1197,22 +1227,29 @@ void RenderScreenImageEditor(float screen_w, float content_h, float ui_scale, bo
             ed_photo_request_focus = true;
         }
 
-        if (f_large) ImGui::PushFont(f_large);
-        ImGui::TextColored(G.accent, "%s", TR("Step 2: Choose Source Photo", "Passo 2: Escolher Foto de Origem"));
-        if (f_large) ImGui::PopFont();
+        ImGui::TextColored(G.accent, "%s", TR("Step 2/3: Choose Source Photo", "Passo 2/3: Escolher Foto de Origem"));
+        ImGui::SameLine(0, 14.0f * ui_scale);
         ImGui::TextColored(ImVec4(0.85f, 0.85f, 0.85f, 1.0f),
             TR("Assigning artwork for: %s", "Definindo arte para: %s"), GetFilename(G.editor_dump_path).c_str());
+        ImGui::SameLine(0, 14.0f * ui_scale);
+        ImGui::TextColored(ImVec4(0.72f, 0.72f, 0.72f, 1.0f), TR("Folder: %s", "Pasta: %s"), ed_photo_browser_path.c_str());
 
-        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), TR("Folder: %s", "Pasta: %s"), ed_photo_browser_path.c_str());
-        ImGui::Spacing();
+        // Responsive Step 2 Single-Row Toolbar with Gamepad Shortcuts
+        float btn_h = 42.0f * ui_scale;
+        const char* lbl_lat  = TR("[Y] Latest Photos", "[Y] Recentes");
+        const char* lbl_alb  = TR("[X] Album Root", "[X] Álbum");
+        const char* lbl_sd   = TR("[L] SD Root (/)", "[L] Raiz SD (/)");
+        const char* lbl_back = TR("(B) Back", "(B) Voltar");
 
-        // Responsive Step 2 Toolbar with 44px height and Gamepad Shortcuts
-        float btn_h = 44.0f * ui_scale;
+        ImVec2 sz_lat  = AutoBtnSize(lbl_lat,  165.0f * ui_scale, btn_h);
+        ImVec2 sz_alb  = AutoBtnSize(lbl_alb,  135.0f * ui_scale, btn_h);
+        ImVec2 sz_sd   = AutoBtnSize(lbl_sd,   140.0f * ui_scale, btn_h);
+        ImVec2 sz_back = AutoBtnSize(lbl_back, 135.0f * ui_scale, btn_h);
 
         std::string def_album = GetDefaultPhotoBrowserDir();
         bool is_def_album = (ed_photo_browser_path == def_album);
         if (is_def_album) ImGui::PushStyleColor(ImGuiCol_Button, G.accent);
-        if (ImGui::Button(TR("[Y] Latest Photos", "[Y] Recentes"), ImVec2(170.0f * ui_scale, btn_h)) || ImGui::IsKeyPressed(ImGuiKey_GamepadFaceLeft)) {
+        if (ImGui::Button(lbl_lat, sz_lat) || ImGui::IsKeyPressed(ImGuiKey_GamepadFaceLeft)) {
             ed_photo_browser_path = def_album;
             for (auto& pf : ed_photo_files) if (pf.tex) { glDeleteTextures(1, &pf.tex); pf.tex = 0; }
             ed_photo_files.clear();
@@ -1226,7 +1263,7 @@ void RenderScreenImageEditor(float screen_w, float content_h, float ui_scale, bo
         std::string album_root = DetectSwitchAlbumDir();
         bool is_album_root = (ed_photo_browser_path == album_root);
         if (is_album_root) ImGui::PushStyleColor(ImGuiCol_Button, G.accent);
-        if (ImGui::Button(TR("[X] Album Root", "[X] Álbum"), ImVec2(140.0f * ui_scale, btn_h)) || ImGui::IsKeyPressed(ImGuiKey_GamepadFaceUp)) {
+        if (ImGui::Button(lbl_alb, sz_alb) || ImGui::IsKeyPressed(ImGuiKey_GamepadFaceUp)) {
             ed_photo_browser_path = album_root;
             for (auto& pf : ed_photo_files) if (pf.tex) { glDeleteTextures(1, &pf.tex); pf.tex = 0; }
             ed_photo_files.clear();
@@ -1239,7 +1276,7 @@ void RenderScreenImageEditor(float screen_w, float content_h, float ui_scale, bo
 
         bool is_sd_root = (ed_photo_browser_path == "sdmc:/");
         if (is_sd_root) ImGui::PushStyleColor(ImGuiCol_Button, G.accent);
-        if (ImGui::Button(TR("[L] SD Root (/)", "[L] Raiz SD (/)"), ImVec2(140.0f * ui_scale, btn_h)) || ImGui::IsKeyPressed(ImGuiKey_GamepadL1)) {
+        if (ImGui::Button(lbl_sd, sz_sd) || ImGui::IsKeyPressed(ImGuiKey_GamepadL1)) {
             ed_photo_browser_path = "sdmc:/";
             for (auto& pf : ed_photo_files) if (pf.tex) { glDeleteTextures(1, &pf.tex); pf.tex = 0; }
             ed_photo_files.clear();
@@ -1248,22 +1285,19 @@ void RenderScreenImageEditor(float screen_w, float content_h, float ui_scale, bo
         }
         if (is_sd_root) ImGui::PopStyleColor();
 
-        // Right-aligned Back to Figures button
-        float back_w = 140.0f * ui_scale;
+        // Keep (B) Back on the exact same horizontal row, right-aligned
+        ImGui::SameLine(0, 10.0f * ui_scale);
         float avail_w = ImGui::GetContentRegionAvail().x;
-        if (avail_w > back_w + 10.0f * ui_scale) {
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + avail_w - back_w);
-        } else {
-            ImGui::SameLine(0, 10.0f * ui_scale);
+        if (avail_w > sz_back.x) {
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + avail_w - sz_back.x);
         }
-        if (ImGui::Button(TR("(B) Back", "(B) Voltar"), ImVec2(back_w, btn_h))) {
+        if (ImGui::Button(lbl_back, sz_back)) {
             for (auto& pf : ed_photo_files) if (pf.tex) { glDeleteTextures(1, &pf.tex); pf.tex = 0; }
             ed_photo_files.clear();
             G.editor_state = EditorState::SELECT_DUMP;
             ed_dump_request_focus = true;
             ed_dump_selected_idx = 0;
         }
-        ImGui::Spacing();
 
         if (ed_photo_files.empty() || (ed_photo_files.size() == 1 && ed_photo_files[0].name == "<- Go back 1 directory")) {
             ImGui::Spacing();
@@ -1277,7 +1311,7 @@ void RenderScreenImageEditor(float screen_w, float content_h, float ui_scale, bo
         }
 
         if (ed_photo_request_focus) ImGui::SetNextWindowFocus();
-        float tbl_h = content_h - 195.0f * ui_scale;
+        float tbl_h = std::max(120.0f * ui_scale, ImGui::GetContentRegionAvail().y - 6.0f * ui_scale);
         if (ImGui::BeginTable("EditorPhotos", 3, ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersH, ImVec2(0, tbl_h))) {
             ImGui::TableSetupColumn(TR("Preview / Name", "Prévia / Nome"), ImGuiTableColumnFlags_WidthStretch);
             ImGui::TableSetupColumn(TR("Type", "Tipo"), ImGuiTableColumnFlags_WidthFixed, 80 * ui_scale);
@@ -1383,21 +1417,29 @@ void RenderScreenImageEditor(float screen_w, float content_h, float ui_scale, bo
 
     // --- STEP 3: INTERACTIVE CROP TOOL (175 x 275) ---
     } else if (G.editor_state == EditorState::CROP_EDIT) {
-        if (f_large) ImGui::PushFont(f_large);
-        ImGui::TextColored(G.accent, "%s", TR("Step 3: Crop & Save Artwork", "Passo 3: Recortar e Salvar Arte"));
-        if (f_large) ImGui::PopFont();
-
+        (void)content_h; (void)f_large;
+        ImGui::TextColored(G.accent, "%s", TR("Step 3/3: Crop & Save Artwork", "Passo 3/3: Recortar e Salvar Arte"));
+        ImGui::SameLine(0, 16.0f * ui_scale);
         size_t dot = G.editor_dump_path.find_last_of('.');
         std::string target_png = (dot != std::string::npos ? G.editor_dump_path.substr(0, dot) : G.editor_dump_path) + ".png";
         ImGui::TextColored(ImVec4(0.85f, 0.85f, 0.85f, 1.0f),
             TR("Target: %s  ->  %s", "Alvo: %s  ->  %s"), GetFilename(G.editor_dump_path).c_str(), GetFilename(target_png).c_str());
-        ImGui::Spacing();
 
         if (G.editor_photo_tex) {
             float avail_w = ImGui::GetContentRegionAvail().x;
-            float avail_h = content_h - 130.0f * ui_scale;
+            float avail_h = std::max(200.0f * ui_scale, ImGui::GetContentRegionAvail().y - 8.0f * ui_scale);
 
-            float right_panel_w = 250.0f * ui_scale;
+            const char* lbl_save  = TR("Save Artwork (A)", "Salvar Arte (A)");
+            const char* lbl_reset = TR("Reset Frame (X)", "Redefinir (X)");
+            const char* lbl_back  = TR("Back to Photos (B)", "Voltar (B)");
+            float act_btn_h = 42.0f * ui_scale;
+
+            float right_panel_w = std::max({
+                250.0f * ui_scale,
+                AutoBtnSize(lbl_save,  250.0f * ui_scale, act_btn_h).x,
+                AutoBtnSize(lbl_reset, 250.0f * ui_scale, act_btn_h).x,
+                AutoBtnSize(lbl_back,  250.0f * ui_scale, act_btn_h).x
+            });
             float max_disp_w = avail_w - right_panel_w - 25.0f * ui_scale;
 
             // Dimensions for photo display (maintaining photo aspect)
@@ -1529,7 +1571,7 @@ void RenderScreenImageEditor(float screen_w, float content_h, float ui_scale, bo
             ImVec2 uv0(G.crop_pos.x / disp_w, G.crop_pos.y / disp_h);
             ImVec2 uv1((G.crop_pos.x + G.crop_size.x) / disp_w, (G.crop_pos.y + G.crop_size.y) / disp_h);
 
-            float prev_h = 160.0f * ui_scale;
+            float prev_h = std::min(165.0f * ui_scale, std::max(90.0f * ui_scale, avail_h - 185.0f * ui_scale));
             float prev_w = prev_h * target_ratio;
             float center_off_x = (right_panel_w - prev_w) * 0.5f;
             if (center_off_x > 0) ImGui::SetCursorPosX(ImGui::GetCursorPosX() + center_off_x);
@@ -1586,25 +1628,24 @@ void RenderScreenImageEditor(float screen_w, float content_h, float ui_scale, bo
             };
 
             float act_btn_w = right_panel_w;
-            float act_btn_h = 42.0f * ui_scale;
 
             ImGui::PushStyleColor(ImGuiCol_Button, G.accent);
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, G.accent_hover);
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, G.accent_active);
-            if (ImGui::Button(TR("Save Artwork (A)", "Salvar Arte (A)"), ImVec2(act_btn_w, act_btn_h)) || ImGui::IsKeyPressed(ImGuiKey_GamepadFaceRight)) {
+            if (ImGui::Button(lbl_save, ImVec2(act_btn_w, act_btn_h)) || ImGui::IsKeyPressed(ImGuiKey_GamepadFaceRight)) {
                 SaveCroppedArt();
             }
             ImGui::PopStyleColor(3);
 
             ImGui::Spacing();
 
-            if (ImGui::Button(TR("Reset Frame (X)", "Redefinir (X)"), ImVec2(act_btn_w, act_btn_h)) || ImGui::IsKeyPressed(ImGuiKey_GamepadFaceUp)) {
+            if (ImGui::Button(lbl_reset, ImVec2(act_btn_w, act_btn_h)) || ImGui::IsKeyPressed(ImGuiKey_GamepadFaceUp)) {
                 s_crop_initialized = false;
             }
 
             ImGui::Spacing();
 
-            if (ImGui::Button(TR("Back to Photos (B)", "Voltar (B)"), ImVec2(act_btn_w, act_btn_h)) || ImGui::IsKeyPressed(ImGuiKey_GamepadFaceDown)) {
+            if (ImGui::Button(lbl_back, ImVec2(act_btn_w, act_btn_h)) || ImGui::IsKeyPressed(ImGuiKey_GamepadFaceDown)) {
                 if (G.editor_photo_tex) {
                     glDeleteTextures(1, &G.editor_photo_tex);
                     G.editor_photo_tex = 0;
@@ -1649,7 +1690,8 @@ void RenderScreenDownloaders(float screen_w, float content_h, float ui_scale, bo
         ImGui::InputText(TR("Custom URL", "URL Personalizada"), url_buf, sizeof(url_buf));
         ImGui::PopItemWidth();
         ImGui::SameLine(0, 10.0f * ui_scale);
-        if (ImGui::Button(TR("(L) Edit URL", "(L) Editar URL"), ImVec2(210.0f * ui_scale, 42.0f * ui_scale)) || ImGui::IsKeyPressed(ImGuiKey_GamepadL1)) {
+        const char* edit_url_lbl = TR("(L) Edit URL", "(L) Editar URL");
+        if (ImGui::Button(edit_url_lbl, AutoBtnSize(edit_url_lbl, 210.0f * ui_scale, 42.0f * ui_scale)) || ImGui::IsKeyPressed(ImGuiKey_GamepadL1)) {
             std::string res = ShowKeyboard(url_buf, TR("Enter ZIP URL", "Digite a URL do ZIP"));
             if (!res.empty()) {
                 strncpy(url_buf, res.c_str(), sizeof(url_buf) - 1);
@@ -1659,7 +1701,8 @@ void RenderScreenDownloaders(float screen_w, float content_h, float ui_scale, bo
         ImGui::Spacing(); ImGui::Spacing();
 
         if (!G.dl_running) {
-            if (ImGui::Button(TR("Download & Extract", "Baixar e Extrair"), ImVec2(300 * ui_scale, 50 * ui_scale))) {
+            const char* dl_ext_lbl = TR("Download & Extract", "Baixar e Extrair");
+            if (ImGui::Button(dl_ext_lbl, AutoBtnSize(dl_ext_lbl, 300.0f * ui_scale, 50.0f * ui_scale))) {
                 std::string url = url_buf;
                 if (!url.empty()) {
                     G.progress.store(0.0f);
@@ -1685,9 +1728,20 @@ void RenderScreenDownloaders(float screen_w, float content_h, float ui_scale, bo
                         curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, CurlDownloadProgressCallback);
                         curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
                         curl_easy_setopt(curl, CURLOPT_USERAGENT, APP_USER_AGENT);
-                        curl_easy_perform(curl);
+                        CURLcode res = curl_easy_perform(curl);
+                        long http_code = 0;
+                        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
                         if (fp) fclose(fp);
                         curl_easy_cleanup(curl);
+
+                        if (res != CURLE_OK || (http_code != 200 && http_code != 0)) {
+                            std::error_code ec_rm; fs::remove("sdmc:/emulanders/tmp_dump.zip", ec_rm);
+                            strncpy(G.status_msg, TR("Download failed! Check your internet connection or URL.",
+                                                     "Falha no download! Verifique sua conexão ou a URL."), sizeof(G.status_msg) - 1);
+                            G.progress.store(0.0f);
+                            G.dl_running = false;
+                            return;
+                        }
 
                         strncpy(G.status_msg, TR("Extracting...", "Extraindo..."), sizeof(G.status_msg) - 1);
                         G.progress.store(0.5f);
@@ -1764,6 +1818,10 @@ void RenderScreenDownloaders(float screen_w, float content_h, float ui_scale, bo
                     });
                 }
             }
+            if (G.status_msg[0] != '\0') {
+                ImGui::Spacing();
+                ImGui::TextColored(G.accent, "%s", G.status_msg);
+            }
         } else {
             float prog = G.progress.load();
             if (prog >= 0.0f) {
@@ -1801,14 +1859,17 @@ void RenderScreenDownloaders(float screen_w, float content_h, float ui_scale, bo
             }
         }
 
-        if (ImGui::BeginChild("URLList", ImVec2(0, 200 * ui_scale), true, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
+        float url_list_h = std::max(100.0f * ui_scale, ImGui::GetContentRegionAvail().y - 6.0f * ui_scale);
+        if (ImGui::BeginChild("URLList", ImVec2(0, url_list_h), true, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
+            const char* use_lbl = TR("Use", "Usar");
+            ImVec2 use_sz = AutoBtnSize(use_lbl, 100.0f * ui_scale, 45.0f * ui_scale);
             for (size_t i = 0; i < detected_urls.size(); i++) {
                 ImGui::PushID((int)i);
-                if (ImGui::Button(detected_urls[i].c_str(), ImVec2(ImGui::GetContentRegionAvail().x - 110 * ui_scale, 45 * ui_scale))) {
+                if (ImGui::Button(detected_urls[i].c_str(), ImVec2(ImGui::GetContentRegionAvail().x - use_sz.x - 10.0f * ui_scale, 45 * ui_scale))) {
                     strncpy(url_buf, detected_urls[i].c_str(), sizeof(url_buf)-1);
                 }
                 ImGui::SameLine();
-                if (ImGui::Button(TR("Use", "Usar"), ImVec2(100 * ui_scale, 45 * ui_scale))) {
+                if (ImGui::Button(use_lbl, use_sz)) {
                     strncpy(url_buf, detected_urls[i].c_str(), sizeof(url_buf)-1);
                 }
                 ImGui::PopID();
@@ -1828,77 +1889,96 @@ void RenderScreenDownloaders(float screen_w, float content_h, float ui_scale, bo
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
                 ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
                 ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
-                ImGui::Button(TR("System Busy...", "Sistema Ocupado..."), ImVec2(300 * ui_scale, 50 * ui_scale));
+                const char* busy_lbl = TR("System Busy...", "Sistema Ocupado...");
+                ImGui::Button(busy_lbl, AutoBtnSize(busy_lbl, 300.0f * ui_scale, 50.0f * ui_scale));
                 ImGui::PopStyleColor(3);
-            } else if (ImGui::Button(TR("Download Assets", "Baixar Assets"), ImVec2(300 * ui_scale, 50 * ui_scale))) {
-                G.progress.store(0.0f);
-                G.dl_running = true;
-                G.bg_thread.launch([]() {
-                    const char* asset_url = "https://github.com/joaohypo/emulanders/releases/download/1.0.0/emulanders_assets_pack.zip";
-                    strncpy(G.status_msg, "Downloading assets...", sizeof(G.status_msg) - 1);
-                    CURL* curl = curl_easy_init();
-                    FILE* fp = fopen("sdmc:/emulanders/tmp_assets.zip", "wb");
-                    curl_easy_setopt(curl, CURLOPT_URL, asset_url);
-                    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWriteCallback);
-                    curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
-                    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-                    curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, CurlDownloadProgressCallback);
-                    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-                    curl_easy_setopt(curl, CURLOPT_USERAGENT, APP_USER_AGENT);
-                    curl_easy_perform(curl);
-                    fclose(fp);
-                    curl_easy_cleanup(curl);
+            } else {
+                const char* dl_assets_lbl = TR("Download Assets", "Baixar Assets");
+                if (ImGui::Button(dl_assets_lbl, AutoBtnSize(dl_assets_lbl, 300.0f * ui_scale, 50.0f * ui_scale))) {
+                    G.progress.store(0.0f);
+                    G.dl_running = true;
+                    G.bg_thread.launch([]() {
+                        const char* asset_url = "https://github.com/joaohypo/emulanders/releases/download/1.0.0/emulanders_assets_pack.zip";
+                        strncpy(G.status_msg, "Downloading assets...", sizeof(G.status_msg) - 1);
+                        CURL* curl = curl_easy_init();
+                        FILE* fp = fopen("sdmc:/emulanders/tmp_assets.zip", "wb");
+                        curl_easy_setopt(curl, CURLOPT_URL, asset_url);
+                        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWriteCallback);
+                        curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+                        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+                        curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, CurlDownloadProgressCallback);
+                        curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+                        curl_easy_setopt(curl, CURLOPT_USERAGENT, APP_USER_AGENT);
+                        CURLcode res = curl_easy_perform(curl);
+                        long http_code = 0;
+                        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+                        if (fp) fclose(fp);
+                        curl_easy_cleanup(curl);
 
-                    strncpy(G.status_msg, "Extracting assets...", sizeof(G.status_msg) - 1);
-                    G.progress.store(0.5f);
-                    unzFile uf = unzOpen("sdmc:/emulanders/tmp_assets.zip");
-                    if (uf) {
-                        unz_global_info gi;
-                        unzGetGlobalInfo(uf, &gi);
-                        for (uLong i = 0; i < gi.number_entry; i++) {
-                            G.progress.store(0.5f + ((float)i / gi.number_entry) * 0.5f);
-                            std::this_thread::sleep_for(std::chrono::milliseconds(1));
-
-                            char fzip[512]; unz_file_info fi;
-                            unzGetCurrentFileInfo(uf, &fi, fzip, sizeof(fzip), NULL, 0, NULL, 0);
-                            for (int j = 0; fzip[j]; j++) {
-                                if (fzip[j] == '\\') fzip[j] = '/';
-                                if ((unsigned char)fzip[j] > 126) fzip[j] = '_';
-                            }
-                            std::string full = "sdmc:/" + std::string(fzip);
-                            if (fzip[strlen(fzip) - 1] == '/') {
-                                std::error_code ec;
-                                fs::create_directories(full, ec);
-                                chmod(full.c_str(), 0777);
-                            } else {
-                                std::error_code ec;
-                                fs::create_directories(fs::path(full).parent_path(), ec);
-                                if (fs::exists(full, ec)) {
-                                    if (i + 1 < gi.number_entry) unzGoToNextFile(uf);
-                                    continue;
-                                }
-                                if (unzOpenCurrentFile(uf) == UNZ_OK) {
-                                    FILE* out = fopen(full.c_str(), "wb");
-                                    if (out) {
-                                        char buf[8192]; int r;
-                                        while ((r = unzReadCurrentFile(uf, buf, sizeof(buf))) > 0)
-                                            fwrite(buf, 1, r, out);
-                                        fclose(out);
-                                        chmod(full.c_str(), 0777);
-                                    }
-                                    unzCloseCurrentFile(uf);
-                                }
-                            }
-                            if (i + 1 < gi.number_entry) unzGoToNextFile(uf);
+                        if (res != CURLE_OK || (http_code != 200 && http_code != 0)) {
+                            std::error_code ec_rm; fs::remove("sdmc:/emulanders/tmp_assets.zip", ec_rm);
+                            strncpy(G.status_msg, TR("Download failed! Check your internet connection.",
+                                                     "Falha no download! Verifique sua conexão com a internet."), sizeof(G.status_msg) - 1);
+                            G.progress.store(0.0f);
+                            G.dl_running = false;
+                            return;
                         }
-                        unzClose(uf);
-                    }
-                    std::error_code ec_rm; fs::remove("sdmc:/emulanders/tmp_assets.zip", ec_rm);
-                    strncpy(G.status_msg, TR("Assets installed!", "Fotos/assets instalados com sucesso!"), sizeof(G.status_msg) - 1);
-                    G.progress.store(1.0f);
-                    G.dl_running = false;
-                    G.dl_finished_popup = true;
-                });
+
+                        strncpy(G.status_msg, "Extracting assets...", sizeof(G.status_msg) - 1);
+                        G.progress.store(0.5f);
+                        unzFile uf = unzOpen("sdmc:/emulanders/tmp_assets.zip");
+                        if (uf) {
+                            unz_global_info gi;
+                            unzGetGlobalInfo(uf, &gi);
+                            for (uLong i = 0; i < gi.number_entry; i++) {
+                                G.progress.store(0.5f + ((float)i / gi.number_entry) * 0.5f);
+                                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+                                char fzip[512]; unz_file_info fi;
+                                unzGetCurrentFileInfo(uf, &fi, fzip, sizeof(fzip), NULL, 0, NULL, 0);
+                                for (int j = 0; fzip[j]; j++) {
+                                    if (fzip[j] == '\\') fzip[j] = '/';
+                                    if ((unsigned char)fzip[j] > 126) fzip[j] = '_';
+                                }
+                                std::string full = "sdmc:/" + std::string(fzip);
+                                if (fzip[strlen(fzip) - 1] == '/') {
+                                    std::error_code ec;
+                                    fs::create_directories(full, ec);
+                                    chmod(full.c_str(), 0777);
+                                } else {
+                                    std::error_code ec;
+                                    fs::create_directories(fs::path(full).parent_path(), ec);
+                                    if (fs::exists(full, ec)) {
+                                        if (i + 1 < gi.number_entry) unzGoToNextFile(uf);
+                                        continue;
+                                    }
+                                    if (unzOpenCurrentFile(uf) == UNZ_OK) {
+                                        FILE* out = fopen(full.c_str(), "wb");
+                                        if (out) {
+                                            char buf[8192]; int r;
+                                            while ((r = unzReadCurrentFile(uf, buf, sizeof(buf))) > 0)
+                                                fwrite(buf, 1, r, out);
+                                            fclose(out);
+                                            chmod(full.c_str(), 0777);
+                                        }
+                                        unzCloseCurrentFile(uf);
+                                    }
+                                }
+                                if (i + 1 < gi.number_entry) unzGoToNextFile(uf);
+                            }
+                            unzClose(uf);
+                        }
+                        std::error_code ec_rm; fs::remove("sdmc:/emulanders/tmp_assets.zip", ec_rm);
+                        strncpy(G.status_msg, TR("Assets installed!", "Fotos/assets instalados com sucesso!"), sizeof(G.status_msg) - 1);
+                        G.progress.store(1.0f);
+                        G.dl_running = false;
+                        G.dl_finished_popup = true;
+                    });
+                }
+            }
+            if (G.status_msg[0] != '\0') {
+                ImGui::Spacing();
+                ImGui::TextColored(G.accent, "%s", G.status_msg);
             }
         } else {
             float prog = G.progress.load();
@@ -1918,12 +1998,12 @@ void RenderScreenDownloaders(float screen_w, float content_h, float ui_scale, bo
 // ============================================================
 
 void RenderScreenSettings(float screen_w, float content_h, float ui_scale, bool& just_entered_content, ImFont* f_large, ImFont* f_small) {
-    (void)screen_w; (void)f_small;
+    (void)screen_w; (void)content_h; (void)f_small;
     if (just_entered_content) {
         ImGui::SetNextWindowFocus();
     }
 
-    float table_h = content_h - 20.0f * ui_scale;
+    float table_h = std::max(150.0f * ui_scale, ImGui::GetContentRegionAvail().y - 6.0f * ui_scale);
     if (ImGui::BeginChild("SettingsScroll", ImVec2(0, table_h), false, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
         if (f_large) ImGui::PushFont(f_large);
         ImGui::TextColored(G.accent, "%s", TR("APPLICATION LANGUAGE", "IDIOMA DO APLICATIVO"));
@@ -1931,25 +2011,33 @@ void RenderScreenSettings(float screen_w, float content_h, float ui_scale, bool&
         ImGui::Spacing();
 
         ImGui::TextColored(ImVec4(0.80f, 0.80f, 0.80f, 1.0f), "%s",
-            TR("Select interface language (English / Português):",
-               "Selecione o idioma da interface (Inglês / Português):"));
+            TR("Select interface language (shared with Tesla Overlay):",
+               "Selecione o idioma da interface (compartilhado com o Tesla Overlay):"));
         ImGui::Spacing();
 
-        if (G.language == AppLanguage::EN) ImGui::PushStyleColor(ImGuiCol_Button, G.accent);
-        if (ImGui::Button("English", ImVec2(180.0f * ui_scale, 44.0f * ui_scale))) {
-            G.language = AppLanguage::EN;
-            SaveAppConfig();
+        int lang_count = 0;
+        const LanguageOption* langs = GetSupportedLanguages(&lang_count);
+        for (int i = 0; i < lang_count; i++) {
+            ImGui::PushID(i + 100);
+            ImVec2 btn_sz = AutoBtnSize(langs[i].display_name, 165.0f * ui_scale, 44.0f * ui_scale);
+            if (i > 0) {
+                ImGui::SameLine(0, 12.0f * ui_scale);
+                if (ImGui::GetContentRegionAvail().x < btn_sz.x) {
+                    ImGui::NewLine();
+                }
+            }
+            bool selected = (G.language == langs[i].lang);
+            if (selected) ImGui::PushStyleColor(ImGuiCol_Button, G.accent);
+            if (just_entered_content && i == 0) {
+                ImGui::SetItemDefaultFocus();
+            }
+            if (ImGui::Button(langs[i].display_name, btn_sz)) {
+                G.language = langs[i].lang;
+                SaveAppConfig();
+            }
+            if (selected) ImGui::PopStyleColor();
+            ImGui::PopID();
         }
-        if (G.language == AppLanguage::EN) ImGui::PopStyleColor();
-
-        ImGui::SameLine(0, 15.0f * ui_scale);
-
-        if (G.language == AppLanguage::PT_BR) ImGui::PushStyleColor(ImGuiCol_Button, G.accent);
-        if (ImGui::Button("Português (Brasil)", ImVec2(230.0f * ui_scale, 44.0f * ui_scale))) {
-            G.language = AppLanguage::PT_BR;
-            SaveAppConfig();
-        }
-        if (G.language == AppLanguage::PT_BR) ImGui::PopStyleColor();
 
         ImGui::Spacing(); ImGui::Spacing();
         ImGui::Separator();
@@ -1980,6 +2068,13 @@ void RenderScreenSettings(float screen_w, float content_h, float ui_scale, bool&
 
         for (size_t i = 0; i < sizeof(presets) / sizeof(presets[0]); i++) {
             ImGui::PushID((int)i);
+            ImVec2 preset_sz = AutoBtnSize(presets[i].name, 190.0f * ui_scale, 44.0f * ui_scale);
+            if (i > 0) {
+                ImGui::SameLine(0, 10.0f * ui_scale);
+                if (ImGui::GetContentRegionAvail().x < preset_sz.x) {
+                    ImGui::NewLine();
+                }
+            }
             ImGui::PushStyleColor(ImGuiCol_Button, presets[i].color);
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(std::min(1.0f, presets[i].color.x + 0.1f),
                                                                  std::min(1.0f, presets[i].color.y + 0.1f),
@@ -1988,17 +2083,11 @@ void RenderScreenSettings(float screen_w, float content_h, float ui_scale, bool&
                                                                  std::max(0.0f, presets[i].color.y - 0.1f),
                                                                  std::max(0.0f, presets[i].color.z - 0.1f), 1.0f));
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 1));
-            if (just_entered_content && i == 0) {
-                ImGui::SetItemDefaultFocus();
-            }
-            if (ImGui::Button(presets[i].name, ImVec2(200.0f * ui_scale, 44.0f * ui_scale))) {
+            if (ImGui::Button(presets[i].name, preset_sz)) {
                 G.accent = presets[i].color;
                 SetupImGuiStyle(ui_scale, G.accent, G.accent_hover, G.accent_active);
             }
             ImGui::PopStyleColor(4);
-            if ((i + 1) % 4 != 0 && (i + 1) < sizeof(presets) / sizeof(presets[0])) {
-                ImGui::SameLine(0, 10.0f * ui_scale);
-            }
             ImGui::PopID();
         }
 
@@ -2036,7 +2125,8 @@ void RenderScreenSettings(float screen_w, float content_h, float ui_scale, bool&
                 col_changed = true;
             }
             ImGui::Spacing();
-            if (ImGui::Button(TR("Close (B)", "Fechar (B)"), ImVec2(220.0f * ui_scale, 42.0f * ui_scale)) || ImGui::IsKeyPressed(ImGuiKey_GamepadFaceDown)) {
+            const char* close_b_lbl = TR("Close (B)", "Fechar (B)");
+            if (ImGui::Button(close_b_lbl, AutoBtnSize(close_b_lbl, 220.0f * ui_scale, 42.0f * ui_scale)) || ImGui::IsKeyPressed(ImGuiKey_GamepadFaceDown)) {
                 ImGui::CloseCurrentPopup();
             }
             ImGui::EndPopup();
@@ -2050,7 +2140,8 @@ void RenderScreenSettings(float screen_w, float content_h, float ui_scale, bool&
 
         ImGui::Spacing(); ImGui::Spacing();
         static Uint32 save_notify_time = 0;
-        if (ImGui::Button(TR("Save Configuration", "Salvar Configurações"), ImVec2(340.0f * ui_scale, 48.0f * ui_scale))) {
+        const char* save_cfg_lbl = TR("Save Configuration", "Salvar Configurações");
+        if (ImGui::Button(save_cfg_lbl, AutoBtnSize(save_cfg_lbl, 340.0f * ui_scale, 48.0f * ui_scale))) {
             SaveAppConfig();
             save_notify_time = SDL_GetTicks();
         }
@@ -2100,7 +2191,7 @@ void RenderScreenSettings(float screen_w, float content_h, float ui_scale, bool&
         ImGui::TextColored(ImVec4(0.55f, 0.55f, 0.55f, 1.0f), TR("Figures Directory:  %s", "Diretório de Bonecos:  %s"), FIGURES_DIR);
         ImGui::TextColored(ImVec4(0.55f, 0.55f, 0.55f, 1.0f), "%s", TR("Assets Directory:   sdmc:/emulanders/assets/", "Diretório de Fotos:    sdmc:/emulanders/assets/"));
         ImGui::TextColored(ImVec4(0.55f, 0.55f, 0.55f, 1.0f), "%s", TR("Config File:        sdmc:/emulanders/config.json", "Arquivo de Config:    sdmc:/emulanders/config.json"));
-        ImGui::TextColored(ImVec4(0.55f, 0.55f, 0.55f, 1.0f), "%s", TR("Language:           English", "Idioma:              Português (Brasil)"));
+        ImGui::TextColored(ImVec4(0.55f, 0.55f, 0.55f, 1.0f), TR("Language:           %s", "Idioma:              %s"), LanguageToDisplayName(G.language));
 
         ImGui::EndChild();
     }

@@ -2,195 +2,195 @@
     "strings": [
         {
             "key": "OtherServiceError",
-            "value": "An error occurred accessing services:"
+            "value": "存取系統服務時發生錯誤："
         },
         {
             "key": "EmulationStatus",
-            "value": "Emulation status"
+            "value": "模擬狀態"
         },
         {
             "key": "On",
-            "value": "On"
+            "value": "開啟"
         },
         {
             "key": "Off",
-            "value": "Off"
+            "value": "關閉"
         },
         {
             "key": "InterceptingGame",
-            "value": "Intercepting Game"
+            "value": "遊戲攔截狀態"
         },
         {
             "key": "Intercepted",
-            "value": "intercepted"
+            "value": "已攔截"
         },
         {
             "key": "NotIntercepted",
-            "value": "not intercepted"
+            "value": "未攔截"
         },
         {
             "key": "Connected",
-            "value": "connected"
+            "value": "已連線"
         },
         {
             "key": "Disconnected",
-            "value": "disconnected"
+            "value": "未連線"
         },
         {
             "key": "ViewFavorites",
-            "value": "View favorites"
+            "value": "查看最愛"
         },
         {
             "key": "Help",
-            "value": "Help"
+            "value": "說明"
         },
         {
             "key": "DebugLogging",
-            "value": "Debug Logging"
+            "value": "除錯日誌"
         },
         {
             "key": "ViewRAMLog",
-            "value": "View RAM Log"
+            "value": "查看記憶體日誌"
         },
         {
             "key": "ExtractToSD",
-            "value": "Extract to SD"
+            "value": "匯出至SD卡"
         },
         {
             "key": "ClearRAMLog",
-            "value": "Clear RAM Log"
+            "value": "清除記憶體日誌"
         },
         {
             "key": "EnableEmulation",
-            "value": "Enable Emulation"
+            "value": "開啟模擬"
         },
         {
             "key": "DisableEmulation",
-            "value": "Disable Emulation"
+            "value": "關閉模擬"
         },
         {
             "key": "SelectSkylanderFolder",
-            "value": "Select Skylander/folder"
+            "value": "選擇角色/資料夾"
         },
         {
             "key": "ClearActiveSkylander",
-            "value": "Clear active Skylander"
+            "value": "移除目前角色"
         },
         {
             "key": "LogsManager",
-            "value": "Logs Manager"
+            "value": "日誌管理"
         },
         {
             "key": "ViewFiguresFolder",
-            "value": "View Figures Folder"
+            "value": "查看角色資料夾"
         },
         {
             "key": "AvailableSkylanders",
-            "value": "Available Skylanders in"
+            "value": "可用角色位於"
         },
         {
             "key": "NoActiveFigure",
-            "value": "None Selected"
+            "value": "未選擇"
         },
         {
             "key": "SkylanderLoaded",
-            "value": "Skylander loaded"
+            "value": "角色已載入"
         },
         {
             "key": "SystemReady",
-            "value": "System ready"
+            "value": "系統就緒"
         },
         {
             "key": "SkylanderLabel",
-            "value": "Skylander:"
+            "value": "角色："
         },
         {
             "key": "ToggleFavorite",
-            "value": "Toggle Favorite"
+            "value": "切換最愛"
         },
         {
             "key": "Yes",
-            "value": "Yes"
+            "value": "是"
         },
         {
             "key": "No",
-            "value": "No"
+            "value": "否"
         },
         {
             "key": "FolderSelected",
-            "value": "Folder"
+            "value": "資料夾"
         },
         {
             "key": "NoFigure",
-            "value": "None Selected"
+            "value": "未選擇"
         },
         {
             "key": "UpngInvalidFile",
-            "value": "Invalid file"
+            "value": "無效檔案"
         },
         {
             "key": "UpngUnsupportedRgbPng",
-            "value": "Unsupported RGB"
+            "value": "不支援RGB格式"
         },
         {
             "key": "UpngUpscaleUnsupported",
-            "value": "Upscale not supported"
+            "value": "不支援放大"
         },
         {
             "key": "UpngImageTooLarge",
-            "value": "Image too large"
+            "value": "圖片過大"
         },
         {
             "key": "UpngImageNotFound",
-            "value": "Image not found"
+            "value": "找不到圖片"
         },
         {
             "key": "UpngNotPngImage",
-            "value": "Not a PNG"
+            "value": "非PNG圖片"
         },
         {
             "key": "UpngMalformedPng",
-            "value": "Malformed PNG"
+            "value": "PNG檔案損毀"
         },
         {
             "key": "UpngUnsupportedPng",
-            "value": "Unsupported PNG"
+            "value": "不支援的PNG"
         },
         {
             "key": "UpngUnsupportedInterlacing",
-            "value": "Interlacing not supported"
+            "value": "不支援交錯掃描"
         },
         {
             "key": "UpngUnsupportedColorFormat",
-            "value": "Color format not supported"
+            "value": "不支援的色彩格式"
         },
         {
             "key": "UpngInvalidParameter",
-            "value": "Invalid parameter"
+            "value": "無效參數"
         },
         {
             "key": "LegendActive",
-            "value": "ACTIVE"
+            "value": "啟用"
         },
         {
             "key": "LegendCursor",
-            "value": "CURSOR"
+            "value": "游標"
         },
         {
             "key": "LogsWarningTitle",
-            "value": "IMPORTANT: Debug Logging"
+            "value": "重要提示：除錯日誌"
         },
         {
             "key": "LogsWarningRAM",
-            "value": "Enabling debug logs consumes system RAM."
+            "value": "開啟除錯日誌會佔用系統記憶體。"
         },
         {
             "key": "LogsWarningTrouble",
-            "value": "Use only for troubleshooting purposes."
+            "value": "僅用於故障排除。"
         },
         {
             "key": "LogsWarningDisable",
-            "value": "Disable it for normal gameplay."
+            "value": "正常遊玩時請將其關閉。"
         }
     ]
 }

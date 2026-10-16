@@ -71,7 +71,10 @@ pub fn log_debug(msg: &str) {
     }
     let mut log = G_DEBUG_LOG.lock();
     if log.len() + msg.len() > 16384 {
-        let new_start = log.len() / 2;
+        let mut new_start = log.len() / 2;
+        while new_start < log.len() && !log.is_char_boundary(new_start) {
+            new_start += 1;
+        }
         *log = alloc::string::String::from(&log[new_start..]);
     }
     log.push_str(msg);

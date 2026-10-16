@@ -939,8 +939,9 @@ class EmulandersOverlay : public tsl::Overlay {
             if(!g_Version.EqualsExceptBuild(ExpectedVersion)) {
                 g_InitializationStatus = InitializationStatus::OkVersionMismatch;
             }
-
-            g_InitializationStatus = InitializationStatus::Ok;
+            else {
+                g_InitializationStatus = InitializationStatus::Ok;
+            }
         }
 
         virtual void exitServices() override {

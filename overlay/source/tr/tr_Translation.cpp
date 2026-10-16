@@ -33,10 +33,45 @@ namespace tr {
                 return "fr";
             }
 
+            if((base_lang == "pt") || (base_lang == "pt-PT")) {
+                return "pt-BR";
+            }
+
+            if(base_lang == "zh-CN") {
+                return "zh-Hans";
+            }
+
+            if((base_lang == "zh-TW") || (base_lang == "zh-HK")) {
+                return "zh-Hant";
+            }
+
             return base_lang;
         }
 
+        bool GetConfiguredLanguage(std::string &out_lang) {
+            auto ok = false;
+            tsl::hlp::doWithSDCardHandle([&]() {
+                try {
+                    std::ifstream ifs("sdmc:/emulanders/config.json");
+                    if(ifs.is_open()) {
+                        const auto cfg_json = nlohmann::json::parse(ifs);
+                        if(cfg_json.count("language") && cfg_json["language"].is_string()) {
+                            out_lang = cfg_json["language"].get<std::string>();
+                            ok = !out_lang.empty();
+                        }
+                    }
+                }
+                catch(std::exception&) {
+                    ok = false;
+                }
+            });
+            return ok;
+        }
+
         bool GetSystemLanguage(std::string &out_lang) {
+            if(GetConfiguredLanguage(out_lang)) {
+                return true;
+            }
             auto ok = false;
             if(R_SUCCEEDED(setInitialize())) {
                 u64 lang_code = 0;
@@ -97,6 +132,9 @@ namespace tr {
         if(!IsDefaultLanguage(lang)) {
             // If loading fails, default strings will be used
             LoadLanguageStrings(lang, g_SystemLanguageStrings);
+        }
+        else {
+            g_SystemLanguageStrings.clear();
         }
 
         return true;
