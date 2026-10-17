@@ -33,3 +33,21 @@ In Handheld Mode with Joy-Cons physically attached to the rails, the game may di
 
 ### Workaround
 Detach the Joy-Con controllers from the console. This is a game-level restriction within *Skylanders: Imaginators* and not an issue with the Emulanders sysmodule itself.
+
+---
+
+## Applet Mode (Album) Memory Limits (Error 0xD401 / 2001-0106)
+
+### Description
+Launching `EmulandersPortal` from the Homebrew Menu via the Photo Album (Applet Mode) crashes immediately on startup with error code `0xD401 (2001-0106: Kernel Out of Memory)`.
+
+### Technical Cause
+In modern Horizon OS versions (19.0.0 through 23.0.0+), Nintendo drastically reduced the system memory pool allocated to the Photo Album applet (~7 to 16 MB). Because Emulanders Portal initializes SDL2, GLAD, Mesa/nouveau OpenGL 4.3, TrueType font atlases for 10 languages, and image textures, it requires ~60 to 120 MB of RAM, triggering an instant Kernel Out-of-Memory panic.
+
+### Workaround
+Always launch the Homebrew Menu in **Full Application Mode** via **Title Override**:
+1. On the Nintendo Switch Home Menu, hold the **`R`** button on your controller.
+2. While holding **`R`**, click on **any installed game** (or demo/cartridge).
+3. Keep holding **`R`** until the Homebrew Menu opens.
+4. Launch **Emulanders Portal** with full access to **3.5 GB of RAM**.
+*(Alternatively, launch via an installed Home Menu Forwarder NSP).*

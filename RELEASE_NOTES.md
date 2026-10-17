@@ -9,6 +9,7 @@ Maintenance release. No change to the sysmodule's behaviour; the main changes ar
 - Buttons now size themselves to their label, and the language and theme lists wrap onto a new row, so longer translations no longer overflow.
 - Cyrillic and CJK text is rendered with the console's shared system fonts.
 - Figure Image Editor: the `Figures / Scans / Favorites` and `Menu / Back` buttons are on a single row, and the step header is one line instead of three. This gives the figure and photo lists roughly 95 px of extra height (about seven visible rows instead of four).
+- Figure Image Editor (Step 3 Crop Tool): tuned live preview sizing and button heights so `(B) Back to Photos` has generous vertical clearance and is never clipped by the bottom status bar in 720p handheld mode.
 - Download failures (no network, bad URL) are reported instead of silently extracting an empty archive.
 - Fixed controller hot-plugging when docking and undocking, and resizing between 720p and 1080p.
 
@@ -33,7 +34,7 @@ Maintenance release. No change to the sysmodule's behaviour; the main changes ar
 Extract the bundle over the existing install and restart the console. Figures, assets and settings are kept. The sysmodule and overlay must be updated together; the overlay warns if their versions differ.
 
 ## Compatibility
-Tested on firmware 22.1 with Atmosphere 1.11.1. Support for firmware 23.0 / Atmosphere 1.12.x has not been tested yet and will be reported in a later release.
+Fully verified and tested on **Firmware 23.0.1 with Atmosphère 1.12.1** (CNX 23.0.1-1) and Firmware 22.1 with Atmosphère 1.11.1. Full hardware validation confirmed for `nfc:mf:u` protocol emulation, physical Joy-Con Mifare tag dumping, Tesla Overlay hot-swapping, and in-game figure write-back. Compatible with all firmwares 4.0.0+.
 
 ## Credits
 - XorTroll and Emuiibo contributors (Subv, ogniK, averne, spx01, SciresM): original sysmodule architecture and `nfp-mitm` research.

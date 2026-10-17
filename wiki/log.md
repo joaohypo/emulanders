@@ -38,3 +38,10 @@ Format: `## [YYYY-MM-DD] <type> | <Title>` (`<type>` $\in$ `{release, fix, arch,
 - Figure Image Editor: toolbar buttons on one row and a single-line step header, about 95 px more list height at 720p.
 - Version bumped to 1.0.1 in all manifests. Sysmodule and overlay are versioned together because the overlay compares them.
 - Added [`wiki/switch-upgrade-playbook.md`](switch-upgrade-playbook.md) for the 22.1 -> 23.0 / AMS 1.12.1 / CNX 23.0.1-1 upgrade. Versioning policy: `1.0.x` for compatible fixes, `1.1.0` for firmware-driven changes that stay backwards compatible, `1.2.0+` if older firmware or the NFC IPC surface changes.
+
+## [2026-10-17] verify & release | Firmware 23.0.1 Validation, Crop Layout Polish & HBAS PR #942
+- **Horizon OS 23.0.1 & Atmosphère 1.12.1 Hardware Verification:** Performed full end-to-end upgrade on Nintendo Switch hardware via Daybreak. Confirmed zero breaking changes to `nfc:mf:u` IPC service interface. Interception, Joy-Con physical dumping, in-game figure summoning, and savegame write-back work out-of-the-box.
+- **Cropper Button Clearance Fix ([`EmulandersPortal/source/screens.cpp`](../EmulandersPortal/source/screens.cpp)):** Adjusted live preview height cap to `125px` and button height to `38px` in Step 3 of the Figure Image Editor, restoring `190px` of vertical breathing room and preventing `(B) Back to Photos` from being clipped by the footer status bar in 720p handheld mode. Recompiled Portal and refreshed release zip bundles.
+- **Homebrew App Store Pull Request ([`fortheusers/switch-hbas-repo#942`](https://github.com/fortheusers/switch-hbas-repo/pull/942)):** Submitted official 1.0.1 update PR containing the new 4:1 `848×208` widescreen banner (`screen.png`) and `256×150` non-square icon (`icon.png`), 10-language metadata, and bundle download URL.
+- **Applet Mode Out-of-Memory Documentation:** Documented Horizon 23.x Applet Mode ~7–16 MB memory restrictions (`0xD401 / 2001-0106 Kernel OOM`) and established Title Override (holding `R` on any installed title) as the mandatory launch procedure.
+

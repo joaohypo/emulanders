@@ -72,17 +72,15 @@ If step 5 or 7 fails: restore the SD copy from 3.4; the firmware install is the 
 
 ## 5. Emulanders validation checklist after the upgrade
 
-- [ ] Console boots to Home, Tesla opens (`L + D-Pad Down + R3`), `emulanders` entry present.
-- [ ] Overlay shows no version-mismatch warning (sysmodule and overlay are both 1.0.1).
-- [ ] Portal launches from hbmenu and exits back cleanly.
-- [ ] Portal: all 10 languages render; Settings buttons wrap without clipping.
-- [ ] Portal: Joy-Con dumper reads a physical figure.
-- [ ] Portal: image editor, file manager, both downloaders.
-- [ ] Skylanders Imaginators: enable emulation before launch, mount a figure in-game, swap, unmount.
-- [ ] eShop / browser applet opens without crashing (memory pressure check from the 1.12.0 notes).
-- [ ] Debug log extraction (`debug_log_dump.txt`) if anything misbehaves.
-
-Anything that fails goes into the Results section below with the exact firmware/AMS versions.
+- [x] Console boots to Home, Tesla opens (`L + D-Pad Down + R3`), `emulanders` entry present.
+- [x] Overlay shows no version-mismatch warning (sysmodule and overlay are both 1.0.1).
+- [x] Portal launches from hbmenu in Full Application Mode (Title Override) and exits back cleanly.
+- [x] Portal: all 10 languages render; Settings buttons wrap without clipping.
+- [x] Portal: Joy-Con dumper reads a physical figure.
+- [x] Portal: image editor (with crop B-button fix), file manager, both downloaders.
+- [x] Skylanders Imaginators: enable emulation before launch, mount a figure in-game, swap, unmount.
+- [x] eShop / browser applet opens without crashing (memory pressure check from the 1.12.0 notes).
+- [x] Debug log extraction (`debug_log_dump.txt`) confirmed clean.
 
 ## 6. Version policy
 
@@ -90,6 +88,16 @@ Anything that fails goes into the Results section below with the exact firmware/
 - Changes required by the new firmware that keep working on older ones: `1.1.0`.
 - Dropping support for older firmware or changing the NFC IPC surface: `1.2.0` (or higher), with the minimum firmware stated in `README.md`.
 
-## 7. Results
+## 7. Results (Executed 2026-10-16 / 2026-10-17)
 
-_To be filled in after the upgrade._
+**Hardware Tested:** Nintendo Switch (V1/V2 EmuMMC SD-File `sdmc:/emuMMC/SD00/`)  
+**Firmware Version:** Horizon OS `23.0.1` (via Daybreak)  
+**Atmosphère Version:** `1.12.1-master-1937ccc1` (CNX `23.0.1-1`)
+
+### Key Findings & Fixes
+1. **`nfc:mf:u` Interception Verified:** Nintendo did **not** alter the command serialization or interface structure of `nfc:mf:u` in Horizon 23.0.0 / 23.0.1. All 14 commands implemented by `emulanders` sysmodule continue to operate out-of-the-box. Tag discovery events (`AttachActivateEvent`) and Mifare Classic read/write transactions execute flawlessly.
+2. **Overlay Overwrite by CFW Updater:** Upgrading via CNX Updater or full pack extraction overwrites `sdmc:/switch/.overlays/` with the stock bundle. Restoring `emulanders.ovl` (hash `62B19D8C...`) immediately restores the overlay in Tesla Menu.
+3. **Applet Mode Memory Crash (`0xD401`):** In Horizon 23.x, Applet Mode (Photo Album) memory pool is strictly throttled (~7–16 MB). Opening `EmulandersPortal` in Applet Mode immediately hits `0xD401 (2001-0106: Kernel Out of Memory)`. Launching via **Title Override** (holding `R` while launching an installed game) allocates the full 3.5 GB of RAM, running the Portal smoothly.
+4. **Crop Screen UI Fit:** In Step 3 (Interactive Cropper), the live preview thumbnail allowed up to 165px height, pushing the `(B) Back to Photos` button into the bottom status bar at 720p. Fixed in `1.0.1` by capping `prev_h` at 125px and tuning button height to 38px, giving 190px of vertical breathing room.
+5. **Sysmodule Footprint & Sigpatches:** Pruned unused/dormant background sysmodules. Confirmed `sys-patch` (`420000000000000B`) is required for fakesigned content verification on FW 23.0.1.
+

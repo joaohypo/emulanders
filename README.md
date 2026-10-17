@@ -58,8 +58,8 @@ Standard Nintendo Amiibos use NTAG215 tags through the high-level `nfp` service.
 ## Compatibility
 
 - **Target Game**: *Skylanders: Imaginators* (Nintendo Switch version)
-- **Firmware Support**: 4.0.0+ (minimum required by `nfc:mf:u`)
-- **Tested On**: Firmware 22.1 with Atmosphère 1.11.1 (firmware 23.0 / Atmosphère 1.12.x not yet tested)
+- **Firmware Support**: 4.0.0+ through 23.0.1+ (minimum required by `nfc:mf:u`)
+- **Verified & Tested On**: Firmware **23.0.1** with Atmosphère **1.12.1** (CNX 23.0.1-1) and Firmware 22.1 with Atmosphère 1.11.1. Full hardware validation of `nfc:mf:u` emulation, Joy-Con tag dumping, Tesla overlay, and in-game figure write-back.
 
 ---
 
@@ -156,6 +156,11 @@ An **Assets Pack** with portraits for every Skylander and variant is available o
 </p>
 
 Emulanders Portal (`switch/EmulandersPortal/EmulandersPortal.nro`) is the collection manager app for the console. Launch it from the Homebrew Menu (`hbmenu`).
+
+> [!IMPORTANT]
+> **Always launch in Full Application Mode (Title Override):**
+> On modern Horizon OS versions (19.x through 23.x+), launching Homebrew via the Album (Applet Mode) allocates only ~7–16 MB of RAM, which triggers `0xD401 (2001-0106: Kernel Out of Memory)` when initializing OpenGL, SDL2, and font atlases.
+> **To launch with full 3.5 GB of RAM:** Hold the **`R`** button while launching **any installed game** from the Switch Home Menu until the Homebrew Menu appears, then open Emulanders Portal. Alternatively, use an installed Home Menu Forwarder.
 
 ### Joy-Con NFC Dumper
 
